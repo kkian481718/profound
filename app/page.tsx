@@ -1,6 +1,3 @@
-import { Snippet } from "@heroui/snippet";
-import { Code } from "@heroui/code";
-
 import { title, subtitle } from "@/components/primitives";
 import { OrderForm } from "@/components/order-form";
 

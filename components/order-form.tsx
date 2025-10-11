@@ -1,12 +1,13 @@
 "use client";
 
+import type { Selection } from "@react-types/shared";
+
 import { useMemo, useState, type FormEvent } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Alert } from "@heroui/alert";
 import { Select, SelectItem } from "@heroui/select";
-import type { Selection } from "@react-types/shared";
 
 const pickupLocations = [
   { label: "校外", value: "校外" },
@@ -78,6 +79,7 @@ export function OrderForm({ products }: OrderFormProps) {
 
   const handleProductChange = (keys: Selection) => {
     const key = Array.from(keys)[0];
+
     setSelectedProduct(key ? String(key) : null);
     setErrors((prev) => ({ ...prev, product: "" }));
   };
@@ -85,6 +87,7 @@ export function OrderForm({ products }: OrderFormProps) {
   const handlePickupLocationChange = (keys: Selection) => {
     const key = Array.from(keys)[0];
     const location = key ? String(key) : null;
+
     setSelectedPickupLocation(location);
     setErrors((prev) => ({ ...prev, pickupLocation: "" }));
 
@@ -104,6 +107,7 @@ export function OrderForm({ products }: OrderFormProps) {
     }
 
     const normalizedPhone = phoneNumber.trim();
+
     if (!normalizedPhone) {
       nextErrors.phone = "請輸入手機號碼";
       hasError = true;
@@ -148,7 +152,7 @@ export function OrderForm({ products }: OrderFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-2xl shadow-small">
+    <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
         <h2 className="text-2xl font-semibold">訂購資訊</h2>
         <p className="text-sm text-default-500">
@@ -164,16 +168,16 @@ export function OrderForm({ products }: OrderFormProps) {
 
         <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
           <Select
+            isRequired
+            aria-label="購買商品"
+            errorMessage={errors.product || undefined}
+            isInvalid={Boolean(errors.product)}
             label="購買商品"
             placeholder="請選擇商品"
-            aria-label="購買商品"
-            isRequired
             selectedKeys={
               selectedProduct ? new Set([selectedProduct]) : new Set([])
             }
             onSelectionChange={handleProductChange}
-            isInvalid={Boolean(errors.product)}
-            errorMessage={errors.product || undefined}
           >
             {productOptions.map((product) => (
               <SelectItem key={product.value}>{product.label}</SelectItem>
@@ -181,35 +185,35 @@ export function OrderForm({ products }: OrderFormProps) {
           </Select>
 
           <Input
-            label="手機號碼"
-            placeholder="請輸入手機號碼"
-            aria-label="手機號碼"
             isRequired
+            aria-label="手機號碼"
+            description="請輸入 10 碼手機號碼"
+            errorMessage={errors.phone || undefined}
+            isInvalid={Boolean(errors.phone)}
+            label="手機號碼"
+            maxLength={10}
+            placeholder="請輸入手機號碼"
             type="tel"
             value={phoneNumber}
             onValueChange={(value) => {
               setPhoneNumber(value);
               setErrors((prev) => ({ ...prev, phone: "" }));
             }}
-            isInvalid={Boolean(errors.phone)}
-            errorMessage={errors.phone || undefined}
-            maxLength={10}
-            description="請輸入 10 碼手機號碼"
           />
 
           <Select
+            isRequired
+            aria-label="取貨地點"
+            errorMessage={errors.pickupLocation || undefined}
+            isInvalid={Boolean(errors.pickupLocation)}
             label="取貨地點"
             placeholder="請選擇取貨地點"
-            aria-label="取貨地點"
-            isRequired
             selectedKeys={
               selectedPickupLocation
                 ? new Set([selectedPickupLocation])
                 : new Set([])
             }
             onSelectionChange={handlePickupLocationChange}
-            isInvalid={Boolean(errors.pickupLocation)}
-            errorMessage={errors.pickupLocation || undefined}
           >
             {pickupLocations.map((location) => (
               <SelectItem key={location.value}>{location.label}</SelectItem>
@@ -218,26 +222,26 @@ export function OrderForm({ products }: OrderFormProps) {
 
           {showOffCampusAddress ? (
             <Input
+              isRequired
+              aria-label="校外地址"
+              errorMessage={errors.address || undefined}
+              isInvalid={Boolean(errors.address)}
               label="校外地址"
               placeholder="請輸入校外地址"
-              aria-label="校外地址"
-              isRequired
               value={offCampusAddress}
               onValueChange={(value) => {
                 setOffCampusAddress(value);
                 setErrors((prev) => ({ ...prev, address: "" }));
               }}
-              isInvalid={Boolean(errors.address)}
-              errorMessage={errors.address || undefined}
             />
           ) : null}
 
           <div className="flex flex-col gap-3">
             <Button
-              color="primary"
-              type="submit"
               className="w-full md:w-auto"
+              color="primary"
               isLoading={isSubmitting}
+              type="submit"
             >
               送出
             </Button>
