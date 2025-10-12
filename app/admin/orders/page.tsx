@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
@@ -40,7 +40,7 @@ interface Order {
     | "cancelled";
 }
 
-export default function OrdersPage() {
+function OrdersContent() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [stores, setStores] = useState<any[]>([]);
@@ -433,5 +433,19 @@ export default function OrdersPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <p>載入中...</p>
+        </div>
+      }
+    >
+      <OrdersContent />
+    </Suspense>
   );
 }

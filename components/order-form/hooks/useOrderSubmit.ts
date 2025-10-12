@@ -79,7 +79,7 @@ export function useOrderSubmit() {
       const defaultPickupTime = new Date();
 
       defaultPickupTime.setHours(
-        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS
+        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS,
       );
 
       const orderData = {
@@ -115,7 +115,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}`
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}`,
       );
 
       return true;

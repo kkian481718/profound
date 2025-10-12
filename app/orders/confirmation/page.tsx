@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [orderInfo, setOrderInfo] = useState<{
@@ -125,5 +125,24 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 px-4">
+          <div className="max-w-2xl w-full space-y-6">
+            <div className="text-center space-y-2">
+              <div className="text-6xl">⏳</div>
+              <h1 className="text-3xl font-bold">載入中...</h1>
+            </div>
+          </div>
+        </section>
+      }
+    >
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }

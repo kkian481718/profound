@@ -37,6 +37,7 @@ export default function StoresPage() {
       if (error) throw error;
       setStores(data || []);
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to fetch stores:", err);
     } finally {
       setLoading(false);
@@ -54,6 +55,7 @@ export default function StoresPage() {
       if (error) throw error;
       fetchStores();
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to update store:", err);
     }
   };
