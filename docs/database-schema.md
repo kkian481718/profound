@@ -25,7 +25,7 @@ CREATE INDEX idx_stores_created_at ON stores(created_at);
 - `id`: 店家唯一識別碼 (UUID)
 - `name`: 店家名稱
 - `is_open`: 是否開放接單
-- `order_deadline`: 開放接單期限
+- `order_deadline`: 最後下單時間
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 

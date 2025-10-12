@@ -97,7 +97,7 @@ export default function OrdersPage() {
           stores (
             name
           )
-        `
+        `,
         )
         .order("order_time", { ascending: false });
 
@@ -131,7 +131,7 @@ export default function OrdersPage() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_code.toLowerCase().includes(query) ||
-          order.pickup_phone.includes(query)
+          order.pickup_phone.includes(query),
       );
     }
 
@@ -143,14 +143,14 @@ export default function OrdersPage() {
     // 付款狀態過濾
     if (filterPayment) {
       filtered = filtered.filter(
-        (order) => order.payment_status === filterPayment
+        (order) => order.payment_status === filterPayment,
       );
     }
 
     // 配送狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.delivery_status === filterDelivery
+        (order) => order.delivery_status === filterDelivery,
       );
     }
 
@@ -159,7 +159,7 @@ export default function OrdersPage() {
       const fromDate = new Date(filterDateFrom);
 
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate
+        (order) => new Date(order.order_time) >= fromDate,
       );
     }
 
@@ -168,7 +168,7 @@ export default function OrdersPage() {
 
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate
+        (order) => new Date(order.order_time) <= toDate,
       );
     }
 
@@ -188,7 +188,7 @@ export default function OrdersPage() {
   };
 
   const getPaymentStatusColor = (
-    status: string
+    status: string,
   ): "default" | "success" | "warning" => {
     switch (status) {
       case "paid":
@@ -201,7 +201,7 @@ export default function OrdersPage() {
   };
 
   const getDeliveryStatusColor = (
-    status: string
+    status: string,
   ): "default" | "primary" | "success" | "warning" | "danger" => {
     switch (status) {
       case "preparing":

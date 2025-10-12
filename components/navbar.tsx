@@ -73,7 +73,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium"
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
                 color="foreground"
                 href={item.href}
@@ -100,17 +100,23 @@ export const Navbar = () => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Admin Menu">
-              {siteConfig.adminNavItems.map((item) => (
+              <>
+                {siteConfig.adminNavItems.map((item) => (
+                  <DropdownItem
+                    key={item.href}
+                    onPress={() => router.push(item.href)}
+                  >
+                    {item.label}
+                  </DropdownItem>
+                ))}
                 <DropdownItem
-                  key={item.href}
-                  onPress={() => router.push(item.href)}
+                  key="logout"
+                  color="danger"
+                  onPress={handleLogout}
                 >
-                  {item.label}
+                  登出
                 </DropdownItem>
-              ))}
-              <DropdownItem key="logout" color="danger" onPress={handleLogout}>
-                登出
-              </DropdownItem>
+              </>
             </DropdownMenu>
           </Dropdown>
         ) : (

@@ -73,7 +73,7 @@ export default function AddStorePage() {
 
             {isOpen && (
               <Input
-                label="開放接單期限"
+                label="最後下單時間（選填）"
                 placeholder="選擇日期和時間"
                 type="datetime-local"
                 value={deadline}
