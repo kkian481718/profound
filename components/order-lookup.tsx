@@ -14,6 +14,7 @@ type OrderData = {
   order_type: string;
   pickup_time: string | null;
   pickup_location: string | null;
+  pickup_name: string;
   menu_items: string | null;
   menu_image_url: string | null;
   cost: number;
@@ -69,6 +70,7 @@ export function OrderLookup() {
           order_type,
           pickup_time,
           pickup_location,
+          pickup_name,
           menu_items,
           menu_image_url,
           cost,
@@ -77,7 +79,7 @@ export function OrderLookup() {
           payment_status,
           delivery_status,
           created_at
-        `,
+        `
         )
         .eq("pickup_code", pickupCode.trim())
         .eq("pickup_phone", phoneNumber.trim())
@@ -163,9 +165,13 @@ export function OrderLookup() {
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
-        <h2 className="text-2xl font-semibold">查詢訂單</h2>
+        <h2 className="text-2xl font-semibold">
+          {order ? `${order.pickup_name}，您的訂單已成立` : "查詢訂單"}
+        </h2>
         <p className="text-sm text-default-500">
-          請輸入取貨密碼和手機號碼查詢您的訂單
+          {order
+            ? "以下是您的訂單資訊"
+            : "請輸入取貨密碼和手機號碼查詢您的訂單"}
         </p>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">

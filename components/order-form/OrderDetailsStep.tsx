@@ -14,7 +14,9 @@ type OrderDetailsStepProps = {
   storeOptions: StoreOption[];
   selectedStore: string | null;
   menuItems: string;
+  cost: string;
   phoneNumber: string;
+  pickupName: string;
   selectedPickupLocation: string | null;
   offCampusAddress: string;
   imagePreview: string | null;
@@ -25,7 +27,9 @@ type OrderDetailsStepProps = {
   fileInputRef: React.RefObject<HTMLInputElement>;
   showOffCampusAddress: boolean;
   onMenuItemsChange: (value: string) => void;
+  onCostChange: (value: string) => void;
   onPhoneNumberChange: (value: string) => void;
+  onPickupNameChange: (value: string) => void;
   onPickupLocationChange: (keys: Selection) => void;
   onOffCampusAddressChange: (value: string) => void;
   onImageChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -38,7 +42,9 @@ export function OrderDetailsStep({
   storeOptions,
   selectedStore,
   menuItems,
+  cost,
   phoneNumber,
+  pickupName,
   selectedPickupLocation,
   offCampusAddress,
   imagePreview,
@@ -49,7 +55,9 @@ export function OrderDetailsStep({
   fileInputRef,
   showOffCampusAddress,
   onMenuItemsChange,
+  onCostChange,
   onPhoneNumberChange,
+  onPickupNameChange,
   onPickupLocationChange,
   onOffCampusAddressChange,
   onImageChange,
@@ -57,6 +65,11 @@ export function OrderDetailsStep({
   onBack,
   onSubmit,
 }: OrderDetailsStepProps) {
+  // 計算運費和總金額
+  const costNum = parseFloat(cost) || 0;
+  const shippingFee = costNum * 0.1;
+  const totalAmount = costNum + shippingFee;
+
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
@@ -99,13 +112,51 @@ export function OrderDetailsStep({
             onValueChange={onMenuItemsChange}
           />
 
+          <div className="space-y-2">
+            <Input
+              isRequired
+              aria-label="餐點金額"
+              description="請輸入餐點總金額（新台幣）"
+              errorMessage={errors.cost || undefined}
+              isInvalid={Boolean(errors.cost)}
+              label="餐點金額"
+              placeholder="0"
+              startContent={
+                <div className="pointer-events-none flex items-center">
+                  <span className="text-default-400 text-small">NT$</span>
+                </div>
+              }
+              type="number"
+              value={cost}
+              onValueChange={onCostChange}
+            />
+            {costNum > 0 && (
+              <div className="text-sm text-default-600 space-y-1 px-1">
+                <div className="flex justify-between">
+                  <span>餐點金額：</span>
+                  <span className="font-medium">NT$ {costNum.toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>運費 (10%)：</span>
+                  <span className="font-medium">
+                    NT$ {shippingFee.toFixed(0)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
+                  <span>總金額：</span>
+                  <span>NT$ {totalAmount.toFixed(0)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <span className="text-sm font-medium text-default-700">
-                菜單圖片（選填）
+                圖片（選填）
               </span>
               <p className="text-xs text-default-500">
-                可上傳菜單截圖或照片,檔案大小限制 5MB
+                若有先訂購可上傳截圖，檔案大小限制 5MB
               </p>
             </div>
             <input
@@ -150,6 +201,20 @@ export function OrderDetailsStep({
               <p className="text-xs text-danger">{errors.image}</p>
             )}
           </div>
+
+          <Input
+            isRequired
+            aria-label="暱稱"
+            description="請輸入您的暱稱"
+            errorMessage={errors.pickupName || undefined}
+            isInvalid={Boolean(errors.pickupName)}
+            label="暱稱"
+            maxLength={20}
+            placeholder="請輸入您的暱稱"
+            type="text"
+            value={pickupName}
+            onValueChange={onPickupNameChange}
+          />
 
           <Input
             isRequired

@@ -149,9 +149,10 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
 ```sql
 -- stores 資料表政策
--- 允許所有人查看開放接單的店家
+-- 允許所有人（包括匿名用戶）查看開放接單的店家
 CREATE POLICY "Allow public read open stores" ON stores
   FOR SELECT
+  TO public
   USING (is_open = true);
 
 -- 允許已驗證用戶查看所有店家
@@ -170,19 +171,20 @@ CREATE POLICY "Allow authenticated users to insert stores" ON stores
 CREATE POLICY "Allow authenticated users to update stores" ON stores
   FOR UPDATE
   TO authenticated
-  USING (true);
-
--- orders 資料表政策
--- 允許匿名使用者新增訂單
-CREATE POLICY "Allow anonymous users to insert orders" ON orders
-  FOR INSERT
-  TO anon
+  USING (true)
   WITH CHECK (true);
 
--- 允許匿名使用者透過取貨密碼和手機號碼查詢自己的訂單
-CREATE POLICY "Allow anonymous users to read own orders by code" ON orders
+-- orders 資料表政策
+-- 允許所有人（包括匿名用戶）新增訂單
+CREATE POLICY "Allow public to insert orders" ON orders
+  FOR INSERT
+  TO public
+  WITH CHECK (true);
+
+-- 允許所有人（包括匿名用戶）透過取貨密碼和手機號碼查詢訂單
+CREATE POLICY "Allow public to read orders by code" ON orders
   FOR SELECT
-  TO anon
+  TO public
   USING (
     pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
@@ -198,7 +200,8 @@ CREATE POLICY "Allow authenticated users to read all orders" ON orders
 CREATE POLICY "Allow authenticated users to update orders" ON orders
   FOR UPDATE
   TO authenticated
-  USING (true);
+  USING (true)
+  WITH CHECK (true);
 ```
 
 ---

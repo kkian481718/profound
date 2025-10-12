@@ -24,11 +24,13 @@ export function OrderForm({ stores }: OrderFormProps) {
 
   // 表單資料
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    null,
+    null
   );
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [menuItems, setMenuItems] = useState("");
+  const [cost, setCost] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [pickupName, setPickupName] = useState("");
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<
     string | null
   >(null);
@@ -56,7 +58,9 @@ export function OrderForm({ stores }: OrderFormProps) {
     setSelectedServiceType(null);
     setSelectedStore(null);
     setMenuItems("");
+    setCost("");
     setPhoneNumber("");
+    setPickupName("");
     setSelectedPickupLocation(null);
     setOffCampusAddress("");
     handleRemoveImage();
@@ -127,10 +131,12 @@ export function OrderForm({ stores }: OrderFormProps) {
 
     const validation = validateOrderDetails(
       menuItems,
+      cost,
       phoneNumber,
+      pickupName,
       selectedPickupLocation,
       offCampusAddress,
-      showOffCampusAddress,
+      showOffCampusAddress
     );
 
     if (!validation.isValid) {
@@ -142,7 +148,9 @@ export function OrderForm({ stores }: OrderFormProps) {
     const success = await submitOrder({
       selectedStore: selectedStore!,
       menuItems,
+      cost,
       phoneNumber,
+      pickupName,
       selectedPickupLocation: selectedPickupLocation!,
       offCampusAddress,
       uploadedImage,
@@ -183,6 +191,7 @@ export function OrderForm({ stores }: OrderFormProps) {
 
   return (
     <OrderDetailsStep
+      cost={cost}
       errors={{ ...errors, image: imageError }}
       fileInputRef={fileInputRef}
       imagePreview={imagePreview}
@@ -190,6 +199,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       menuItems={menuItems}
       offCampusAddress={offCampusAddress}
       phoneNumber={phoneNumber}
+      pickupName={pickupName}
       selectedPickupLocation={selectedPickupLocation}
       selectedStore={selectedStore}
       showOffCampusAddress={showOffCampusAddress}
@@ -197,6 +207,10 @@ export function OrderForm({ stores }: OrderFormProps) {
       submitError={submitError}
       wasSubmitted={wasSubmitted}
       onBack={() => setCurrentStep(2)}
+      onCostChange={(value) => {
+        setCost(value);
+        setErrors((prev) => ({ ...prev, cost: "" }));
+      }}
       onImageChange={handleImageChange}
       onMenuItemsChange={(value) => {
         setMenuItems(value);
@@ -211,6 +225,10 @@ export function OrderForm({ stores }: OrderFormProps) {
         setErrors((prev) => ({ ...prev, phone: "" }));
       }}
       onPickupLocationChange={handlePickupLocationChange}
+      onPickupNameChange={(value) => {
+        setPickupName(value);
+        setErrors((prev) => ({ ...prev, pickupName: "" }));
+      }}
       onRemoveImage={handleRemoveImage}
       onSubmit={handleSubmit}
     />

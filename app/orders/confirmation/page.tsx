@@ -13,16 +13,19 @@ function OrderConfirmationContent() {
   const [orderInfo, setOrderInfo] = useState<{
     pickupCode: string;
     phoneNumber: string;
+    totalAmount: string;
   } | null>(null);
 
   useEffect(() => {
     const pickupCode = searchParams.get("pickupCode");
     const phoneNumber = searchParams.get("phoneNumber");
+    const totalAmount = searchParams.get("totalAmount");
 
     if (pickupCode && phoneNumber) {
       setOrderInfo({
         pickupCode,
         phoneNumber,
+        totalAmount: totalAmount || "0",
       });
     } else {
       // 如果沒有訂單資訊，導向首頁
@@ -78,6 +81,13 @@ function OrderConfirmationContent() {
                 <span className="text-sm font-medium">手機號碼</span>
                 <span className="text-lg font-semibold">
                   {orderInfo.phoneNumber}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-success-50 dark:bg-success-900/20 rounded-lg">
+                <span className="text-sm font-medium">總金額</span>
+                <span className="text-xl font-bold text-success-600 dark:text-success-400">
+                  NT$ {orderInfo.totalAmount}
                 </span>
               </div>
             </div>

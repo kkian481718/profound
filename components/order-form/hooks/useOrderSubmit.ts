@@ -8,7 +8,9 @@ import { createClient } from "@/lib/supabase/client";
 type SubmitOrderParams = {
   selectedStore: string;
   menuItems: string;
+  cost: string;
   phoneNumber: string;
+  pickupName: string;
   selectedPickupLocation: string;
   offCampusAddress: string;
   uploadedImage: File | null;
@@ -79,8 +81,13 @@ export function useOrderSubmit() {
       const defaultPickupTime = new Date();
 
       defaultPickupTime.setHours(
-        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS,
+        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS
       );
+
+      // 計算金額
+      const costNum = parseFloat(params.cost);
+      const shippingFeeNum = costNum * 0.1;
+      const totalAmountNum = costNum + shippingFeeNum;
 
       const orderData = {
         store_id: params.selectedStore,
@@ -88,14 +95,14 @@ export function useOrderSubmit() {
         pickup_location: params.showOffCampusAddress
           ? params.offCampusAddress
           : params.selectedPickupLocation,
-        pickup_name: "客戶", // 可以之後新增輸入欄位
+        pickup_name: params.pickupName,
         pickup_code: pickupCode,
         pickup_phone: params.phoneNumber,
         menu_items: params.menuItems,
         menu_image_url: menuImageUrl,
-        cost: 0, // 需要之後計算或輸入
-        shipping_fee: 0, // 需要之後計算或輸入
-        total_amount: 0, // 需要之後計算
+        cost: costNum,
+        shipping_fee: shippingFeeNum,
+        total_amount: totalAmountNum,
         payment_status: "pending",
         delivery_status: "pending",
         pickup_time: defaultPickupTime.toISOString(),
@@ -115,7 +122,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}`,
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${totalAmountNum.toFixed(0)}`
       );
 
       return true;

@@ -3,7 +3,7 @@ import type { ErrorState } from "../types";
 import { initialErrors } from "../constants";
 
 export function validateServiceType(
-  selectedServiceType: string | null,
+  selectedServiceType: string | null
 ): string {
   if (!selectedServiceType) {
     return "請選擇服務類型";
@@ -22,16 +22,28 @@ export function validateStore(selectedStore: string | null): string {
 
 export function validateOrderDetails(
   menuItems: string,
+  cost: string,
   phoneNumber: string,
+  pickupName: string,
   selectedPickupLocation: string | null,
   offCampusAddress: string,
-  showOffCampusAddress: boolean,
+  showOffCampusAddress: boolean
 ): { isValid: boolean; errors: ErrorState } {
   let hasError = false;
   const nextErrors: ErrorState = { ...initialErrors };
 
   if (!menuItems.trim()) {
     nextErrors.menuItems = "請輸入想點的餐點";
+    hasError = true;
+  }
+
+  const costNum = parseFloat(cost);
+
+  if (!cost.trim()) {
+    nextErrors.cost = "請輸入餐點金額";
+    hasError = true;
+  } else if (isNaN(costNum) || costNum <= 0) {
+    nextErrors.cost = "請輸入有效的金額";
     hasError = true;
   }
 
@@ -42,6 +54,19 @@ export function validateOrderDetails(
     hasError = true;
   } else if (!/^09\d{8}$/.test(normalizedPhone)) {
     nextErrors.phone = "請輸入有效的手機號碼 (例如:0912345678)";
+    hasError = true;
+  }
+
+  const normalizedName = pickupName.trim();
+
+  if (!normalizedName) {
+    nextErrors.pickupName = "請輸入暱稱";
+    hasError = true;
+  } else if (normalizedName.length < 2) {
+    nextErrors.pickupName = "暱稱至少需要2個字元";
+    hasError = true;
+  } else if (normalizedName.length > 20) {
+    nextErrors.pickupName = "暱稱不能超過20個字元";
     hasError = true;
   }
 

@@ -19,6 +19,8 @@ DROP POLICY IF EXISTS "Allow authenticated users to delete stores" ON stores;
 -- 刪除 orders 資料表的所有 policies
 DROP POLICY IF EXISTS "Allow anonymous users to insert orders" ON orders;
 DROP POLICY IF EXISTS "Allow anonymous users to read own orders by code" ON orders;
+DROP POLICY IF EXISTS "Allow public to insert orders" ON orders;
+DROP POLICY IF EXISTS "Allow public to read orders by code" ON orders;
 DROP POLICY IF EXISTS "Allow authenticated users to read all orders" ON orders;
 DROP POLICY IF EXISTS "Allow authenticated users to insert orders" ON orders;
 DROP POLICY IF EXISTS "Allow authenticated users to update orders" ON orders;
@@ -64,16 +66,16 @@ CREATE POLICY "Allow authenticated users to update stores" ON stores
 -- 步驟 4: 建立 orders 資料表的 policies
 -- ============================================
 
--- 1. 允許匿名使用者新增訂單
-CREATE POLICY "Allow anonymous users to insert orders" ON orders
+-- 1. 允許所有人（包括匿名用戶）新增訂單
+CREATE POLICY "Allow public to insert orders" ON orders
   FOR INSERT
-  TO anon
+  TO public
   WITH CHECK (true);
 
--- 2. 允許匿名使用者透過取貨密碼和手機號碼查詢自己的訂單
-CREATE POLICY "Allow anonymous users to read own orders by code" ON orders
+-- 2. 允許所有人（包括匿名用戶）透過取貨密碼和手機號碼查詢訂單
+CREATE POLICY "Allow public to read orders by code" ON orders
   FOR SELECT
-  TO anon
+  TO public
   USING (
     pickup_code IS NOT NULL AND 
     pickup_phone IS NOT NULL

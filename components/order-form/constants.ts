@@ -20,10 +20,12 @@ export const initialErrors: ErrorState = {
   serviceType: "",
   store: "",
   menuItems: "",
+  cost: "",
   phone: "",
   pickupLocation: "",
   address: "",
   image: "",
+  pickupName: "",
 };
 
 export const IMAGE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
