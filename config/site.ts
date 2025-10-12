@@ -14,6 +14,20 @@ export const siteConfig = {
       href: "/orders",
     },
   ],
+  adminNavItems: [
+    {
+      label: "店家管理",
+      href: "/admin/stores",
+    },
+    {
+      label: "新增店家",
+      href: "/admin/add-store",
+    },
+    {
+      label: "歷史訂單",
+      href: "/admin/orders",
+    },
+  ],
   links: {
     line: "https://line.me/ti/g2/doSJzEdtzFR3oAV6YoZPhoZR8mubtUVPf9tWmQ",
   },
