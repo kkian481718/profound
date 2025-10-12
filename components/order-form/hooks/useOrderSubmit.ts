@@ -1,0 +1,146 @@
+import { useState } from "react";
+
+import { DEFAULT_PICKUP_HOURS } from "../constants";
+
+import { createClient } from "@/lib/supabase/client";
+
+type SubmitOrderParams = {
+  selectedStore: string;
+  menuItems: string;
+  phoneNumber: string;
+  selectedPickupLocation: string;
+  offCampusAddress: string;
+  uploadedImage: File | null;
+  showOffCampusAddress: boolean;
+};
+
+export function useOrderSubmit() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [wasSubmitted, setWasSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const supabase = createClient();
+
+  const generatePickupCode = () => {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  };
+
+  const uploadImageToStorage = async (image: File): Promise<string | null> => {
+    try {
+      const fileExt = image.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `order-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("orders")
+        .upload(filePath, image, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        // eslint-disable-next-line no-console
+        console.warn("圖片上傳失敗:", uploadError);
+
+        return null;
+      }
+
+      // 取得公開 URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("orders").getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("圖片上傳錯誤:", error);
+
+      return null;
+    }
+  };
+
+  const submitOrder = async (params: SubmitOrderParams) => {
+    setWasSubmitted(false);
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      const pickupCode = generatePickupCode();
+      let menuImageUrl: string | null = null;
+
+      // 如果有上傳圖片，先上傳到 Supabase Storage
+      if (params.uploadedImage) {
+        menuImageUrl = await uploadImageToStorage(params.uploadedImage);
+      }
+
+      // 準備訂單資料
+      // 預設取貨時間為下單後 8 小時
+      const defaultPickupTime = new Date();
+
+      defaultPickupTime.setHours(
+        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS
+      );
+
+      const orderData = {
+        store_id: params.selectedStore,
+        order_type: "delivery",
+        pickup_location: params.showOffCampusAddress
+          ? params.offCampusAddress
+          : params.selectedPickupLocation,
+        pickup_name: "客戶", // 可以之後新增輸入欄位
+        pickup_code: pickupCode,
+        pickup_phone: params.phoneNumber,
+        menu_items: params.menuItems,
+        menu_image_url: menuImageUrl,
+        cost: 0, // 需要之後計算或輸入
+        shipping_fee: 0, // 需要之後計算或輸入
+        total_amount: 0, // 需要之後計算
+        payment_status: "pending",
+        delivery_status: "pending",
+        pickup_time: defaultPickupTime.toISOString(),
+      };
+
+      // 儲存訂單到資料庫
+      const { error: orderError } = await supabase
+        .from("orders")
+        .insert([orderData])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 成功提交
+      setWasSubmitted(true);
+
+      // 顯示取貨密碼和查詢說明
+      alert(
+        `✅ 訂單已建立！\n\n` +
+          `📋 訂單資訊：\n` +
+          `取貨密碼：${pickupCode}\n` +
+          `手機號碼：${params.phoneNumber}\n\n` +
+          `💡 請妥善保管此資訊！\n` +
+          `您可以使用「取貨密碼」和「手機號碼」\n` +
+          `隨時查詢訂單狀態。\n\n` +
+          `🔍 查詢訂單請前往：訂單查詢頁面\n` +
+          `建議立即截圖保存！`
+      );
+
+      return true;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("提交訂單失敗:", error);
+      setSubmitError("提交訂單時發生錯誤，請稍後再試。");
+
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return {
+    isSubmitting,
+    wasSubmitted,
+    submitError,
+    submitOrder,
+    setSubmitError,
+  };
+}

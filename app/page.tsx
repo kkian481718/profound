@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@heroui/button";
 
 import { title, subtitle } from "@/components/primitives";
-import { OrderForm } from "@/components/order-form";
+import { OrderForm } from "@/components/order-form/index";
 
 export default function Home() {
   return (

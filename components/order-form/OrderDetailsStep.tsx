@@ -1,0 +1,222 @@
+import type { Selection } from "@react-types/shared";
+import type { FormEvent, ChangeEvent } from "react";
+import type { ErrorState, StoreOption } from "./types";
+
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
+import { Alert } from "@heroui/alert";
+import { Select, SelectItem } from "@heroui/select";
+
+import { pickupLocations } from "./constants";
+
+type OrderDetailsStepProps = {
+  storeOptions: StoreOption[];
+  selectedStore: string | null;
+  menuItems: string;
+  phoneNumber: string;
+  selectedPickupLocation: string | null;
+  offCampusAddress: string;
+  imagePreview: string | null;
+  errors: ErrorState;
+  isSubmitting: boolean;
+  wasSubmitted: boolean;
+  submitError: string | null;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  showOffCampusAddress: boolean;
+  onMenuItemsChange: (value: string) => void;
+  onPhoneNumberChange: (value: string) => void;
+  onPickupLocationChange: (keys: Selection) => void;
+  onOffCampusAddressChange: (value: string) => void;
+  onImageChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onRemoveImage: () => void;
+  onBack: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+};
+
+export function OrderDetailsStep({
+  storeOptions,
+  selectedStore,
+  menuItems,
+  phoneNumber,
+  selectedPickupLocation,
+  offCampusAddress,
+  imagePreview,
+  errors,
+  isSubmitting,
+  wasSubmitted,
+  submitError,
+  fileInputRef,
+  showOffCampusAddress,
+  onMenuItemsChange,
+  onPhoneNumberChange,
+  onPickupLocationChange,
+  onOffCampusAddressChange,
+  onImageChange,
+  onRemoveImage,
+  onBack,
+  onSubmit,
+}: OrderDetailsStepProps) {
+  return (
+    <Card className="w-full max-w-2xl shadow-small p-3">
+      <CardHeader className="flex flex-col items-start gap-1 pb-0">
+        <h2 className="text-2xl font-semibold">Step 3. 訂單資訊</h2>
+        <p className="text-sm text-default-500">
+          商品為貨到付款,請確保聯絡資訊正確。
+        </p>
+      </CardHeader>
+      <CardBody className="flex flex-col gap-6">
+        {wasSubmitted ? (
+          <Alert color="success" title="提交成功" variant="flat">
+            我們已收到您的訂購需求,請留意後續通知。
+          </Alert>
+        ) : null}
+
+        {submitError ? (
+          <Alert color="danger" title="提交失敗" variant="flat">
+            {submitError}
+          </Alert>
+        ) : null}
+
+        <form className="flex flex-col gap-6" onSubmit={onSubmit}>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-default-600">
+              <span className="font-medium">店家：</span>
+              {storeOptions.find((s) => s.value === selectedStore)?.label}
+            </p>
+          </div>
+
+          <Textarea
+            isRequired
+            aria-label="點餐內容"
+            description="請詳細描述您想點的餐點、數量及備註"
+            errorMessage={errors.menuItems || undefined}
+            isInvalid={Boolean(errors.menuItems)}
+            label="點餐內容"
+            minRows={4}
+            placeholder="例如：大麥克套餐 x2（去洋蔥）&#10;薯條大份 x1&#10;可樂中杯 x2"
+            value={menuItems}
+            onValueChange={onMenuItemsChange}
+          />
+
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-default-700">
+                菜單圖片（選填）
+              </span>
+              <p className="text-xs text-default-500">
+                可上傳菜單截圖或照片,檔案大小限制 5MB
+              </p>
+            </div>
+            <input
+              ref={fileInputRef}
+              accept="image/*"
+              aria-label="上傳菜單圖片"
+              className="hidden"
+              type="file"
+              onChange={onImageChange}
+            />
+            {imagePreview ? (
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full max-w-md">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt="菜單預覽"
+                    className="w-full h-auto rounded-lg border-2 border-default-200"
+                    src={imagePreview}
+                  />
+                </div>
+                <Button
+                  className="w-full md:w-auto"
+                  color="danger"
+                  size="sm"
+                  variant="flat"
+                  onPress={onRemoveImage}
+                >
+                  移除圖片
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="w-full md:w-auto"
+                color="default"
+                variant="flat"
+                onPress={() => fileInputRef.current?.click()}
+              >
+                上傳菜單圖片
+              </Button>
+            )}
+            {errors.image && (
+              <p className="text-xs text-danger">{errors.image}</p>
+            )}
+          </div>
+
+          <Input
+            isRequired
+            aria-label="手機號碼"
+            description="請輸入 10 碼手機號碼"
+            errorMessage={errors.phone || undefined}
+            isInvalid={Boolean(errors.phone)}
+            label="手機號碼"
+            maxLength={10}
+            placeholder="請輸入手機號碼"
+            type="tel"
+            value={phoneNumber}
+            onValueChange={onPhoneNumberChange}
+          />
+
+          <Select
+            isRequired
+            aria-label="取貨地點"
+            errorMessage={errors.pickupLocation || undefined}
+            isInvalid={Boolean(errors.pickupLocation)}
+            label="取貨地點"
+            placeholder="請選擇取貨地點"
+            selectedKeys={
+              selectedPickupLocation
+                ? new Set([selectedPickupLocation])
+                : new Set([])
+            }
+            onSelectionChange={onPickupLocationChange}
+          >
+            {pickupLocations.map((location) => (
+              <SelectItem key={location.value}>{location.label}</SelectItem>
+            ))}
+          </Select>
+
+          {showOffCampusAddress ? (
+            <Input
+              isRequired
+              aria-label="校外地址"
+              errorMessage={errors.address || undefined}
+              isInvalid={Boolean(errors.address)}
+              label="校外地址"
+              placeholder="請輸入校外地址"
+              value={offCampusAddress}
+              onValueChange={onOffCampusAddressChange}
+            />
+          ) : null}
+
+          <div className="flex gap-3">
+            <Button
+              className="w-full md:w-auto"
+              color="default"
+              variant="flat"
+              onPress={onBack}
+            >
+              回上一步
+            </Button>
+            <Button
+              className="w-full md:w-auto"
+              color="primary"
+              isLoading={isSubmitting}
+              type="submit"
+            >
+              送出訂單
+            </Button>
+          </div>
+        </form>
+      </CardBody>
+    </Card>
+  );
+}
