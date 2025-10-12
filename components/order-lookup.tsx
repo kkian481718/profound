@@ -61,6 +61,11 @@ export function OrderLookup() {
     setIsLoading(true);
 
     try {
+      // 計算 24 小時前的時間
+      const twentyFourHoursAgo = new Date();
+
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
       const { data, error: queryError } = await supabase
         .from("orders")
         .select(
@@ -79,15 +84,18 @@ export function OrderLookup() {
           payment_status,
           delivery_status,
           created_at
-        `
+        `,
         )
         .eq("pickup_code", pickupCode.trim())
         .eq("pickup_phone", phoneNumber.trim())
+        .gte("created_at", twentyFourHoursAgo.toISOString())
         .single();
 
       if (queryError) {
         if (queryError.code === "PGRST116") {
-          setError("找不到訂單，請確認取貨密碼和手機號碼是否正確");
+          setError(
+            "找不到訂單，請確認取貨密碼和手機號碼是否正確，或訂單可能已超過24小時",
+          );
         } else {
           throw queryError;
         }
@@ -169,9 +177,7 @@ export function OrderLookup() {
           {order ? `${order.pickup_name}，您的訂單已成立` : "查詢訂單"}
         </h2>
         <p className="text-sm text-default-500">
-          {order
-            ? "以下是您的訂單資訊"
-            : "請輸入取貨密碼和手機號碼查詢您的訂單"}
+          {order ? "以下是您的訂單資訊" : "僅限查詢24小時內的訂單"}
         </p>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">

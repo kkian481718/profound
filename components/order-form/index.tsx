@@ -24,7 +24,7 @@ export function OrderForm({ stores }: OrderFormProps) {
 
   // 表單資料
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    null
+    null,
   );
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [menuItems, setMenuItems] = useState("");
@@ -136,7 +136,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       pickupName,
       selectedPickupLocation,
       offCampusAddress,
-      showOffCampusAddress
+      showOffCampusAddress,
     );
 
     if (!validation.isValid) {

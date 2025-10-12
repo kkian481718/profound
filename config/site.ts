@@ -20,11 +20,7 @@ export const siteConfig = {
       href: "/admin/stores",
     },
     {
-      label: "新增店家",
-      href: "/admin/add-store",
-    },
-    {
-      label: "歷史訂單",
+      label: "訂單管理",
       href: "/admin/orders",
     },
   ],

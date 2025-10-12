@@ -30,6 +30,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export const Navbar = () => {
   const [user, setUser] = useState<any>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -50,16 +51,26 @@ export const Navbar = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
+
   const handleLogout = async () => {
     const supabase = createClient();
 
     await supabase.auth.signOut();
+    setIsMenuOpen(false);
     router.push("/");
     router.refresh();
   };
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar
+      isMenuOpen={isMenuOpen}
+      maxWidth="xl"
+      position="sticky"
+      onMenuOpenChange={setIsMenuOpen}
+    >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
@@ -137,7 +148,12 @@ export const Navbar = () => {
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
-              <Link color={"foreground"} href={item.href} size="lg">
+              <Link
+                color={"foreground"}
+                href={item.href}
+                size="lg"
+                onPress={handleLinkClick}
+              >
                 {item.label}
               </Link>
             </NavbarMenuItem>
@@ -147,7 +163,12 @@ export const Navbar = () => {
               <div className="my-2 border-t border-divider" />
               {siteConfig.adminNavItems.map((item, index) => (
                 <NavbarMenuItem key={`admin-${item}-${index}`}>
-                  <Link color={"primary"} href={item.href} size="lg">
+                  <Link
+                    color={"primary"}
+                    href={item.href}
+                    size="lg"
+                    onPress={handleLinkClick}
+                  >
                     {item.label}
                   </Link>
                 </NavbarMenuItem>
@@ -174,6 +195,7 @@ export const Navbar = () => {
                   color="primary"
                   href="/login"
                   variant="flat"
+                  onPress={handleLinkClick}
                 >
                   管理員登入
                 </Button>

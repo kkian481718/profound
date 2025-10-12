@@ -6,8 +6,19 @@ import { Button } from "@heroui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Switch } from "@heroui/switch";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from "@heroui/modal";
 
+import AddStoreModal from "@/components/stores/add-store-modal";
+import DeadlineEditor from "@/components/stores/deadline-editor";
 import { createClient } from "@/lib/supabase/client";
+import { closeAllExpiredStores } from "@/lib/validateStore";
 
 interface Store {
   id: string;
@@ -20,10 +31,31 @@ interface Store {
 export default function StoresPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
+  const [storeToDelete, setStoreToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
+  // 新增店家的 Modal 狀態
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  // 刪除確認的 Modal 狀態
+  const {
+    isOpen: isDeleteModalOpen,
+    onOpen: onDeleteModalOpen,
+    onOpenChange: onDeleteModalOpenChange,
+  } = useDisclosure();
+
   useEffect(() => {
-    fetchStores();
+    // 頁面載入時檢查一次過期店家並載入資料
+    const initializePage = async () => {
+      await checkAndCloseExpiredStores();
+      await fetchStores();
+    };
+
+    initializePage();
   }, []);
 
   const fetchStores = async () => {
@@ -44,12 +76,32 @@ export default function StoresPage() {
     }
   };
 
+  const checkAndCloseExpiredStores = async () => {
+    try {
+      await closeAllExpiredStores();
+      fetchStores();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to check expired stores:", err);
+    }
+  };
+
   const toggleStoreStatus = async (storeId: string, currentStatus: boolean) => {
     try {
       const supabase = createClient();
+      // 如果是關閉轉開啟,清除截止時間
+      const updateData: { is_open: boolean; order_deadline?: null } = {
+        is_open: !currentStatus,
+      };
+
+      if (!currentStatus) {
+        // 重新開啟時清除截止時間
+        updateData.order_deadline = null;
+      }
+
       const { error } = await supabase
         .from("stores")
-        .update({ is_open: !currentStatus })
+        .update(updateData)
         .eq("id", storeId);
 
       if (error) throw error;
@@ -60,17 +112,35 @@ export default function StoresPage() {
     }
   };
 
-  const formatDeadline = (deadline: string | null) => {
-    if (!deadline) return null;
-    const date = new Date(deadline);
+  const openDeleteModal = (storeId: string, storeName: string) => {
+    setStoreToDelete({ id: storeId, name: storeName });
+    onDeleteModalOpen();
+  };
 
-    return date.toLocaleString("zh-TW", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const confirmDeleteStore = async () => {
+    if (!storeToDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("stores")
+        .delete()
+        .eq("id", storeToDelete.id);
+
+      if (error) throw error;
+
+      // 刪除成功後重新載入店家列表
+      fetchStores();
+      onDeleteModalOpenChange();
+      setStoreToDelete(null);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to delete store:", err);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (loading) {
@@ -88,10 +158,17 @@ export default function StoresPage() {
           <h1 className="text-3xl font-bold">店家管理</h1>
           <p className="mt-2 text-default-500">管理所有外送店家與接單狀態</p>
         </div>
-        <Button color="primary" onPress={() => router.push("/admin/add-store")}>
+        <Button color="primary" onPress={onOpen}>
           新增店家
         </Button>
       </div>
+
+      {/* 新增店家 Modal */}
+      <AddStoreModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onSuccess={fetchStores}
+      />
 
       {stores.length === 0 ? (
         <Card>
@@ -122,13 +199,8 @@ export default function StoresPage() {
                     {store.is_open ? "開放中" : "未開放"}
                   </Chip>
                 </div>
-                {store.order_deadline && store.is_open && (
-                  <p className="text-xs text-default-500">
-                    截止時間：{formatDeadline(store.order_deadline)}
-                  </p>
-                )}
               </CardHeader>
-              <CardBody className="px-6">
+              <CardBody className="flex flex-col gap-4 px-6">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">接單狀態</span>
                   <Switch
@@ -138,21 +210,82 @@ export default function StoresPage() {
                     }
                   />
                 </div>
+
+                {store.is_open && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium">截止時間</span>
+                    <DeadlineEditor
+                      currentDeadline={store.order_deadline}
+                      storeId={store.id}
+                      onSuccess={fetchStores}
+                    />
+                  </div>
+                )}
               </CardBody>
-              <CardFooter className="px-6 pb-6">
+              <CardFooter className="flex gap-2 px-6 pb-6">
                 <Button
-                  className="w-full"
+                  className="flex-1"
                   color="primary"
                   variant="flat"
                   onPress={() => router.push(`/admin/orders?store=${store.id}`)}
                 >
                   查看訂單
                 </Button>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onPress={() => openDeleteModal(store.id, store.name)}
+                >
+                  刪除
+                </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
       )}
+
+      {/* 刪除確認 Modal */}
+      <Modal isOpen={isDeleteModalOpen} onOpenChange={onDeleteModalOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                確認刪除店家
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  確定要刪除店家「
+                  <span className="font-semibold">{storeToDelete?.name}</span>
+                  」嗎？
+                </p>
+                <div className="mt-2 rounded-lg bg-danger-50 p-3">
+                  <p className="text-sm text-danger">
+                    ⚠️
+                    警告：刪除店家後，所有相關訂單也會一併被刪除，此操作無法復原。
+                  </p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  color="default"
+                  isDisabled={isDeleting}
+                  variant="flat"
+                  onPress={onClose}
+                >
+                  取消
+                </Button>
+                <Button
+                  color="danger"
+                  isLoading={isDeleting}
+                  onPress={confirmDeleteStore}
+                >
+                  確認刪除
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

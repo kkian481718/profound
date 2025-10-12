@@ -3,6 +3,7 @@ import type { StoreOption } from "../types";
 import { useState, useEffect, useMemo } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+import { closeAllExpiredStores } from "@/lib/validateStore";
 
 export function useStores(providedStores?: StoreOption[]) {
   const [storesFromDB, setStoresFromDB] = useState<StoreOption[]>([]);
@@ -12,16 +13,25 @@ export function useStores(providedStores?: StoreOption[]) {
   const fetchStores = async () => {
     try {
       setIsLoadingStores(true);
+
       const { data, error } = await supabase
         .from("stores")
-        .select("id, name")
+        .select("id, name, order_deadline")
         .eq("is_open", true)
         .order("name");
 
       if (error) throw error;
 
       if (data) {
-        const formattedStores = data.map((store) => ({
+        // 過濾掉已經過期的店家 (雙重保險)
+        const now = new Date();
+        const validStores = data.filter((store) => {
+          if (!store.order_deadline) return true;
+
+          return new Date(store.order_deadline) > now;
+        });
+
+        const formattedStores = validStores.map((store) => ({
           label: store.name,
           value: store.id,
         }));
@@ -38,7 +48,10 @@ export function useStores(providedStores?: StoreOption[]) {
   };
 
   useEffect(() => {
-    fetchStores();
+    // 先關閉所有過期的店家，只在組件掛載時執行一次
+    closeAllExpiredStores().finally(() => {
+      fetchStores();
+    });
   }, []);
 
   const storeOptions = useMemo<StoreOption[]>(() => {

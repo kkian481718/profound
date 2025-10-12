@@ -16,20 +16,20 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="mt-12 w-full flex justify-center px-4">
+        <OrderForm />
+      </div>
+
       <div className="flex gap-3 mt-4">
         <Button
           as={Link}
           color="primary"
           href="/orders/lookup"
           size="lg"
-          variant="flat"
+          variant="faded"
         >
           🔍 查詢訂單
         </Button>
-      </div>
-
-      <div className="mt-12 w-full flex justify-center px-4">
-        <OrderForm />
       </div>
     </section>
   );

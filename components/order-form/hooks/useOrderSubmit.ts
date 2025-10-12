@@ -81,7 +81,7 @@ export function useOrderSubmit() {
       const defaultPickupTime = new Date();
 
       defaultPickupTime.setHours(
-        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS
+        defaultPickupTime.getHours() + DEFAULT_PICKUP_HOURS,
       );
 
       // 計算金額
@@ -122,7 +122,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${totalAmountNum.toFixed(0)}`
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${totalAmountNum.toFixed(0)}`,
       );
 
       return true;

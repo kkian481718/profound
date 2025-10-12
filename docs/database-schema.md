@@ -174,6 +174,22 @@ CREATE POLICY "Allow authenticated users to update stores" ON stores
   USING (true)
   WITH CHECK (true);
 
+-- 允許所有人(包括匿名用戶)關閉過期的店家
+CREATE POLICY "Allow public to close expired stores" ON stores
+  FOR UPDATE
+  TO public
+  USING (
+    is_open = true AND
+    order_deadline IS NOT NULL AND
+    order_deadline < NOW()
+  )
+  WITH CHECK (
+    -- 允許更新後的狀態為關閉
+    is_open = false AND
+    -- 確保其他欄位沒有被修改(order_deadline 仍然是過去的時間)
+    order_deadline IS NOT NULL
+  );
+
 -- orders 資料表政策
 -- 允許所有人（包括匿名用戶）新增訂單
 CREATE POLICY "Allow public to insert orders" ON orders

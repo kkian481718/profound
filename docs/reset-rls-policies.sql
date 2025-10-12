@@ -15,6 +15,7 @@ DROP POLICY IF EXISTS "Allow authenticated users to read all stores" ON stores;
 DROP POLICY IF EXISTS "Allow authenticated users to insert stores" ON stores;
 DROP POLICY IF EXISTS "Allow authenticated users to update stores" ON stores;
 DROP POLICY IF EXISTS "Allow authenticated users to delete stores" ON stores;
+DROP POLICY IF EXISTS "Allow public to close expired stores" ON stores;
 
 -- 刪除 orders 資料表的所有 policies
 DROP POLICY IF EXISTS "Allow anonymous users to insert orders" ON orders;
@@ -61,6 +62,22 @@ CREATE POLICY "Allow authenticated users to update stores" ON stores
   TO authenticated
   USING (true)
   WITH CHECK (true);
+
+-- 5. 允許所有人(包括匿名用戶)關閉過期的店家
+CREATE POLICY "Allow public to close expired stores" ON stores
+  FOR UPDATE
+  TO public
+  USING (
+    is_open = true AND 
+    order_deadline IS NOT NULL AND 
+    order_deadline < NOW()
+  )
+  WITH CHECK (
+    -- 允許更新後的狀態為關閉
+    is_open = false AND
+    -- 確保其他欄位沒有被修改(order_deadline 仍然是過去的時間)
+    order_deadline IS NOT NULL
+  );
 
 -- ============================================
 -- 步驟 4: 建立 orders 資料表的 policies

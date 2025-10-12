@@ -1,0 +1,30 @@
+name: Close Expired Stores
+
+on:
+  schedule:
+    # 每 10 分鐘執行一次
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  close-stores:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call API to close expired stores
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET "${{ secrets.APP_URL }}/api/cron/close-stores" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+
+          if [ "$http_code" -ne 200 ]; then
+            echo "❌ Failed to close expired stores"
+            exit 1
+          else
+            echo "✅ Successfully closed expired stores"
+          fi
