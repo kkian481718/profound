@@ -10,8 +10,8 @@ export const siteConfig = {
       href: "/",
     },
     {
-      label: "我的訂單到哪了？",
-      href: "/orders",
+      label: "查詢訂單",
+      href: "/orders/lookup",
     },
   ],
   adminNavItems: [
