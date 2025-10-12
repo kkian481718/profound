@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { DEFAULT_PICKUP_HOURS } from "../constants";
 
@@ -18,6 +19,7 @@ export function useOrderSubmit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wasSubmitted, setWasSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
   const supabase = createClient();
 
   const generatePickupCode = () => {
@@ -111,17 +113,9 @@ export function useOrderSubmit() {
       // 成功提交
       setWasSubmitted(true);
 
-      // 顯示取貨密碼和查詢說明
-      alert(
-        `✅ 訂單已建立！\n\n` +
-          `📋 訂單資訊：\n` +
-          `取貨密碼：${pickupCode}\n` +
-          `手機號碼：${params.phoneNumber}\n\n` +
-          `💡 請妥善保管此資訊！\n` +
-          `您可以使用「取貨密碼」和「手機號碼」\n` +
-          `隨時查詢訂單狀態。\n\n` +
-          `🔍 查詢訂單請前往：訂單查詢頁面\n` +
-          `建議立即截圖保存！`
+      // 導航到訂單確認頁面
+      router.push(
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}`
       );
 
       return true;

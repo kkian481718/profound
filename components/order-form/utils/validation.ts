@@ -3,7 +3,7 @@ import type { ErrorState } from "../types";
 import { initialErrors } from "../constants";
 
 export function validateServiceType(
-  selectedServiceType: string | null
+  selectedServiceType: string | null,
 ): string {
   if (!selectedServiceType) {
     return "請選擇服務類型";
@@ -25,7 +25,7 @@ export function validateOrderDetails(
   phoneNumber: string,
   selectedPickupLocation: string | null,
   offCampusAddress: string,
-  showOffCampusAddress: boolean
+  showOffCampusAddress: boolean,
 ): { isValid: boolean; errors: ErrorState } {
   let hasError = false;
   const nextErrors: ErrorState = { ...initialErrors };
