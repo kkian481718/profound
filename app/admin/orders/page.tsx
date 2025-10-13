@@ -15,8 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
+import { Pagination } from "@heroui/pagination";
+import { useDisclosure } from "@heroui/modal";
 
 import { createClient } from "@/lib/supabase/client";
+import EditStatusModal from "@/components/orders/edit-status-modal";
 
 interface Order {
   id: string;
@@ -51,9 +54,13 @@ function OrdersContent() {
   const [filterDelivery, setFilterDelivery] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     fetchData();
@@ -66,6 +73,7 @@ function OrdersContent() {
 
   useEffect(() => {
     applyFilters();
+    setCurrentPage(1); // 當篩選條件改變時，重置到第一頁
   }, [
     orders,
     searchQuery,
@@ -97,7 +105,7 @@ function OrdersContent() {
           stores (
             name
           )
-        `,
+        `
         )
         .order("order_time", { ascending: false });
 
@@ -131,7 +139,7 @@ function OrdersContent() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_code.toLowerCase().includes(query) ||
-          order.pickup_phone.includes(query),
+          order.pickup_phone.includes(query)
       );
     }
 
@@ -143,14 +151,14 @@ function OrdersContent() {
     // 付款狀態過濾
     if (filterPayment) {
       filtered = filtered.filter(
-        (order) => order.payment_status === filterPayment,
+        (order) => order.payment_status === filterPayment
       );
     }
 
     // 配送狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.delivery_status === filterDelivery,
+        (order) => order.delivery_status === filterDelivery
       );
     }
 
@@ -159,7 +167,7 @@ function OrdersContent() {
       const fromDate = new Date(filterDateFrom);
 
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate,
+        (order) => new Date(order.order_time) >= fromDate
       );
     }
 
@@ -168,7 +176,7 @@ function OrdersContent() {
 
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate,
+        (order) => new Date(order.order_time) <= toDate
       );
     }
 
@@ -188,7 +196,7 @@ function OrdersContent() {
   };
 
   const getPaymentStatusColor = (
-    status: string,
+    status: string
   ): "default" | "success" | "warning" => {
     switch (status) {
       case "paid":
@@ -201,7 +209,7 @@ function OrdersContent() {
   };
 
   const getDeliveryStatusColor = (
-    status: string,
+    status: string
   ): "default" | "primary" | "success" | "warning" | "danger" => {
     switch (status) {
       case "preparing":
@@ -252,6 +260,21 @@ function OrdersContent() {
     setFilterDateTo("");
     router.push("/admin/orders");
   };
+
+  const handleEditOrder = (order: Order) => {
+    setSelectedOrder(order);
+    onOpen();
+  };
+
+  const handleStatusUpdateSuccess = () => {
+    fetchData();
+  };
+
+  // 計算分頁相關數據
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -361,9 +384,10 @@ function OrdersContent() {
                 <TableColumn>金額</TableColumn>
                 <TableColumn>付款狀態</TableColumn>
                 <TableColumn>配送狀態</TableColumn>
+                <TableColumn>操作</TableColumn>
               </TableHeader>
               <TableBody>
-                {filteredOrders.map((order) => (
+                {paginatedOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
                       <div className="text-sm">
@@ -425,12 +449,49 @@ function OrdersContent() {
                         {getDeliveryStatusText(order.delivery_status)}
                       </Chip>
                     </TableCell>
+                    <TableCell>
+                      <Button
+                        color="primary"
+                        size="sm"
+                        variant="flat"
+                        onPress={() => handleEditOrder(order)}
+                      >
+                        編輯狀態
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </CardBody>
         </Card>
+      )}
+
+      {filteredOrders.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination
+            showControls
+            page={currentPage}
+            total={totalPages}
+            onChange={setCurrentPage}
+          />
+        </div>
+      )}
+
+      {selectedOrder && (
+        <EditStatusModal
+          currentDeliveryStatus={selectedOrder.delivery_status}
+          currentPaymentStatus={selectedOrder.payment_status}
+          isOpen={isOpen}
+          orderId={selectedOrder.id}
+          orderInfo={{
+            storeName: selectedOrder.store_name,
+            pickupName: selectedOrder.pickup_name,
+            pickupCode: selectedOrder.pickup_code,
+          }}
+          onOpenChange={onOpenChange}
+          onSuccess={handleStatusUpdateSuccess}
+        />
       )}
     </div>
   );
