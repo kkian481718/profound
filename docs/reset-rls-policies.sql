@@ -63,7 +63,13 @@ CREATE POLICY "Allow authenticated users to update stores" ON stores
   USING (true)
   WITH CHECK (true);
 
--- 5. 允許所有人(包括匿名用戶)關閉過期的店家
+-- 5. 允許已驗證用戶刪除店家(管理員)
+CREATE POLICY "Allow authenticated users to delete stores" ON stores
+  FOR DELETE
+  TO authenticated
+  USING (true);
+
+-- 6. 允許所有人(包括匿名用戶)關閉過期的店家
 CREATE POLICY "Allow public to close expired stores" ON stores
   FOR UPDATE
   TO public

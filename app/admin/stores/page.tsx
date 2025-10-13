@@ -131,12 +131,18 @@ export default function StoresPage() {
         .delete()
         .eq("id", storeToDelete.id);
 
-      if (error) throw error;
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to delete store:", error);
+        alert(`刪除失敗：${error.message}\n\n請確認您有足夠的權限來刪除店家。`);
+        throw error;
+      }
 
       // 刪除成功後重新載入店家列表
-      fetchStores();
+      await fetchStores();
       onDeleteModalOpenChange();
       setStoreToDelete(null);
+      alert(`店家「${storeToDelete.name}」已成功刪除`);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to delete store:", err);
