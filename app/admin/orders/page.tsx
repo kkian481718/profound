@@ -20,6 +20,7 @@ import { useDisclosure } from "@heroui/modal";
 
 import { createClient } from "@/lib/supabase/client";
 import EditStatusModal from "@/components/orders/edit-status-modal";
+import { pickupLocations } from "@/components/order-form/constants";
 
 interface Order {
   id: string;
@@ -52,11 +53,13 @@ function OrdersContent() {
   const [filterStore, setFilterStore] = useState("");
   const [filterPayment, setFilterPayment] = useState("");
   const [filterDelivery, setFilterDelivery] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 15;
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -80,6 +83,7 @@ function OrdersContent() {
     filterStore,
     filterPayment,
     filterDelivery,
+    filterLocation,
     filterDateFrom,
     filterDateTo,
   ]);
@@ -105,7 +109,7 @@ function OrdersContent() {
           stores (
             name
           )
-        `
+        `,
         )
         .order("order_time", { ascending: false });
 
@@ -139,7 +143,7 @@ function OrdersContent() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_code.toLowerCase().includes(query) ||
-          order.pickup_phone.includes(query)
+          order.pickup_phone.includes(query),
       );
     }
 
@@ -151,15 +155,33 @@ function OrdersContent() {
     // 付款狀態過濾
     if (filterPayment) {
       filtered = filtered.filter(
-        (order) => order.payment_status === filterPayment
+        (order) => order.payment_status === filterPayment,
       );
     }
 
     // 配送狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.delivery_status === filterDelivery
+        (order) => order.delivery_status === filterDelivery,
       );
+    }
+
+    // 取貨地點過濾
+    if (filterLocation) {
+      // 從 constants 中提取宿舍地點（排除校外選項）
+      const dormLocations: string[] = pickupLocations
+        .filter((loc) => loc.value !== "校外")
+        .map((loc) => loc.value);
+
+      if (filterLocation === "校外") {
+        filtered = filtered.filter(
+          (order) => !dormLocations.includes(order.pickup_location),
+        );
+      } else {
+        filtered = filtered.filter(
+          (order) => order.pickup_location === filterLocation,
+        );
+      }
     }
 
     // 日期範圍過濾
@@ -167,7 +189,7 @@ function OrdersContent() {
       const fromDate = new Date(filterDateFrom);
 
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate
+        (order) => new Date(order.order_time) >= fromDate,
       );
     }
 
@@ -176,7 +198,7 @@ function OrdersContent() {
 
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate
+        (order) => new Date(order.order_time) <= toDate,
       );
     }
 
@@ -196,7 +218,7 @@ function OrdersContent() {
   };
 
   const getPaymentStatusColor = (
-    status: string
+    status: string,
   ): "default" | "success" | "warning" => {
     switch (status) {
       case "paid":
@@ -209,7 +231,7 @@ function OrdersContent() {
   };
 
   const getDeliveryStatusColor = (
-    status: string
+    status: string,
   ): "default" | "primary" | "success" | "warning" | "danger" => {
     switch (status) {
       case "preparing":
@@ -256,6 +278,7 @@ function OrdersContent() {
     setFilterStore("");
     setFilterPayment("");
     setFilterDelivery("");
+    setFilterLocation("");
     setFilterDateFrom("");
     setFilterDateTo("");
     router.push("/admin/orders");
@@ -293,9 +316,10 @@ function OrdersContent() {
 
       <Card>
         <CardBody className="gap-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <Input
               isClearable
+              className="flex-1"
               placeholder="搜尋店家、取貨人、密碼、手機..."
               value={searchQuery}
               onClear={() => setSearchQuery("")}
@@ -303,62 +327,103 @@ function OrdersContent() {
             />
 
             <Select
-              label="店家"
-              placeholder="選擇店家"
-              selectedKeys={filterStore ? [filterStore] : []}
-              onChange={(e) => setFilterStore(e.target.value)}
+              className="md:w-48"
+              label="取貨地點"
+              placeholder="選擇取貨地點"
+              selectedKeys={filterLocation ? [filterLocation] : []}
+              onChange={(e) => setFilterLocation(e.target.value)}
             >
-              {stores.map((store) => (
-                <SelectItem key={store.id}>{store.name}</SelectItem>
+              {pickupLocations.map((location) => (
+                <SelectItem key={location.value}>{location.label}</SelectItem>
               ))}
             </Select>
-
-            <Select
-              label="付款狀態"
-              placeholder="選擇付款狀態"
-              selectedKeys={filterPayment ? [filterPayment] : []}
-              onChange={(e) => setFilterPayment(e.target.value)}
-            >
-              <SelectItem key="pending">待付款</SelectItem>
-              <SelectItem key="paid">已付款</SelectItem>
-              <SelectItem key="refunded">已退款</SelectItem>
-            </Select>
-
-            <Select
-              label="配送狀態"
-              placeholder="選擇配送狀態"
-              selectedKeys={filterDelivery ? [filterDelivery] : []}
-              onChange={(e) => setFilterDelivery(e.target.value)}
-            >
-              <SelectItem key="pending">待處理</SelectItem>
-              <SelectItem key="preparing">準備中</SelectItem>
-              <SelectItem key="ready">待取貨</SelectItem>
-              <SelectItem key="completed">已完成</SelectItem>
-              <SelectItem key="cancelled">已取消</SelectItem>
-            </Select>
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <Input
-              className="max-w-xs"
-              label="下訂時間（起）"
-              type="date"
-              value={filterDateFrom}
-              onValueChange={setFilterDateFrom}
-            />
-            <Input
-              className="max-w-xs"
-              label="下訂時間（迄）"
-              type="date"
-              value={filterDateTo}
-              onValueChange={setFilterDateTo}
-            />
-            <Button color="default" variant="flat" onPress={clearFilters}>
-              清除篩選
+          <div className="flex items-center justify-between">
+            <Button
+              color="primary"
+              size="sm"
+              variant="light"
+              onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            >
+              {showAdvancedFilters ? "收起進階搜尋" : "展開進階搜尋"}
             </Button>
+            {(filterStore ||
+              filterPayment ||
+              filterDelivery ||
+              filterLocation ||
+              filterDateFrom ||
+              filterDateTo) && (
+              <Button
+                color="default"
+                size="sm"
+                variant="flat"
+                onPress={clearFilters}
+              >
+                清除篩選
+              </Button>
+            )}
           </div>
 
-          <div className="text-sm text-default-500">
+          {showAdvancedFilters && (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Select
+                  label="店家"
+                  placeholder="選擇店家"
+                  selectedKeys={filterStore ? [filterStore] : []}
+                  onChange={(e) => setFilterStore(e.target.value)}
+                >
+                  {stores.map((store) => (
+                    <SelectItem key={store.id}>{store.name}</SelectItem>
+                  ))}
+                </Select>
+
+                <Select
+                  label="付款狀態"
+                  placeholder="選擇付款狀態"
+                  selectedKeys={filterPayment ? [filterPayment] : []}
+                  onChange={(e) => setFilterPayment(e.target.value)}
+                >
+                  <SelectItem key="pending">待付款</SelectItem>
+                  <SelectItem key="paid">已付款</SelectItem>
+                  <SelectItem key="refunded">已退款</SelectItem>
+                </Select>
+
+                <Select
+                  label="配送狀態"
+                  placeholder="選擇配送狀態"
+                  selectedKeys={filterDelivery ? [filterDelivery] : []}
+                  onChange={(e) => setFilterDelivery(e.target.value)}
+                >
+                  <SelectItem key="pending">待處理</SelectItem>
+                  <SelectItem key="preparing">準備中</SelectItem>
+                  <SelectItem key="ready">待取貨</SelectItem>
+                  <SelectItem key="completed">已完成</SelectItem>
+                  <SelectItem key="cancelled">已取消</SelectItem>
+                </Select>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <Input
+                  className="max-w-xs"
+                  label="下訂時間（起）"
+                  type="date"
+                  value={filterDateFrom}
+                  onValueChange={setFilterDateFrom}
+                />
+                <Input
+                  className="max-w-xs"
+                  label="下訂時間（迄）"
+                  type="date"
+                  value={filterDateTo}
+                  onValueChange={setFilterDateTo}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="text-sm text-default-500 text-center">
             共 {filteredOrders.length} 筆訂單
             {filteredOrders.length !== orders.length &&
               ` (從 ${orders.length} 筆中篩選)`}
