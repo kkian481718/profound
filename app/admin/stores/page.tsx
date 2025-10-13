@@ -17,6 +17,7 @@ import {
 
 import AddStoreModal from "@/components/stores/add-store-modal";
 import DeadlineEditor from "@/components/stores/deadline-editor";
+import DeliveryTimeEditor from "@/components/stores/delivery-time-editor";
 import { createClient } from "@/lib/supabase/client";
 import { closeAllExpiredStores } from "@/lib/validateStore";
 
@@ -25,6 +26,7 @@ interface Store {
   name: string;
   is_open: boolean;
   order_deadline: string | null;
+  next_delivery_time: string | null;
   created_at: string;
 }
 
@@ -152,7 +154,7 @@ export default function StoresPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">店家管理</h1>
@@ -162,6 +164,9 @@ export default function StoresPage() {
           新增店家
         </Button>
       </div>
+
+      {/* 全域下次出貨時間設定 */}
+      <DeliveryTimeEditor onSuccess={fetchStores} />
 
       {/* 新增店家 Modal */}
       <AddStoreModal

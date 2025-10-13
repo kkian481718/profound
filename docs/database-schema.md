@@ -12,6 +12,7 @@ CREATE TABLE stores (
   name VARCHAR(255) NOT NULL,
   is_open BOOLEAN DEFAULT false,
   order_deadline TIMESTAMP WITH TIME ZONE,
+  next_delivery_time TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -19,6 +20,7 @@ CREATE TABLE stores (
 -- 建立索引以提升查詢效能
 CREATE INDEX idx_stores_is_open ON stores(is_open);
 CREATE INDEX idx_stores_created_at ON stores(created_at);
+CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 ```
 
 **欄位說明：**
@@ -27,6 +29,7 @@ CREATE INDEX idx_stores_created_at ON stores(created_at);
 - `name`: 店家名稱
 - `is_open`: 是否開放接單
 - `order_deadline`: 最後下單時間
+- `next_delivery_time`: 下次出貨時間（所有外送訂單將使用此時間作為預設取貨時間）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 
@@ -266,10 +269,10 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
 
 ```sql
 -- 新增測試店家
-INSERT INTO stores (name, is_open, order_deadline) VALUES
-('麥當勞', true, now() + interval '7 days'),
-('肯德基', true, now() + interval '5 days'),
-('星巴克', false, null);
+INSERT INTO stores (name, is_open, order_deadline, next_delivery_time) VALUES
+('麥當勞', true, now() + interval '7 days', now() + interval '2 days'),
+('肯德基', true, now() + interval '5 days', now() + interval '3 days'),
+('星巴克', false, null, null);
 
 -- 新增測試外送訂單（請先確認 store_id）
 INSERT INTO orders (

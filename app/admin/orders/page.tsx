@@ -3,10 +3,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
-import { Card, CardBody } from "@heroui/card";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
 import {
   Table,
   TableBody,
@@ -17,10 +15,21 @@ import {
 } from "@heroui/table";
 import { Pagination } from "@heroui/pagination";
 import { useDisclosure } from "@heroui/modal";
+import { ButtonGroup } from "@heroui/button";
 
 import { createClient } from "@/lib/supabase/client";
 import EditStatusModal from "@/components/orders/edit-status-modal";
+import OrderFilters from "@/components/orders/order-filters";
 import { pickupLocations } from "@/components/order-form/constants";
+import {
+  ClockIcon,
+  GridIcon,
+  LocationIcon,
+  LockIcon,
+  PhoneIcon,
+  TableIcon,
+  UserIcon,
+} from "@/components/icons";
 
 interface Order {
   id: string;
@@ -59,6 +68,7 @@ function OrdersContent() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"table" | "card">("card");
   const itemsPerPage = 15;
 
   const router = useRouter();
@@ -209,11 +219,11 @@ function OrdersContent() {
     const date = new Date(dateTime);
 
     return date.toLocaleString("zh-TW", {
-      year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     });
   };
 
@@ -308,128 +318,55 @@ function OrdersContent() {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-8">
-      <div>
-        <h1 className="text-3xl font-bold">歷史訂單</h1>
-        <p className="mt-2 text-default-500">查看和管理所有訂單記錄</p>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">歷史訂單</h1>
+        </div>
+        <ButtonGroup>
+          <Button
+            color={viewMode === "table" ? "primary" : "default"}
+            variant={viewMode === "table" ? "solid" : "flat"}
+            onPress={() => setViewMode("table")}
+          >
+            <TableIcon className="w-5 h-5" />
+            列表
+          </Button>
+          <Button
+            color={viewMode === "card" ? "primary" : "default"}
+            variant={viewMode === "card" ? "solid" : "flat"}
+            onPress={() => setViewMode("card")}
+          >
+            <GridIcon className="w-5 h-5" />
+            卡片
+          </Button>
+        </ButtonGroup>
       </div>
 
-      <Card>
-        <CardBody className="gap-4">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <Input
-              isClearable
-              className="flex-1"
-              placeholder="搜尋店家、取貨人、密碼、手機..."
-              value={searchQuery}
-              onClear={() => setSearchQuery("")}
-              onValueChange={setSearchQuery}
-            />
-
-            <Select
-              className="md:w-48"
-              label="取貨地點"
-              placeholder="選擇取貨地點"
-              selectedKeys={filterLocation ? [filterLocation] : []}
-              onChange={(e) => setFilterLocation(e.target.value)}
-            >
-              {pickupLocations.map((location) => (
-                <SelectItem key={location.value}>{location.label}</SelectItem>
-              ))}
-            </Select>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Button
-              color="primary"
-              size="sm"
-              variant="light"
-              onPress={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            >
-              {showAdvancedFilters ? "收起進階搜尋" : "展開進階搜尋"}
-            </Button>
-            {(filterStore ||
-              filterPayment ||
-              filterDelivery ||
-              filterLocation ||
-              filterDateFrom ||
-              filterDateTo) && (
-              <Button
-                color="default"
-                size="sm"
-                variant="flat"
-                onPress={clearFilters}
-              >
-                清除篩選
-              </Button>
-            )}
-          </div>
-
-          {showAdvancedFilters && (
-            <>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Select
-                  label="店家"
-                  placeholder="選擇店家"
-                  selectedKeys={filterStore ? [filterStore] : []}
-                  onChange={(e) => setFilterStore(e.target.value)}
-                >
-                  {stores.map((store) => (
-                    <SelectItem key={store.id}>{store.name}</SelectItem>
-                  ))}
-                </Select>
-
-                <Select
-                  label="付款狀態"
-                  placeholder="選擇付款狀態"
-                  selectedKeys={filterPayment ? [filterPayment] : []}
-                  onChange={(e) => setFilterPayment(e.target.value)}
-                >
-                  <SelectItem key="pending">待付款</SelectItem>
-                  <SelectItem key="paid">已付款</SelectItem>
-                  <SelectItem key="refunded">已退款</SelectItem>
-                </Select>
-
-                <Select
-                  label="配送狀態"
-                  placeholder="選擇配送狀態"
-                  selectedKeys={filterDelivery ? [filterDelivery] : []}
-                  onChange={(e) => setFilterDelivery(e.target.value)}
-                >
-                  <SelectItem key="pending">待處理</SelectItem>
-                  <SelectItem key="preparing">準備中</SelectItem>
-                  <SelectItem key="ready">待取貨</SelectItem>
-                  <SelectItem key="completed">已完成</SelectItem>
-                  <SelectItem key="cancelled">已取消</SelectItem>
-                </Select>
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                <Input
-                  className="max-w-xs"
-                  label="下訂時間（起）"
-                  type="date"
-                  value={filterDateFrom}
-                  onValueChange={setFilterDateFrom}
-                />
-                <Input
-                  className="max-w-xs"
-                  label="下訂時間（迄）"
-                  type="date"
-                  value={filterDateTo}
-                  onValueChange={setFilterDateTo}
-                />
-              </div>
-            </>
-          )}
-
-          <div className="text-sm text-default-500 text-center">
-            共 {filteredOrders.length} 筆訂單
-            {filteredOrders.length !== orders.length &&
-              ` (從 ${orders.length} 筆中篩選)`}
-          </div>
-        </CardBody>
-      </Card>
+      <OrderFilters
+        filterDateFrom={filterDateFrom}
+        filterDateTo={filterDateTo}
+        filterDelivery={filterDelivery}
+        filterLocation={filterLocation}
+        filterPayment={filterPayment}
+        filterStore={filterStore}
+        filteredOrdersCount={filteredOrders.length}
+        searchQuery={searchQuery}
+        showAdvancedFilters={showAdvancedFilters}
+        stores={stores}
+        totalOrders={orders.length}
+        onClearFilters={clearFilters}
+        onFilterDateFromChange={setFilterDateFrom}
+        onFilterDateToChange={setFilterDateTo}
+        onFilterDeliveryChange={setFilterDelivery}
+        onFilterLocationChange={setFilterLocation}
+        onFilterPaymentChange={setFilterPayment}
+        onFilterStoreChange={setFilterStore}
+        onSearchQueryChange={setSearchQuery}
+        onToggleAdvancedFilters={() =>
+          setShowAdvancedFilters(!showAdvancedFilters)
+        }
+      />
 
       {filteredOrders.length === 0 ? (
         <Card>
@@ -437,7 +374,7 @@ function OrdersContent() {
             <p className="text-default-500">無符合條件的訂單</p>
           </CardBody>
         </Card>
-      ) : (
+      ) : viewMode === "table" ? (
         <Card>
           <CardBody className="overflow-x-auto">
             <Table aria-label="訂單列表">
@@ -530,6 +467,106 @@ function OrdersContent() {
             </Table>
           </CardBody>
         </Card>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+          {paginatedOrders.map((order) => (
+            <Card key={order.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-col gap-2 pb-2">
+                <div className="flex justify-between items-start w-full">
+                  <h3 className="text-sm md:text-base font-bold flex-1 pr-2 line-clamp-1">
+                    {order.store_name}
+                  </h3>
+                  <div className="flex gap-1">
+                    <Chip
+                      className="text-xs"
+                      color={getPaymentStatusColor(order.payment_status)}
+                      size="sm"
+                      variant="flat"
+                    >
+                      {getPaymentStatusText(order.payment_status)}
+                    </Chip>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center w-full">
+                  <p className="text-xs text-default-500">
+                    {formatDateTime(order.order_time)}
+                  </p>
+                  <Chip
+                    className="text-xs"
+                    color={getDeliveryStatusColor(order.delivery_status)}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {getDeliveryStatusText(order.delivery_status)}
+                  </Chip>
+                </div>
+              </CardHeader>
+              <CardBody className="pt-2 flex flex-col gap-2">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <UserIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+                    <span className="text-xs md:text-sm font-medium truncate">
+                      {order.pickup_name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <LockIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+                    <span className="text-xs text-default-500 truncate">
+                      密碼：{order.pickup_code}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <PhoneIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+                    <span className="text-xs text-default-500 truncate">
+                      {order.pickup_phone}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <LocationIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+                    <span className="text-xs text-default-500 truncate">
+                      {order.pickup_location}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <ClockIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+                    <span className="text-xs text-default-500 truncate">
+                      取貨：{formatDateTime(order.pickup_time)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t pt-1.5 mt-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-default-500">成本</span>
+                    <span className="text-xs md:text-sm">${order.cost}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-default-500">運費</span>
+                    <span className="text-xs md:text-sm">
+                      ${order.shipping_fee}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center font-bold mt-0.5">
+                    <span className="text-xs md:text-sm">總計</span>
+                    <span className="text-sm md:text-base">
+                      ${order.total_amount}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full mt-1.5"
+                  color="primary"
+                  size="sm"
+                  variant="flat"
+                  onPress={() => handleEditOrder(order)}
+                >
+                  編輯
+                </Button>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
       )}
 
       {filteredOrders.length > 0 && totalPages > 1 && (
