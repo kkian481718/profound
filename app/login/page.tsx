@@ -43,9 +43,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col gap-1 px-6 pt-6">
           <h1 className="text-2xl font-bold">管理員登入</h1>
-          <p className="text-sm text-default-500">
-            請使用您的 Supabase 帳號登入
-          </p>
+          <p className="text-sm text-default-500">請使用您的管理者帳號登入</p>
         </CardHeader>
         <CardBody className="px-6 pb-6">
           <form className="flex flex-col gap-4" onSubmit={handleLogin}>

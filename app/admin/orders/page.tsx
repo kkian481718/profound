@@ -42,6 +42,7 @@ interface Order {
   pickup_code: string;
   pickup_phone: string;
   cost: number;
+  dev_fee: number;
   shipping_fee: number;
   total_amount: number;
   payment_status: "pending" | "paid" | "refunded";
@@ -428,6 +429,9 @@ function OrdersContent() {
                         <div className="text-xs text-default-500">
                           運費：${order.shipping_fee}
                         </div>
+                        <div className="text-xs text-default-500">
+                          網頁費：${order.dev_fee}
+                        </div>
                         <div className="font-medium">
                           總計：${order.total_amount}
                         </div>
@@ -545,6 +549,10 @@ function OrdersContent() {
                     <span className="text-xs md:text-sm">
                       ${order.shipping_fee}
                     </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-default-500">網頁費</span>
+                    <span className="text-xs md:text-sm">${order.dev_fee}</span>
                   </div>
                   <div className="flex justify-between items-center font-bold mt-0.5">
                     <span className="text-xs md:text-sm">總計</span>

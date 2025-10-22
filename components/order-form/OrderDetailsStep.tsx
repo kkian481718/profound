@@ -65,10 +65,20 @@ export function OrderDetailsStep({
   onBack,
   onSubmit,
 }: OrderDetailsStepProps) {
-  // 計算運費和總金額
+  // 計算網頁費、運費和總金額
   const costNum = parseFloat(cost) || 0;
-  const shippingFee = costNum * 0.1;
-  const totalAmount = costNum + shippingFee;
+  const devFee = 10; // 固定網頁費 10 元
+
+  // 運費計算邏輯
+  let shippingFee: number;
+
+  if (costNum < 150) {
+    shippingFee = 20; // 商品金額 < 150：運費 20 元
+  } else {
+    shippingFee = Math.round(costNum * 0.12); // 商品金額 >= 150：運費 12%
+  }
+
+  const totalAmount = costNum + devFee + shippingFee;
 
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
@@ -115,8 +125,8 @@ export function OrderDetailsStep({
           <div className="space-y-2">
             <Input
               isRequired
-              aria-label="餐點金額"
-              description="請輸入餐點總金額（新台幣）"
+              aria-label="餐點原始金額"
+              description="請輸入餐點原本的金額，我們會幫您計算運費"
               errorMessage={errors.cost || undefined}
               isInvalid={Boolean(errors.cost)}
               label="餐點金額"
@@ -137,9 +147,9 @@ export function OrderDetailsStep({
                   <span className="font-medium">NT$ {costNum.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>運費 (10%)：</span>
+                  <span>服務費：</span>
                   <span className="font-medium">
-                    NT$ {shippingFee.toFixed(0)}
+                    NT$ {(devFee + shippingFee).toFixed(0)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
@@ -204,13 +214,13 @@ export function OrderDetailsStep({
 
           <Input
             isRequired
-            aria-label="暱稱"
-            description="請輸入您的暱稱"
+            aria-label="LINE社群暱稱"
+            description="請輸入您在LINE社群的暱稱"
             errorMessage={errors.pickupName || undefined}
             isInvalid={Boolean(errors.pickupName)}
-            label="暱稱"
+            label="LINE社群暱稱"
             maxLength={20}
-            placeholder="請輸入您的暱稱"
+            placeholder="請輸入您在LINE社群的暱稱"
             type="text"
             value={pickupName}
             onValueChange={onPickupNameChange}

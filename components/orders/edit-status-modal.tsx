@@ -102,7 +102,7 @@ export default function EditStatusModal({
                 <div className="mb-2 text-sm font-medium">訂單資訊</div>
                 <div className="space-y-1 text-xs text-default-600">
                   <div>店家：{orderInfo.storeName}</div>
-                  <div>取貨人：{orderInfo.pickupName}</div>
+                  <div>社群名稱：{orderInfo.pickupName}</div>
                   <div>取貨密碼：{orderInfo.pickupCode}</div>
                 </div>
               </div>

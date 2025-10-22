@@ -49,13 +49,13 @@ export default function RootLayout({
             </main>
             <footer className="w-full flex items-center justify-center py-3">
               <Link
-                isExternal
                 className="flex items-center gap-1 text-current"
-                href="https://buymeacoffee.com/fatrabbit"
-                title="MiffyStudio homepage"
+                href="#"
+                title=""
               >
-                <p className="text-primary">MiffyStudio</p>
-                <span className="text-default-400"> © 2025</span>
+                <span className="text-default-400">
+                  玄 x MiffyStudio © 2025
+                </span>
               </Link>
             </footer>
           </div>

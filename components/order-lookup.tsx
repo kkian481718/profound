@@ -18,6 +18,7 @@ type OrderData = {
   menu_items: string | null;
   menu_image_url: string | null;
   cost: number;
+  dev_fee: number;
   shipping_fee: number;
   total_amount: number;
   payment_status: string;
@@ -79,6 +80,7 @@ export function OrderLookup() {
           menu_items,
           menu_image_url,
           cost,
+          dev_fee,
           shipping_fee,
           total_amount,
           payment_status,
@@ -295,9 +297,9 @@ export function OrderLookup() {
                     <span className="font-medium">NT$ {order.cost}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-default-500">運費:</span>
+                    <span className="text-default-500">服務費:</span>
                     <span className="font-medium">
-                      NT$ {order.shipping_fee}
+                      NT$ {order.dev_fee + order.shipping_fee}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t border-default-200 pt-2 mt-2">

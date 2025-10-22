@@ -96,8 +96,18 @@ export function useOrderSubmit() {
 
       // 計算金額
       const costNum = parseFloat(params.cost);
-      const shippingFeeNum = costNum * 0.1;
-      const totalAmountNum = costNum + shippingFeeNum;
+      const devFee = 10; // 固定網頁費 10 元
+
+      // 運費計算邏輯
+      let shippingFeeNum: number;
+
+      if (costNum < 150) {
+        shippingFeeNum = 20; // 商品金額 < 150：運費 20 元
+      } else {
+        shippingFeeNum = Math.round(costNum * 0.12); // 商品金額 >= 150：運費 12%
+      }
+
+      const totalAmountNum = costNum + devFee + shippingFeeNum;
 
       const orderData = {
         store_id: params.selectedStore,
@@ -111,6 +121,7 @@ export function useOrderSubmit() {
         menu_items: params.menuItems,
         menu_image_url: menuImageUrl,
         cost: costNum,
+        dev_fee: devFee,
         shipping_fee: shippingFeeNum,
         total_amount: totalAmountNum,
         payment_status: "pending",
