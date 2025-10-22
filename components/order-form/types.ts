@@ -15,7 +15,7 @@ export type ErrorState = {
   pickupName: string;
 };
 
-export type Step = 1 | 2 | 3;
+export type Step = 1 | 2;
 
 export type OrderFormData = {
   selectedServiceType: string | null;

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { InputOtp } from "@heroui/input-otp";
 import { Alert } from "@heroui/alert";
 
 import { createClient } from "@/lib/supabase/client";
@@ -186,16 +187,6 @@ export function OrderLookup() {
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <Input
             isRequired
-            aria-label="取貨密碼"
-            label="取貨密碼"
-            maxLength={4}
-            placeholder="請輸入4位數取貨密碼"
-            value={pickupCode}
-            onValueChange={setPickupCode}
-          />
-
-          <Input
-            isRequired
             aria-label="手機號碼"
             label="手機號碼"
             maxLength={10}
@@ -203,6 +194,16 @@ export function OrderLookup() {
             type="tel"
             value={phoneNumber}
             onValueChange={setPhoneNumber}
+          />
+
+          <InputOtp
+            isRequired
+            allowedKeys="^[0-9]*$"
+            aria-label="取貨密碼"
+            description="取貨密碼"
+            length={4}
+            value={pickupCode}
+            onValueChange={setPickupCode}
           />
 
           {error && (

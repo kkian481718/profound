@@ -73,7 +73,7 @@ export function OrderDetailsStep({
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
-        <h2 className="text-2xl font-semibold">Step 3. 訂單資訊</h2>
+        <h2 className="text-2xl font-semibold">Step 2. 訂單資訊</h2>
         <p className="text-sm text-default-500">
           商品為貨到付款,請確保聯絡資訊正確。
         </p>

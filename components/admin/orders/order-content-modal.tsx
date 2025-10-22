@@ -142,7 +142,7 @@ export default function OrderContentModal({
                         </div>
                         {order.dev_fee > 0 && (
                           <div className="flex justify-between">
-                            <span className="text-default-600">網頁費:</span>
+                            <span className="text-default-600">開發費:</span>
                             <span>${order.dev_fee}</span>
                           </div>
                         )}

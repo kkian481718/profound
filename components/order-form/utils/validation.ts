@@ -2,16 +2,6 @@ import type { ErrorState } from "../types";
 
 import { initialErrors } from "../constants";
 
-export function validateServiceType(
-  selectedServiceType: string | null,
-): string {
-  if (!selectedServiceType) {
-    return "請選擇服務類型";
-  }
-
-  return "";
-}
-
 export function validateStore(selectedStore: string | null): string {
   if (!selectedStore) {
     return "請選擇店家";

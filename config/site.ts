@@ -23,6 +23,10 @@ export const siteConfig = {
       label: "訂單管理",
       href: "/admin/orders",
     },
+    {
+      label: "利潤查詢",
+      href: "/admin/profit",
+    },
   ],
   links: {
     line: "https://line.me/ti/g2/doSJzEdtzFR3oAV6YoZPhoZR8mubtUVPf9tWmQ",

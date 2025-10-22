@@ -9,23 +9,15 @@ import { initialErrors } from "./constants";
 import { useStores } from "./hooks/useStores";
 import { useImageUpload } from "./hooks/useImageUpload";
 import { useOrderSubmit } from "./hooks/useOrderSubmit";
-import {
-  validateServiceType,
-  validateStore,
-  validateOrderDetails,
-} from "./utils/validation";
-import { ServiceTypeStep } from "./ServiceTypeStep";
+import { validateStore, validateOrderDetails } from "./utils/validation";
 import { StoreSelectionStep } from "./StoreSelectionStep";
 import { OrderDetailsStep } from "./OrderDetailsStep";
 
 export function OrderForm({ stores }: OrderFormProps) {
-  // Step 管理
+  // Step 管理 - 直接從店家選擇開始
   const [currentStep, setCurrentStep] = useState<Step>(1);
 
-  // 表單資料
-  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    null,
-  );
+  // 表單資料 - 服務類型固定為外送
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [menuItems, setMenuItems] = useState("");
   const [cost, setCost] = useState("");
@@ -55,7 +47,6 @@ export function OrderForm({ stores }: OrderFormProps) {
   // 重置表單
   const resetForm = () => {
     setCurrentStep(1);
-    setSelectedServiceType(null);
     setSelectedStore(null);
     setMenuItems("");
     setCost("");
@@ -67,32 +58,7 @@ export function OrderForm({ stores }: OrderFormProps) {
     setErrors(initialErrors);
   };
 
-  // Step 1: 服務類型選擇處理
-  const handleServiceTypeChange = (keys: Selection) => {
-    const key = Array.from(keys)[0];
-
-    setSelectedServiceType(key ? String(key) : null);
-    setErrors((prev) => ({ ...prev, serviceType: "" }));
-  };
-
-  const handleStep1Next = () => {
-    const error = validateServiceType(selectedServiceType);
-
-    if (error) {
-      setErrors((prev) => ({ ...prev, serviceType: error }));
-
-      return;
-    }
-
-    if (selectedServiceType === "rideshare") {
-      // 共乘功能尚未開放,不進入下一步
-      return;
-    }
-
-    setCurrentStep(2);
-  };
-
-  // Step 2: 店家選擇處理
+  // Step 1: 店家選擇處理（原本的 Step 2）
   const handleStoreChange = (keys: Selection) => {
     const key = Array.from(keys)[0];
 
@@ -100,7 +66,7 @@ export function OrderForm({ stores }: OrderFormProps) {
     setErrors((prev) => ({ ...prev, store: "" }));
   };
 
-  const handleStep2Next = () => {
+  const handleStep1Next = () => {
     const error = validateStore(selectedStore);
 
     if (error) {
@@ -109,10 +75,10 @@ export function OrderForm({ stores }: OrderFormProps) {
       return;
     }
 
-    setCurrentStep(3);
+    setCurrentStep(2);
   };
 
-  // Step 3: 訂單詳情處理
+  // Step 2: 訂單詳情處理（原本的 Step 3）
   const handlePickupLocationChange = (keys: Selection) => {
     const key = Array.from(keys)[0];
     const location = key ? String(key) : null;
@@ -162,27 +128,17 @@ export function OrderForm({ stores }: OrderFormProps) {
     }
   };
 
-  // 渲染對應的 Step
+  // 渲染對應的 Step - 移除服務類型選擇，直接從店家選擇開始
   if (currentStep === 1) {
-    return (
-      <ServiceTypeStep
-        error={errors.serviceType}
-        selectedServiceType={selectedServiceType}
-        onNext={handleStep1Next}
-        onServiceTypeChange={handleServiceTypeChange}
-      />
-    );
-  }
-
-  if (currentStep === 2) {
     return (
       <StoreSelectionStep
         error={errors.store}
         isLoadingStores={isLoadingStores}
         selectedStore={selectedStore}
+        showBackButton={false} // 第一步，不顯示返回按鈕
         storeOptions={storeOptions}
-        onBack={() => setCurrentStep(1)}
-        onNext={handleStep2Next}
+        onBack={() => {}}
+        onNext={handleStep1Next}
         onRetry={refetchStores}
         onStoreChange={handleStoreChange}
       />
@@ -206,7 +162,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       storeOptions={storeOptions}
       submitError={submitError}
       wasSubmitted={wasSubmitted}
-      onBack={() => setCurrentStep(2)}
+      onBack={() => setCurrentStep(1)}
       onCostChange={(value) => {
         setCost(value);
         setErrors((prev) => ({ ...prev, cost: "" }));

@@ -11,6 +11,7 @@ type StoreSelectionStepProps = {
   selectedStore: string | null;
   error: string;
   isLoadingStores: boolean;
+  showBackButton?: boolean;
   onStoreChange: (keys: Selection) => void;
   onBack: () => void;
   onNext: () => void;
@@ -22,6 +23,7 @@ export function StoreSelectionStep({
   selectedStore,
   error,
   isLoadingStores,
+  showBackButton = true,
   onStoreChange,
   onBack,
   onNext,
@@ -30,7 +32,7 @@ export function StoreSelectionStep({
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
-        <h2 className="text-2xl font-semibold">Step 2. 選擇店家</h2>
+        <h2 className="text-2xl font-semibold">Step 1. 選擇店家</h2>
         <p className="text-sm text-default-500">請選擇您想要訂購的店家</p>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">
@@ -72,16 +74,18 @@ export function StoreSelectionStep({
         )}
 
         <div className="flex gap-3">
+          {showBackButton && (
+            <Button
+              className="w-full md:w-auto"
+              color="default"
+              variant="flat"
+              onPress={onBack}
+            >
+              回上一步
+            </Button>
+          )}
           <Button
-            className="w-full md:w-auto"
-            color="default"
-            variant="flat"
-            onPress={onBack}
-          >
-            回上一步
-          </Button>
-          <Button
-            className="w-full md:w-auto"
+            className={showBackButton ? "w-full md:w-auto" : "w-full"}
             color="primary"
             isDisabled={!selectedStore}
             onPress={onNext}

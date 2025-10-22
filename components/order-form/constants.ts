@@ -11,10 +11,8 @@ export const pickupLocations = [
   { label: "擷雲", value: "擷雲" },
 ] as const;
 
-export const serviceTypes = [
-  { label: "訂購外送", value: "delivery" },
-  { label: "預約共乘", value: "rideshare" },
-] as const;
+// 移除共乘功能，只保留外送服務
+export const serviceTypes = [{ label: "訂購外送", value: "delivery" }] as const;
 
 export const initialErrors: ErrorState = {
   serviceType: "",

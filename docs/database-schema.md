@@ -42,26 +42,22 @@ CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 ```sql
 CREATE TABLE orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  store_id UUID REFERENCES stores(id) ON DELETE CASCADE,
-  order_type VARCHAR(20) NOT NULL DEFAULT 'delivery' CHECK (order_type IN ('delivery', 'ride')),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  order_type VARCHAR(20) NOT NULL DEFAULT 'delivery' CHECK (order_type = 'delivery'),
   order_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
-  -- 外送訂單專用欄位
-  pickup_time TIMESTAMP WITH TIME ZONE,
-  pickup_location VARCHAR(500),
+  -- 外送訂單欄位
+  pickup_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  pickup_location VARCHAR(500) NOT NULL,
   pickup_name VARCHAR(100) NOT NULL,
   pickup_code VARCHAR(4) NOT NULL,
   pickup_phone VARCHAR(20) NOT NULL,
   menu_items TEXT,
   menu_image_url TEXT,
 
-  -- 接送訂單專用欄位
-  meeting_time TIMESTAMP WITH TIME ZONE,
-  start_location VARCHAR(500),
-  end_location VARCHAR(500),
-
-  -- 共用欄位
+  -- 費用相關欄位
   cost DECIMAL(10, 2) NOT NULL,
+  dev_fee DECIMAL(10, 2) NOT NULL DEFAULT 10.00,
   shipping_fee DECIMAL(10, 2) NOT NULL,
   total_amount DECIMAL(10, 2) NOT NULL,
   payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'refunded')),
@@ -70,30 +66,20 @@ CREATE TABLE orders (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
   -- 確保外送訂單必須有相關欄位
-  CONSTRAINT check_delivery_fields CHECK (
-    order_type != 'delivery' OR (
-      pickup_time IS NOT NULL AND
-      pickup_location IS NOT NULL AND
-      store_id IS NOT NULL
-    )
-  ),
-
-  -- 確保接送訂單必須有相關欄位
-  CONSTRAINT check_ride_fields CHECK (
-    order_type != 'ride' OR (
-      meeting_time IS NOT NULL AND
-      start_location IS NOT NULL AND
-      end_location IS NOT NULL
-    )
+  CONSTRAINT check_delivery_required_fields CHECK (
+    pickup_time IS NOT NULL AND
+    pickup_location IS NOT NULL AND
+    store_id IS NOT NULL AND
+    pickup_name IS NOT NULL AND
+    pickup_code IS NOT NULL AND
+    pickup_phone IS NOT NULL
   )
 );
 
 -- 建立索引以提升查詢效能
 CREATE INDEX idx_orders_store_id ON orders(store_id);
-CREATE INDEX idx_orders_order_type ON orders(order_type);
 CREATE INDEX idx_orders_order_time ON orders(order_time);
 CREATE INDEX idx_orders_pickup_time ON orders(pickup_time);
-CREATE INDEX idx_orders_meeting_time ON orders(meeting_time);
 CREATE INDEX idx_orders_payment_status ON orders(payment_status);
 CREATE INDEX idx_orders_delivery_status ON orders(delivery_status);
 CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
@@ -102,34 +88,26 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 **欄位說明：**
 
 - `id`: 訂單唯一識別碼 (UUID)
-- `store_id`: 店家 ID (外鍵參照 stores.id，接送訂單可為 NULL)
-- `order_type`: 訂單類型（delivery=外送 / ride=接送）
+- `store_id`: 店家 ID (外鍵參照 stores.id，必填)
+- `order_type`: 訂單類型（固定為 'delivery'）
 - `order_time`: 下訂時間
 
-**外送訂單專用欄位：**
+**外送訂單欄位：**
 
-- `pickup_time`: 預計取貨時間
-- `pickup_location`: 取貨地點
-- `pickup_name`: 取貨人暱稱
-- `pickup_code`: 取貨密碼（四碼）
-- `pickup_phone`: 取貨人手機
+- `pickup_time`: 預計取貨時間（必填）
+- `pickup_location`: 取貨地點（必填）
+- `pickup_name`: 取貨人暱稱（必填）
+- `pickup_code`: 取貨密碼（四碼，必填）
+- `pickup_phone`: 取貨人手機（必填）
 - `menu_items`: 餐點內容描述
 - `menu_image_url`: 菜單圖片 URL
 
-**接送訂單專用欄位：**
+**費用相關欄位：**
 
-- `meeting_time`: 碰面時間
-- `start_location`: 起點
-- `end_location`: 終點
-
-**共用欄位：**
-
-- `pickup_name`: 聯絡人暱稱
-- `pickup_code`: 取貨/接送密碼（四碼）
-- `pickup_phone`: 聯絡人手機
 - `cost`: 成本金額
-- `shipping_fee`: 運費/服務費
-- `total_amount`: 總金額（成本 + 運費）
+- `dev_fee`: 開發費（固定10元）
+- `shipping_fee`: 運費
+- `total_amount`: 總金額（成本 + 開發費 + 運費）
 - `payment_status`: 付款狀態（pending=待付款 / paid=已付款 / refunded=已退款）
 - `delivery_status`: 訂單狀態（pending=待處理 / preparing=準備中 / ready=已就緒 / completed=已完成 / cancelled=已取消）
 - `created_at`: 建立時間
@@ -282,61 +260,37 @@ INSERT INTO stores (name, is_open, order_deadline, next_delivery_time) VALUES
 
 -- 新增測試外送訂單（請先確認 store_id）
 INSERT INTO orders (
-  order_type,
   store_id,
   pickup_time,
   pickup_location,
   pickup_name,
   pickup_code,
   pickup_phone,
+  menu_items,
   cost,
+  dev_fee,
   shipping_fee,
   total_amount,
   payment_status,
   delivery_status
 ) VALUES (
-  'delivery',
   '您的-store-id-在這裡',
   now() + interval '2 hours',
   '志學車站',
   '王小明',
   '1234',
   '0912345678',
+  '大麥克套餐 x1, 薯條(大) x1',
   150.00,
+  10.00,
   30.00,
-  180.00,
+  190.00,
   'paid',
   'preparing'
 );
 
--- 新增測試接送訂單
-INSERT INTO orders (
-  order_type,
-  meeting_time,
-  start_location,
-  end_location,
-  pickup_name,
-  pickup_code,
-  pickup_phone,
-  cost,
-  shipping_fee,
-  total_amount,
-  payment_status,
-  delivery_status
-) VALUES (
-  'ride',
-  now() + interval '3 hours',
-  '花蓮火車站',
-  '東華大學',
-  '李小華',
-  '5678',
-  '0923456789',
-  0.00,
-  100.00,
-  100.00,
-  'pending',
-  'pending'
-);
+-- 測試資料說明：
+-- 所有訂單現在都是外送訂單，必須包含店家ID和完整的外送資訊
 ```
 
 ---
