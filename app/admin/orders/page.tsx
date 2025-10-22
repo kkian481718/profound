@@ -3,56 +3,20 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Chip } from "@heroui/chip";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@heroui/table";
-import { Pagination } from "@heroui/pagination";
+import { Card, CardBody } from "@heroui/card";
 import { useDisclosure } from "@heroui/modal";
 import { ButtonGroup } from "@heroui/button";
+import { Pagination } from "@heroui/pagination";
 
 import { createClient } from "@/lib/supabase/client";
-import EditStatusModal from "@/components/orders/edit-status-modal";
-import OrderFilters from "@/components/orders/order-filters";
+import EditStatusModal from "@/components/admin/orders/edit-status-modal";
+import OrderFilters from "@/components/admin/orders/order-filters";
+import OrderList from "@/components/admin/orders/order-list";
+import OrderCard from "@/components/admin/orders/order-card";
+import OrderContentModal from "@/components/admin/orders/order-content-modal";
 import { pickupLocations } from "@/components/order-form/constants";
-import {
-  ClockIcon,
-  GridIcon,
-  LocationIcon,
-  LockIcon,
-  PhoneIcon,
-  TableIcon,
-  UserIcon,
-} from "@/components/icons";
-
-interface Order {
-  id: string;
-  store_id: string;
-  store_name: string;
-  order_time: string;
-  pickup_time: string;
-  pickup_location: string;
-  pickup_name: string;
-  pickup_code: string;
-  pickup_phone: string;
-  cost: number;
-  dev_fee: number;
-  shipping_fee: number;
-  total_amount: number;
-  payment_status: "pending" | "paid" | "refunded";
-  delivery_status:
-    | "pending"
-    | "preparing"
-    | "ready"
-    | "completed"
-    | "cancelled";
-}
+import { GridIcon, TableIcon } from "@/components/icons";
+import { Order } from "@/types";
 
 function OrdersContent() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -68,6 +32,8 @@ function OrdersContent() {
   const [filterDateTo, setFilterDateTo] = useState("");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrderForContent, setSelectedOrderForContent] =
+    useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"table" | "card">("card");
   const itemsPerPage = 15;
@@ -75,6 +41,11 @@ function OrdersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isContentOpen,
+    onOpen: onContentOpen,
+    onOpenChange: onContentOpenChange,
+  } = useDisclosure();
 
   useEffect(() => {
     fetchData();
@@ -216,74 +187,6 @@ function OrdersContent() {
     setFilteredOrders(filtered);
   };
 
-  const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
-
-    return date.toLocaleString("zh-TW", {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-
-  const getPaymentStatusColor = (
-    status: string,
-  ): "default" | "success" | "warning" => {
-    switch (status) {
-      case "paid":
-        return "success";
-      case "refunded":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getDeliveryStatusColor = (
-    status: string,
-  ): "default" | "primary" | "success" | "warning" | "danger" => {
-    switch (status) {
-      case "preparing":
-        return "primary";
-      case "ready":
-        return "warning";
-      case "completed":
-        return "success";
-      case "cancelled":
-        return "danger";
-      default:
-        return "default";
-    }
-  };
-
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "已付款";
-      case "refunded":
-        return "已退款";
-      default:
-        return "待付款";
-    }
-  };
-
-  const getDeliveryStatusText = (status: string) => {
-    switch (status) {
-      case "preparing":
-        return "準備中";
-      case "ready":
-        return "待取貨";
-      case "completed":
-        return "已完成";
-      case "cancelled":
-        return "已取消";
-      default:
-        return "待處理";
-    }
-  };
-
   const clearFilters = () => {
     setSearchQuery("");
     setFilterStore("");
@@ -298,6 +201,11 @@ function OrdersContent() {
   const handleEditOrder = (order: Order) => {
     setSelectedOrder(order);
     onOpen();
+  };
+
+  const handleViewContent = (order: Order) => {
+    setSelectedOrderForContent(order);
+    onContentOpen();
   };
 
   const handleStatusUpdateSuccess = () => {
@@ -376,203 +284,20 @@ function OrdersContent() {
           </CardBody>
         </Card>
       ) : viewMode === "table" ? (
-        <Card>
-          <CardBody className="overflow-x-auto">
-            <Table aria-label="訂單列表">
-              <TableHeader>
-                <TableColumn>訂單時間</TableColumn>
-                <TableColumn>店家</TableColumn>
-                <TableColumn>取貨資訊</TableColumn>
-                <TableColumn>取貨時間</TableColumn>
-                <TableColumn>金額</TableColumn>
-                <TableColumn>付款狀態</TableColumn>
-                <TableColumn>配送狀態</TableColumn>
-                <TableColumn>操作</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {paginatedOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <div className="text-sm">
-                        {formatDateTime(order.order_time)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{order.store_name}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="text-sm font-medium">
-                          {order.pickup_name}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          密碼：{order.pickup_code}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          {order.pickup_phone}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          {order.pickup_location}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {formatDateTime(order.pickup_time)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="text-xs text-default-500">
-                          成本：${order.cost}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          運費：${order.shipping_fee}
-                        </div>
-                        <div className="text-xs text-default-500">
-                          網頁費：${order.dev_fee}
-                        </div>
-                        <div className="font-medium">
-                          總計：${order.total_amount}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        color={getPaymentStatusColor(order.payment_status)}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {getPaymentStatusText(order.payment_status)}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        color={getDeliveryStatusColor(order.delivery_status)}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {getDeliveryStatusText(order.delivery_status)}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        color="primary"
-                        size="sm"
-                        variant="flat"
-                        onPress={() => handleEditOrder(order)}
-                      >
-                        編輯狀態
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardBody>
-        </Card>
+        <OrderList
+          orders={paginatedOrders}
+          onEditOrder={handleEditOrder}
+          onViewContent={handleViewContent}
+        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {paginatedOrders.map((order) => (
-            <Card key={order.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-col gap-2 pb-2">
-                <div className="flex justify-between items-start w-full">
-                  <h3 className="text-sm md:text-base font-bold flex-1 pr-2 line-clamp-1">
-                    {order.store_name}
-                  </h3>
-                  <div className="flex gap-1">
-                    <Chip
-                      className="text-xs"
-                      color={getPaymentStatusColor(order.payment_status)}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {getPaymentStatusText(order.payment_status)}
-                    </Chip>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center w-full">
-                  <p className="text-xs text-default-500">
-                    {formatDateTime(order.order_time)}
-                  </p>
-                  <Chip
-                    className="text-xs"
-                    color={getDeliveryStatusColor(order.delivery_status)}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {getDeliveryStatusText(order.delivery_status)}
-                  </Chip>
-                </div>
-              </CardHeader>
-              <CardBody className="pt-2 flex flex-col gap-2">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <UserIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-                    <span className="text-xs md:text-sm font-medium truncate">
-                      {order.pickup_name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <LockIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-                    <span className="text-xs text-default-500 truncate">
-                      密碼：{order.pickup_code}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <PhoneIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-                    <span className="text-xs text-default-500 truncate">
-                      {order.pickup_phone}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <LocationIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-                    <span className="text-xs text-default-500 truncate">
-                      {order.pickup_location}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <ClockIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-                    <span className="text-xs text-default-500 truncate">
-                      取貨：{formatDateTime(order.pickup_time)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="border-t pt-1.5 mt-1">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-default-500">成本</span>
-                    <span className="text-xs md:text-sm">${order.cost}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-default-500">運費</span>
-                    <span className="text-xs md:text-sm">
-                      ${order.shipping_fee}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-default-500">網頁費</span>
-                    <span className="text-xs md:text-sm">${order.dev_fee}</span>
-                  </div>
-                  <div className="flex justify-between items-center font-bold mt-0.5">
-                    <span className="text-xs md:text-sm">總計</span>
-                    <span className="text-sm md:text-base">
-                      ${order.total_amount}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full mt-1.5"
-                  color="primary"
-                  size="sm"
-                  variant="flat"
-                  onPress={() => handleEditOrder(order)}
-                >
-                  編輯
-                </Button>
-              </CardBody>
-            </Card>
+            <OrderCard
+              key={order.id}
+              order={order}
+              onEdit={handleEditOrder}
+              onViewContent={handleViewContent}
+            />
           ))}
         </div>
       )}
@@ -603,6 +328,12 @@ function OrdersContent() {
           onSuccess={handleStatusUpdateSuccess}
         />
       )}
+
+      <OrderContentModal
+        isOpen={isContentOpen}
+        order={selectedOrderForContent}
+        onOpenChange={onContentOpenChange}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Alert } from "@heroui/alert";
 import { Select, SelectItem } from "@heroui/select";
 
 import { pickupLocations } from "./constants";
+import { calculateOrderPricing } from "./utils/pricing";
 
 type OrderDetailsStepProps = {
   storeOptions: StoreOption[];
@@ -65,20 +66,9 @@ export function OrderDetailsStep({
   onBack,
   onSubmit,
 }: OrderDetailsStepProps) {
-  // 計算網頁費、運費和總金額
+  // 使用統一的價格計算函數
   const costNum = parseFloat(cost) || 0;
-  const devFee = 10; // 固定網頁費 10 元
-
-  // 運費計算邏輯
-  let shippingFee: number;
-
-  if (costNum < 150) {
-    shippingFee = 20; // 商品金額 < 150：運費 20 元
-  } else {
-    shippingFee = Math.round(costNum * 0.12); // 商品金額 >= 150：運費 12%
-  }
-
-  const totalAmount = costNum + devFee + shippingFee;
+  const pricing = calculateOrderPricing(costNum);
 
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
@@ -144,17 +134,19 @@ export function OrderDetailsStep({
               <div className="text-sm text-default-600 space-y-1 px-1">
                 <div className="flex justify-between">
                   <span>餐點金額：</span>
-                  <span className="font-medium">NT$ {costNum.toFixed(0)}</span>
+                  <span className="font-medium">
+                    NT$ {pricing.cost.toFixed(0)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>服務費：</span>
                   <span className="font-medium">
-                    NT$ {(devFee + shippingFee).toFixed(0)}
+                    NT$ {(pricing.devFee + pricing.shippingFee).toFixed(0)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
                   <span>總金額：</span>
-                  <span>NT$ {totalAmount.toFixed(0)}</span>
+                  <span>NT$ {pricing.totalAmount.toFixed(0)}</span>
                 </div>
               </div>
             )}
@@ -172,7 +164,7 @@ export function OrderDetailsStep({
             <input
               ref={fileInputRef}
               accept="image/*"
-              aria-label="上傳菜單圖片"
+              aria-label="上傳圖片"
               className="hidden"
               type="file"
               onChange={onImageChange}

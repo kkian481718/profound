@@ -15,9 +15,9 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 
-import AddStoreModal from "@/components/stores/add-store-modal";
-import DeadlineEditor from "@/components/stores/deadline-editor";
-import DeliveryTimeEditor from "@/components/stores/delivery-time-editor";
+import AddStoreModal from "@/components/admin/stores/add-store-modal";
+import DeadlineEditor from "@/components/admin/stores/deadline-editor";
+import DeliveryTimeEditor from "@/components/admin/stores/delivery-time-editor";
 import { createClient } from "@/lib/supabase/client";
 import { closeAllExpiredStores } from "@/lib/validateStore";
 

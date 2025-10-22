@@ -46,7 +46,7 @@ function OrderConfirmationContent() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 px-4">
+    <section className="flex flex-col items-center justify-center gap-4 py-0 md:py-10 px-4">
       <div className="max-w-2xl w-full space-y-6">
         {/* 成功訊息 */}
         <div className="text-center space-y-2">
@@ -98,10 +98,9 @@ function OrderConfirmationContent() {
             <div className="bg-default-100 dark:bg-default-50 p-4 rounded-lg space-y-2">
               <p className="font-semibold text-warning">💡 重要提示</p>
               <ul className="text-sm space-y-1 text-default-700 dark:text-default-600">
-                <li>• 請妥善保管您的取貨密碼和手機號碼</li>
-                <li>• 您可以使用這些資訊隨時查詢訂單狀態</li>
                 <li>• 建議立即截圖保存此頁面</li>
-                <li>• 取貨時請出示您的取貨密碼</li>
+                <li>• 您可以用「手機 + 取貨密碼」隨時查詢訂單狀態</li>
+                <li>• 訂單處理中，配送時間請注意LINE社群</li>
               </ul>
             </div>
           </CardBody>
@@ -129,9 +128,9 @@ function OrderConfirmationContent() {
           </Button>
         </div>
 
-        {/* 額外提示 */}
-        <div className="text-center text-sm text-default-400">
-          <p>訂單處理中，我們會盡快為您配送</p>
+        {/* 免責聲明 */}
+        <div className="text-center text-xs text-default-300">
+          <p>本頁面僅供參考，實際金額請依查詢訂單結果為準</p>
         </div>
       </div>
     </section>

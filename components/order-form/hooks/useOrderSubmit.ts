@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DEFAULT_PICKUP_HOURS } from "../constants";
+import { calculateOrderPricing } from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -94,20 +95,9 @@ export function useOrderSubmit() {
         pickupTime.setHours(pickupTime.getHours() + DEFAULT_PICKUP_HOURS);
       }
 
-      // 計算金額
+      // 使用統一的價格計算函數
       const costNum = parseFloat(params.cost);
-      const devFee = 10; // 固定網頁費 10 元
-
-      // 運費計算邏輯
-      let shippingFeeNum: number;
-
-      if (costNum < 150) {
-        shippingFeeNum = 20; // 商品金額 < 150：運費 20 元
-      } else {
-        shippingFeeNum = Math.round(costNum * 0.12); // 商品金額 >= 150：運費 12%
-      }
-
-      const totalAmountNum = costNum + devFee + shippingFeeNum;
+      const pricing = calculateOrderPricing(costNum);
 
       const orderData = {
         store_id: params.selectedStore,
@@ -120,10 +110,10 @@ export function useOrderSubmit() {
         pickup_phone: params.phoneNumber,
         menu_items: params.menuItems,
         menu_image_url: menuImageUrl,
-        cost: costNum,
-        dev_fee: devFee,
-        shipping_fee: shippingFeeNum,
-        total_amount: totalAmountNum,
+        cost: pricing.cost,
+        dev_fee: pricing.devFee,
+        shipping_fee: pricing.shippingFee,
+        total_amount: pricing.totalAmount,
         payment_status: "pending",
         delivery_status: "pending",
         pickup_time: pickupTime.toISOString(),
@@ -143,7 +133,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${totalAmountNum.toFixed(0)}`,
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`,
       );
 
       return true;
