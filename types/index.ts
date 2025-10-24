@@ -28,3 +28,21 @@ export interface Order {
     | "completed"
     | "cancelled";
 }
+
+export interface Store {
+  id: string;
+  name: string;
+  is_open: boolean;
+  order_deadline: string | null;
+  next_delivery_time: string | null;
+  max_daily_orders: number | null;
+  created_at: string;
+}
+
+export interface GlobalSetting {
+  id: string;
+  setting_key: string;
+  setting_value: string;
+  created_at: string;
+  updated_at: string;
+}

@@ -13,6 +13,7 @@ CREATE TABLE stores (
   is_open BOOLEAN DEFAULT false,
   order_deadline TIMESTAMP WITH TIME ZONE,
   next_delivery_time TIMESTAMP WITH TIME ZONE,
+  max_daily_orders INTEGER DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -30,6 +31,7 @@ CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 - `is_open`: 是否開放接單
 - `order_deadline`: 最後下單時間
 - `next_delivery_time`: 下次出貨時間（所有外送訂單將使用此時間作為預設取貨時間）
+- `max_daily_orders`: 每日最大訂單數限制（NULL 表示無限制）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 
@@ -115,6 +117,33 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 
 ---
 
+### 3. global_settings (全域設定資料表)
+
+儲存系統全域設定，如每日最大訂單數等。
+
+```sql
+CREATE TABLE global_settings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- 建立索引以提升查詢效能
+CREATE INDEX idx_global_settings_key ON global_settings(setting_key);
+```
+
+**欄位說明：**
+
+- `id`: 設定唯一識別碼 (UUID)
+- `setting_key`: 設定鍵值（唯一）
+- `setting_value`: 設定值
+- `created_at`: 建立時間
+- `updated_at`: 更新時間
+
+---
+
 ## Row Level Security (RLS) 設定
 
 為了保護資料安全，建議啟用 RLS 並設定適當的存取政策。
@@ -124,6 +153,7 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 ```sql
 ALTER TABLE stores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE global_settings ENABLE ROW LEVEL SECURITY;
 ```
 
 ### 設定存取政策
@@ -205,6 +235,26 @@ CREATE POLICY "Allow authenticated users to update orders" ON orders
   TO authenticated
   USING (true)
   WITH CHECK (true);
+
+-- global_settings 資料表政策
+-- 允許已驗證用戶查看全域設定
+CREATE POLICY "Allow authenticated users to read global settings" ON global_settings
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- 允許已驗證用戶更新全域設定
+CREATE POLICY "Allow authenticated users to update global settings" ON global_settings
+  FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- 允許已驗證用戶新增全域設定
+CREATE POLICY "Allow authenticated users to insert global settings" ON global_settings
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
 ```
 
 ---
@@ -228,6 +278,10 @@ CREATE TRIGGER update_stores_updated_at BEFORE UPDATE ON stores
 -- 為 orders 資料表建立 trigger
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 為 global_settings 資料表建立 trigger
+CREATE TRIGGER update_global_settings_updated_at BEFORE UPDATE ON global_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 ---
@@ -239,11 +293,12 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
 3. 點選左側選單的「SQL Editor」
 4. 依序複製並執行上述 SQL 指令
 5. 執行順序：
-   - 先建立資料表
+   - 先建立資料表（stores, orders, global_settings）
    - 再建立索引
    - 然後啟用 RLS
    - 接著設定存取政策
-   - 最後建立 trigger
+   - 建立 trigger
+   - 最後插入預設資料
 
 ---
 
@@ -253,10 +308,15 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
 
 ```sql
 -- 新增測試店家
-INSERT INTO stores (name, is_open, order_deadline, next_delivery_time) VALUES
-('麥當勞', true, now() + interval '7 days', now() + interval '2 days'),
-('肯德基', true, now() + interval '5 days', now() + interval '3 days'),
-('星巴克', false, null, null);
+INSERT INTO stores (name, is_open, order_deadline, next_delivery_time, max_daily_orders) VALUES
+('麥當勞', true, now() + interval '7 days', now() + interval '2 days', 50),
+('肯德基', true, now() + interval '5 days', now() + interval '3 days', 30),
+('星巴克', false, null, null, null);
+
+-- 新增全域設定測試資料
+INSERT INTO global_settings (setting_key, setting_value) VALUES
+('max_daily_orders', '100')
+ON CONFLICT (setting_key) DO NOTHING;
 
 -- 新增測試外送訂單（請先確認 store_id）
 INSERT INTO orders (
@@ -291,6 +351,8 @@ INSERT INTO orders (
 
 -- 測試資料說明：
 -- 所有訂單現在都是外送訂單，必須包含店家ID和完整的外送資訊
+-- 店家資料包含每日最大訂單數限制
+-- 全域設定包含系統層級的每日最大訂單數限制
 ```
 
 ---
@@ -303,3 +365,5 @@ INSERT INTO orders (
 4. **時間戳記**: 使用 `TIMESTAMP WITH TIME ZONE` 來正確處理時區
 5. **索引優化**: 針對常用查詢欄位建立索引以提升效能
 6. **RLS 安全性**: 確保只有已登入的管理員可以存取敏感資料
+7. **訂單限制**: 支援店家層級和全域層級的每日訂單數量限制功能
+8. **全域設定**: 使用 global_settings 表來儲存系統層級的設定值

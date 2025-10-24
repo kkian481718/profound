@@ -18,6 +18,8 @@ import {
 import AddStoreModal from "@/components/admin/stores/add-store-modal";
 import DeadlineEditor from "@/components/admin/stores/deadline-editor";
 import DeliveryTimeEditor from "@/components/admin/stores/delivery-time-editor";
+import GlobalMaxOrdersSetting from "@/components/admin/stores/global-max-orders-setting";
+import StoreMaxOrdersEditor from "@/components/admin/stores/store-max-orders-editor";
 import { createClient } from "@/lib/supabase/client";
 import { closeAllExpiredStores } from "@/lib/validateStore";
 
@@ -27,6 +29,7 @@ interface Store {
   is_open: boolean;
   order_deadline: string | null;
   next_delivery_time: string | null;
+  max_daily_orders: number | null;
   created_at: string;
 }
 
@@ -171,6 +174,9 @@ export default function StoresPage() {
         </Button>
       </div>
 
+      {/* 全域本日最大訂單數設定 */}
+      <GlobalMaxOrdersSetting onSuccess={fetchStores} />
+
       {/* 全域下次出貨時間設定 */}
       <DeliveryTimeEditor onSuccess={fetchStores} />
 
@@ -232,6 +238,15 @@ export default function StoresPage() {
                     />
                   </div>
                 )}
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-medium">每日最大訂單數</span>
+                  <StoreMaxOrdersEditor
+                    currentMaxOrders={store.max_daily_orders}
+                    storeId={store.id}
+                    onSuccess={fetchStores}
+                  />
+                </div>
               </CardBody>
               <CardFooter className="flex gap-2 px-6 pb-6">
                 <Button

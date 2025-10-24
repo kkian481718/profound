@@ -13,6 +13,8 @@ import { validateStore, validateOrderDetails } from "./utils/validation";
 import { StoreSelectionStep } from "./StoreSelectionStep";
 import { OrderDetailsStep } from "./OrderDetailsStep";
 
+import { checkOrderLimits } from "@/lib/checkOrderLimits";
+
 export function OrderForm({ stores }: OrderFormProps) {
   // Step 管理 - 直接從店家選擇開始
   const [currentStep, setCurrentStep] = useState<Step>(1);
@@ -95,6 +97,19 @@ export function OrderForm({ stores }: OrderFormProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    // 再次檢查訂單數限制（防止在填寫過程中達到限制）
+    try {
+      const limitCheck = await checkOrderLimits(selectedStore!);
+
+      if (!limitCheck.canOrder) {
+        alert(limitCheck.reason || "訂單數已達上限，無法下單");
+
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking order limits:", err);
+    }
+
     const validation = validateOrderDetails(
       menuItems,
       cost,
@@ -138,6 +153,9 @@ export function OrderForm({ stores }: OrderFormProps) {
         showBackButton={false} // 第一步，不顯示返回按鈕
         storeOptions={storeOptions}
         onBack={() => {}}
+        onGlobalLimitError={(reason) => {
+          setErrors((prev) => ({ ...prev, store: reason }));
+        }}
         onNext={handleStep1Next}
         onRetry={refetchStores}
         onStoreChange={handleStoreChange}
