@@ -105,7 +105,6 @@ export function useOrderSubmit() {
 
       const orderData = {
         store_id: params.selectedStore,
-        order_type: "delivery",
         pickup_location: params.showOffCampusAddress
           ? params.selectedPickupLocation === "校內教學區"
             ? `[校內教學區] ${params.offCampusAddress}`
@@ -120,8 +119,7 @@ export function useOrderSubmit() {
         dev_fee: pricing.devFee,
         shipping_fee: pricing.shippingFee,
         total_amount: pricing.totalAmount,
-        payment_status: "pending",
-        delivery_status: "pending",
+        order_status: "pending",
         pickup_time: pickupTime.toISOString(),
       };
 

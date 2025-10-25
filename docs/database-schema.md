@@ -45,7 +45,6 @@ CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 CREATE TABLE orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  order_type VARCHAR(20) NOT NULL DEFAULT 'delivery' CHECK (order_type = 'delivery'),
   order_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
   -- 外送訂單欄位
@@ -62,8 +61,7 @@ CREATE TABLE orders (
   dev_fee DECIMAL(10, 2) NOT NULL DEFAULT 10.00,
   shipping_fee DECIMAL(10, 2) NOT NULL,
   total_amount DECIMAL(10, 2) NOT NULL,
-  payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'refunded')),
-  delivery_status VARCHAR(20) DEFAULT 'pending' CHECK (delivery_status IN ('pending', 'preparing', 'ready', 'completed', 'cancelled')),
+  order_status VARCHAR(20) DEFAULT 'pending' CHECK (order_status IN ('pending', 'preparing', 'completed')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
@@ -82,8 +80,7 @@ CREATE TABLE orders (
 CREATE INDEX idx_orders_store_id ON orders(store_id);
 CREATE INDEX idx_orders_order_time ON orders(order_time);
 CREATE INDEX idx_orders_pickup_time ON orders(pickup_time);
-CREATE INDEX idx_orders_payment_status ON orders(payment_status);
-CREATE INDEX idx_orders_delivery_status ON orders(delivery_status);
+CREATE INDEX idx_orders_order_status ON orders(order_status);
 CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 ```
 
@@ -91,7 +88,6 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 
 - `id`: 訂單唯一識別碼 (UUID)
 - `store_id`: 店家 ID (外鍵參照 stores.id，必填)
-- `order_type`: 訂單類型（固定為 'delivery'）
 - `order_time`: 下訂時間
 
 **外送訂單欄位：**
@@ -110,8 +106,7 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 - `dev_fee`: 開發費（固定10元）
 - `shipping_fee`: 運費
 - `total_amount`: 總金額（成本 + 開發費 + 運費）
-- `payment_status`: 付款狀態（pending=待付款 / paid=已付款 / refunded=已退款）
-- `delivery_status`: 訂單狀態（pending=待處理 / preparing=準備中 / ready=已就緒 / completed=已完成 / cancelled=已取消）
+- `order_status`: 訂單狀態（pending=待處理 / preparing=準備中 / completed=已完成）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 
@@ -331,8 +326,7 @@ INSERT INTO orders (
   dev_fee,
   shipping_fee,
   total_amount,
-  payment_status,
-  delivery_status
+  order_status
 ) VALUES (
   '您的-store-id-在這裡',
   now() + interval '2 hours',
@@ -345,12 +339,11 @@ INSERT INTO orders (
   10.00,
   30.00,
   190.00,
-  'paid',
   'preparing'
 );
 
 -- 測試資料說明：
--- 所有訂單現在都是外送訂單，必須包含店家ID和完整的外送資訊
+-- 所有訂單都是外送訂單，必須包含店家ID和完整的外送資訊
 -- 店家資料包含每日最大訂單數限制
 -- 全域設定包含系統層級的每日最大訂單數限制
 ```
@@ -361,7 +354,7 @@ INSERT INTO orders (
 
 1. **UUID 生成**: 使用 `gen_random_uuid()` 自動生成 UUID
 2. **外鍵約束**: orders.store_id 參照 stores.id，使用 CASCADE 刪除
-3. **CHECK 約束**: payment_status 和 delivery_status 限制只能使用指定的值
+3. **CHECK 約束**: order_status 限制只能使用指定的值
 4. **時間戳記**: 使用 `TIMESTAMP WITH TIME ZONE` 來正確處理時區
 5. **索引優化**: 針對常用查詢欄位建立索引以提升效能
 6. **RLS 安全性**: 確保只有已登入的管理員可以存取敏感資料

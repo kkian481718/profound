@@ -12,7 +12,6 @@ import { createClient } from "@/lib/supabase/client";
 type OrderData = {
   id: string;
   store_id: string;
-  order_type: string;
   pickup_time: string | null;
   pickup_location: string | null;
   pickup_name: string;
@@ -22,8 +21,7 @@ type OrderData = {
   dev_fee: number;
   shipping_fee: number;
   total_amount: number;
-  payment_status: string;
-  delivery_status: string;
+  order_status: string;
   created_at: string;
 };
 
@@ -74,7 +72,6 @@ export function OrderLookup() {
           `
           id,
           store_id,
-          order_type,
           pickup_time,
           pickup_location,
           pickup_name,
@@ -84,8 +81,7 @@ export function OrderLookup() {
           dev_fee,
           shipping_fee,
           total_amount,
-          payment_status,
-          delivery_status,
+          order_status,
           created_at
         `,
         )
@@ -133,9 +129,7 @@ export function OrderLookup() {
     const statusMap: Record<string, string> = {
       pending: "待處理",
       preparing: "準備中",
-      ready: "已就緒",
       completed: "已完成",
-      cancelled: "已取消",
     };
 
     return statusMap[status] || status;
@@ -145,29 +139,7 @@ export function OrderLookup() {
     const colorMap: Record<string, string> = {
       pending: "text-warning",
       preparing: "text-primary",
-      ready: "text-success",
       completed: "text-success",
-      cancelled: "text-danger",
-    };
-
-    return colorMap[status] || "text-default";
-  };
-
-  const getPaymentStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      pending: "待付款",
-      paid: "已付款",
-      refunded: "已退款",
-    };
-
-    return statusMap[status] || status;
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    const colorMap: Record<string, string> = {
-      pending: "text-warning",
-      paid: "text-success",
-      refunded: "text-danger",
     };
 
     return colorMap[status] || "text-default";
@@ -275,17 +247,9 @@ export function OrderLookup() {
                   <div>
                     <span className="text-default-500">訂單狀態:</span>
                     <p
-                      className={`font-medium ${getStatusColor(order.delivery_status)}`}
+                      className={`font-medium ${getStatusColor(order.order_status)}`}
                     >
-                      {getStatusText(order.delivery_status)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-default-500">付款狀態:</span>
-                    <p
-                      className={`font-medium ${getPaymentStatusColor(order.payment_status)}`}
-                    >
-                      {getPaymentStatusText(order.payment_status)}
+                      {getStatusText(order.order_status)}
                     </p>
                   </div>
                 </div>

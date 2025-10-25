@@ -37,57 +37,25 @@ export default function OrderList({
     });
   };
 
-  const getPaymentStatusColor = (
+  const getOrderStatusColor = (
     status: string,
-  ): "default" | "success" | "warning" => {
-    switch (status) {
-      case "paid":
-        return "success";
-      case "refunded":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getDeliveryStatusColor = (
-    status: string,
-  ): "default" | "primary" | "success" | "warning" | "danger" => {
+  ): "default" | "primary" | "success" => {
     switch (status) {
       case "preparing":
         return "primary";
-      case "ready":
-        return "warning";
       case "completed":
         return "success";
-      case "cancelled":
-        return "danger";
       default:
         return "default";
     }
   };
 
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "已付款";
-      case "refunded":
-        return "已退款";
-      default:
-        return "待付款";
-    }
-  };
-
-  const getDeliveryStatusText = (status: string) => {
+  const getOrderStatusText = (status: string) => {
     switch (status) {
       case "preparing":
         return "準備中";
-      case "ready":
-        return "待取貨";
       case "completed":
         return "已完成";
-      case "cancelled":
-        return "已取消";
       default:
         return "待處理";
     }
@@ -113,8 +81,7 @@ export default function OrderList({
             <TableColumn>聯絡資訊</TableColumn>
             <TableColumn>訂單摘要</TableColumn>
             <TableColumn>總金額</TableColumn>
-            <TableColumn>付款狀態</TableColumn>
-            <TableColumn>配送狀態</TableColumn>
+            <TableColumn>訂單狀態</TableColumn>
             <TableColumn>操作</TableColumn>
           </TableHeader>
           <TableBody>
@@ -159,20 +126,11 @@ export default function OrderList({
                 </TableCell>
                 <TableCell>
                   <Chip
-                    color={getPaymentStatusColor(order.payment_status)}
+                    color={getOrderStatusColor(order.order_status)}
                     size="sm"
                     variant="flat"
                   >
-                    {getPaymentStatusText(order.payment_status)}
-                  </Chip>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    color={getDeliveryStatusColor(order.delivery_status)}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {getDeliveryStatusText(order.delivery_status)}
+                    {getOrderStatusText(order.order_status)}
                   </Chip>
                 </TableCell>
                 <TableCell>

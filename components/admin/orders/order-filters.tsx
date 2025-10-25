@@ -10,7 +10,6 @@ import { adminPickupLocations } from "@/components/order-form/constants";
 interface OrderFiltersProps {
   searchQuery: string;
   filterStore: string;
-  filterPayment: string;
   filterDelivery: string;
   filterLocation: string;
   filterDateFrom: string;
@@ -21,7 +20,6 @@ interface OrderFiltersProps {
   filteredOrdersCount: number;
   onSearchQueryChange: (value: string) => void;
   onFilterStoreChange: (value: string) => void;
-  onFilterPaymentChange: (value: string) => void;
   onFilterDeliveryChange: (value: string) => void;
   onFilterLocationChange: (value: string) => void;
   onFilterDateFromChange: (value: string) => void;
@@ -33,7 +31,6 @@ interface OrderFiltersProps {
 export default function OrderFilters({
   searchQuery,
   filterStore,
-  filterPayment,
   filterDelivery,
   filterLocation,
   filterDateFrom,
@@ -44,7 +41,6 @@ export default function OrderFilters({
   filteredOrdersCount,
   onSearchQueryChange,
   onFilterStoreChange,
-  onFilterPaymentChange,
   onFilterDeliveryChange,
   onFilterLocationChange,
   onFilterDateFromChange,
@@ -54,7 +50,6 @@ export default function OrderFilters({
 }: OrderFiltersProps) {
   const hasActiveFilters =
     filterStore ||
-    filterPayment ||
     filterDelivery ||
     filterLocation ||
     filterDateFrom ||
@@ -110,7 +105,7 @@ export default function OrderFilters({
 
         {showAdvancedFilters && (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Select
                 label="店家"
                 placeholder="選擇店家"
@@ -123,27 +118,14 @@ export default function OrderFilters({
               </Select>
 
               <Select
-                label="付款狀態"
-                placeholder="選擇付款狀態"
-                selectedKeys={filterPayment ? [filterPayment] : []}
-                onChange={(e) => onFilterPaymentChange(e.target.value)}
-              >
-                <SelectItem key="pending">待付款</SelectItem>
-                <SelectItem key="paid">已付款</SelectItem>
-                <SelectItem key="refunded">已退款</SelectItem>
-              </Select>
-
-              <Select
-                label="配送狀態"
-                placeholder="選擇配送狀態"
+                label="訂單狀態"
+                placeholder="選擇訂單狀態"
                 selectedKeys={filterDelivery ? [filterDelivery] : []}
                 onChange={(e) => onFilterDeliveryChange(e.target.value)}
               >
                 <SelectItem key="pending">待處理</SelectItem>
                 <SelectItem key="preparing">準備中</SelectItem>
-                <SelectItem key="ready">待取貨</SelectItem>
                 <SelectItem key="completed">已完成</SelectItem>
-                <SelectItem key="cancelled">已取消</SelectItem>
               </Select>
             </div>
 

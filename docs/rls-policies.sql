@@ -28,8 +28,6 @@ CREATE POLICY "Allow public to insert delivery orders" ON orders
   FOR INSERT
   TO public
   WITH CHECK (
-    -- 確保是外送訂單
-    order_type = 'delivery' AND
     -- 確保有店家ID
     store_id IS NOT NULL AND
     -- 確保有必要的外送資訊
@@ -45,8 +43,6 @@ CREATE POLICY "Allow public to read delivery orders by code" ON orders
   FOR SELECT
   TO public
   USING (
-    -- 只能查詢外送訂單
-    order_type = 'delivery' AND
     -- 必須提供取貨密碼和手機號碼
     pickup_code IS NOT NULL AND 
     pickup_phone IS NOT NULL
@@ -64,8 +60,6 @@ CREATE POLICY "Allow authenticated users to update orders" ON orders
   TO authenticated
   USING (true)
   WITH CHECK (
-    -- 更新後仍必須是外送訂單
-    order_type = 'delivery' AND
     -- 更新後仍必須有店家ID
     store_id IS NOT NULL AND
     -- 更新後仍必須有必要的外送資訊
@@ -86,8 +80,8 @@ CREATE POLICY "Allow authenticated users to delete orders" ON orders
 -- 完成!
 -- ============================================
 -- 執行完成後，您的 orders RLS policies 將確保：
--- 1. 所有新訂單都必須是外送訂單且有完整資訊
--- 2. 匿名用戶只能查詢外送訂單
+-- 1. 所有新訂單都必須有完整的外送資訊
+-- 2. 匿名用戶只能查詢有效的訂單
 -- 3. 管理員可以管理所有訂單
 -- 
 -- stores 的 policies 不需要修改，因為沒有相關變更

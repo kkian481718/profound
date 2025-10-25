@@ -57,7 +57,7 @@ export default function ProfitPage() {
       if (timeRange === "today") {
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       } else {
-        // 本週（週一到現在）
+        // 本週（週一到週日）
         const dayOfWeek = now.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
@@ -67,6 +67,13 @@ export default function ProfitPage() {
       }
 
       const endDate = new Date(now);
+
+      if (timeRange === "week") {
+        // 週模式：設定為週日結束時間
+        const dayOfWeek = now.getDay();
+        const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+        endDate.setDate(now.getDate() + daysToSunday);
+      }
 
       endDate.setHours(23, 59, 59, 999);
 
@@ -83,11 +90,11 @@ export default function ProfitPage() {
           stores (
             name
           )
-        `,
+        `
         )
         .gte("order_time", startDate.toISOString())
         .lte("order_time", endDate.toISOString())
-        .eq("payment_status", "paid");
+        .eq("order_status", "completed");
 
       if (error) throw error;
 
@@ -129,10 +136,18 @@ export default function ProfitPage() {
       if (timeRange === "week") {
         const dailyGroupedData: Record<string, DailyProfitData> = {};
 
-        // 初始化週一到週五的數據
-        const dayNames = ["週一", "週二", "週三", "週四", "週五"];
+        // 初始化週一到週日的數據
+        const dayNames = [
+          "週一",
+          "週二",
+          "週三",
+          "週四",
+          "週五",
+          "週六",
+          "週日",
+        ];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 7; i++) {
           const date = new Date(startDate);
 
           date.setDate(startDate.getDate() + i);
@@ -171,22 +186,22 @@ export default function ProfitPage() {
       const summary: ProfitSummary = {
         total_shipping_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_shipping_fee,
-          0,
+          0
         ),
         total_dev_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_dev_fee,
-          0,
+          0
         ),
         total_amount: profitDataArray.reduce(
           (sum, item) => sum + item.total_amount,
-          0,
+          0
         ),
         total_orders: profitDataArray.reduce(
           (sum, item) => sum + item.order_count,
-          0,
+          0
         ),
         profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount,
+          (a, b) => b.total_amount - a.total_amount
         ),
         daily_profit_data: dailyProfitData,
       };
@@ -300,7 +315,7 @@ export default function ProfitPage() {
               <Divider />
               <CardBody>
                 {profitData.daily_profit_data.some(
-                  (day) => day.order_count > 0,
+                  (day) => day.order_count > 0
                 ) ? (
                   <DailyProfitChart data={profitData.daily_profit_data} />
                 ) : (

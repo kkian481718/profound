@@ -6,7 +6,6 @@ This is a **Next.js 15** + **Supabase** food delivery platform connecting Hualie
 
 ### Core Business Logic
 
-- **Single Order Type**: All orders are delivery-only (`order_type: 'delivery'`)
 - **Store Management**: Automated deadline-based store closing via cron jobs
 - **Order Limits**: Dual-layer limits (global + per-store daily maximums)
 - **Pricing**: Fixed dev fee (10 TWD) + tiered shipping (20 TWD if <150, else 12% of cost)

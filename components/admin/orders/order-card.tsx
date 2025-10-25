@@ -30,57 +30,25 @@ export default function OrderCard({
     });
   };
 
-  const getPaymentStatusColor = (
+  const getOrderStatusColor = (
     status: string,
-  ): "default" | "success" | "warning" => {
-    switch (status) {
-      case "paid":
-        return "success";
-      case "refunded":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getDeliveryStatusColor = (
-    status: string,
-  ): "default" | "primary" | "success" | "warning" | "danger" => {
+  ): "default" | "primary" | "success" => {
     switch (status) {
       case "preparing":
         return "primary";
-      case "ready":
-        return "warning";
       case "completed":
         return "success";
-      case "cancelled":
-        return "danger";
       default:
         return "default";
     }
   };
 
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "已付款";
-      case "refunded":
-        return "已退款";
-      default:
-        return "待付款";
-    }
-  };
-
-  const getDeliveryStatusText = (status: string) => {
+  const getOrderStatusText = (status: string) => {
     switch (status) {
       case "preparing":
         return "準備中";
-      case "ready":
-        return "待取貨";
       case "completed":
         return "已完成";
-      case "cancelled":
-        return "已取消";
       default:
         return "待處理";
     }
@@ -93,29 +61,19 @@ export default function OrderCard({
           <h3 className="text-sm md:text-base font-bold flex-1 pr-2 line-clamp-1">
             {order.store_name}
           </h3>
-          <div className="flex gap-1">
-            <Chip
-              className="text-xs"
-              color={getPaymentStatusColor(order.payment_status)}
-              size="sm"
-              variant="flat"
-            >
-              {getPaymentStatusText(order.payment_status)}
-            </Chip>
-          </div>
+          <Chip
+            className="text-xs"
+            color={getOrderStatusColor(order.order_status)}
+            size="sm"
+            variant="flat"
+          >
+            {getOrderStatusText(order.order_status)}
+          </Chip>
         </div>
         <div className="flex justify-between items-center w-full">
           <p className="text-xs text-default-500">
             {formatDateTime(order.order_time)}
           </p>
-          <Chip
-            className="text-xs"
-            color={getDeliveryStatusColor(order.delivery_status)}
-            size="sm"
-            variant="flat"
-          >
-            {getDeliveryStatusText(order.delivery_status)}
-          </Chip>
         </div>
       </CardHeader>
       <CardBody className="pt-2 flex flex-col gap-2">

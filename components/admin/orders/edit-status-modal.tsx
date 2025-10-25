@@ -21,13 +21,7 @@ interface EditStatusModalProps {
   onOpenChange: () => void;
   onSuccess: () => void;
   orderId: string;
-  currentPaymentStatus: "pending" | "paid" | "refunded";
-  currentDeliveryStatus:
-    | "pending"
-    | "preparing"
-    | "ready"
-    | "completed"
-    | "cancelled";
+  currentOrderStatus: "pending" | "preparing" | "completed";
   orderInfo: {
     storeName: string;
     pickupName: string;
@@ -40,12 +34,10 @@ export default function EditStatusModal({
   onOpenChange,
   onSuccess,
   orderId,
-  currentPaymentStatus,
-  currentDeliveryStatus,
+  currentOrderStatus,
   orderInfo,
 }: EditStatusModalProps) {
-  const [paymentStatus, setPaymentStatus] = useState(currentPaymentStatus);
-  const [deliveryStatus, setDeliveryStatus] = useState(currentDeliveryStatus);
+  const [orderStatus, setOrderStatus] = useState(currentOrderStatus);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -58,10 +50,9 @@ export default function EditStatusModal({
 
   // 當 props 改變時，更新 state
   useEffect(() => {
-    setPaymentStatus(currentPaymentStatus);
-    setDeliveryStatus(currentDeliveryStatus);
+    setOrderStatus(currentOrderStatus);
     setError("");
-  }, [currentPaymentStatus, currentDeliveryStatus, orderId]);
+  }, [currentOrderStatus, orderId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,8 +65,7 @@ export default function EditStatusModal({
       const { error: updateError } = await supabase
         .from("orders")
         .update({
-          payment_status: paymentStatus,
-          delivery_status: deliveryStatus,
+          order_status: orderStatus,
         })
         .eq("id", orderId);
 
@@ -92,8 +82,7 @@ export default function EditStatusModal({
 
   const handleClose = () => {
     // 重置表單狀態
-    setPaymentStatus(currentPaymentStatus);
-    setDeliveryStatus(currentDeliveryStatus);
+    setOrderStatus(currentOrderStatus);
     setError("");
     onOpenChange();
   };
@@ -148,73 +137,11 @@ export default function EditStatusModal({
                 >
                   <Select
                     isRequired
-                    label="付款狀態"
-                    selectedKeys={[paymentStatus]}
+                    label="訂單狀態"
+                    selectedKeys={[orderStatus]}
                     onChange={(e) =>
-                      setPaymentStatus(
-                        e.target.value as "pending" | "paid" | "refunded",
-                      )
-                    }
-                  >
-                    <SelectItem
-                      key="pending"
-                      startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="default"
-                          size="sm"
-                          variant="flat"
-                        >
-                          待付款
-                        </Chip>
-                      }
-                    >
-                      待付款
-                    </SelectItem>
-                    <SelectItem
-                      key="paid"
-                      startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="success"
-                          size="sm"
-                          variant="flat"
-                        >
-                          已付款
-                        </Chip>
-                      }
-                    >
-                      已付款
-                    </SelectItem>
-                    <SelectItem
-                      key="refunded"
-                      startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="warning"
-                          size="sm"
-                          variant="flat"
-                        >
-                          已退款
-                        </Chip>
-                      }
-                    >
-                      已退款
-                    </SelectItem>
-                  </Select>
-
-                  <Select
-                    isRequired
-                    label="配送狀態"
-                    selectedKeys={[deliveryStatus]}
-                    onChange={(e) =>
-                      setDeliveryStatus(
-                        e.target.value as
-                          | "pending"
-                          | "preparing"
-                          | "ready"
-                          | "completed"
-                          | "cancelled",
+                      setOrderStatus(
+                        e.target.value as "pending" | "preparing" | "completed",
                       )
                     }
                   >
@@ -249,21 +176,6 @@ export default function EditStatusModal({
                       準備中
                     </SelectItem>
                     <SelectItem
-                      key="ready"
-                      startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="warning"
-                          size="sm"
-                          variant="flat"
-                        >
-                          待取貨
-                        </Chip>
-                      }
-                    >
-                      待取貨
-                    </SelectItem>
-                    <SelectItem
                       key="completed"
                       startContent={
                         <Chip
@@ -277,21 +189,6 @@ export default function EditStatusModal({
                       }
                     >
                       已完成
-                    </SelectItem>
-                    <SelectItem
-                      key="cancelled"
-                      startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="danger"
-                          size="sm"
-                          variant="flat"
-                        >
-                          已取消
-                        </Chip>
-                      }
-                    >
-                      已取消
                     </SelectItem>
                   </Select>
 

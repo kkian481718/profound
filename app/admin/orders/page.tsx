@@ -29,7 +29,6 @@ function OrdersContent() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStore, setFilterStore] = useState("");
-  const [filterPayment, setFilterPayment] = useState("");
   const [filterDelivery, setFilterDelivery] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -67,7 +66,6 @@ function OrdersContent() {
     orders,
     searchQuery,
     filterStore,
-    filterPayment,
     filterDelivery,
     filterLocation,
     filterDateFrom,
@@ -138,17 +136,10 @@ function OrdersContent() {
       filtered = filtered.filter((order) => order.store_id === filterStore);
     }
 
-    // 付款狀態過濾
-    if (filterPayment) {
-      filtered = filtered.filter(
-        (order) => order.payment_status === filterPayment,
-      );
-    }
-
-    // 配送狀態過濾
+    // 訂單狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.delivery_status === filterDelivery,
+        (order) => order.order_status === filterDelivery,
       );
     }
 
@@ -220,7 +211,6 @@ function OrdersContent() {
   const clearFilters = () => {
     setSearchQuery("");
     setFilterStore("");
-    setFilterPayment("");
     setFilterDelivery("");
     setFilterLocation("");
     setFilterDateFrom("");
@@ -287,7 +277,6 @@ function OrdersContent() {
         filterDateTo={filterDateTo}
         filterDelivery={filterDelivery}
         filterLocation={filterLocation}
-        filterPayment={filterPayment}
         filterStore={filterStore}
         filteredOrdersCount={filteredOrders.length}
         searchQuery={searchQuery}
@@ -299,7 +288,6 @@ function OrdersContent() {
         onFilterDateToChange={setFilterDateTo}
         onFilterDeliveryChange={setFilterDelivery}
         onFilterLocationChange={setFilterLocation}
-        onFilterPaymentChange={setFilterPayment}
         onFilterStoreChange={setFilterStore}
         onSearchQueryChange={setSearchQuery}
         onToggleAdvancedFilters={() =>
@@ -345,8 +333,7 @@ function OrdersContent() {
 
       {selectedOrder && (
         <EditStatusModal
-          currentDeliveryStatus={selectedOrder.delivery_status}
-          currentPaymentStatus={selectedOrder.payment_status}
+          currentOrderStatus={selectedOrder.order_status}
           isOpen={isOpen}
           orderId={selectedOrder.id}
           orderInfo={{
