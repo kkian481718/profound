@@ -17,7 +17,7 @@ export function validateOrderDetails(
   pickupName: string,
   selectedPickupLocation: string | null,
   offCampusAddress: string,
-  showOffCampusAddress: boolean,
+  showOffCampusAddress: boolean
 ): { isValid: boolean; errors: ErrorState } {
   let hasError = false;
   const nextErrors: ErrorState = { ...initialErrors };
@@ -51,9 +51,6 @@ export function validateOrderDetails(
 
   if (!normalizedName) {
     nextErrors.pickupName = "請輸入暱稱";
-    hasError = true;
-  } else if (normalizedName.length < 2) {
-    nextErrors.pickupName = "暱稱至少需要2個字元";
     hasError = true;
   } else if (normalizedName.length > 20) {
     nextErrors.pickupName = "暱稱不能超過20個字元";
