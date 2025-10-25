@@ -44,7 +44,9 @@ export function OrderForm({ stores }: OrderFormProps) {
   const { isSubmitting, wasSubmitted, submitError, submitOrder } =
     useOrderSubmit();
 
-  const showOffCampusAddress = selectedPickupLocation === "校外";
+  const showOffCampusAddress =
+    selectedPickupLocation === "校外" ||
+    selectedPickupLocation === "校內教學區";
 
   // 重置表單
   const resetForm = () => {
@@ -88,7 +90,7 @@ export function OrderForm({ stores }: OrderFormProps) {
     setSelectedPickupLocation(location);
     setErrors((prev) => ({ ...prev, pickupLocation: "" }));
 
-    if (location !== "校外") {
+    if (location !== "校外" && location !== "校內教學區") {
       setOffCampusAddress("");
       setErrors((prev) => ({ ...prev, address: "" }));
     }

@@ -17,7 +17,7 @@ export function validateOrderDetails(
   pickupName: string,
   selectedPickupLocation: string | null,
   offCampusAddress: string,
-  showOffCampusAddress: boolean
+  showOffCampusAddress: boolean,
 ): { isValid: boolean; errors: ErrorState } {
   let hasError = false;
   const nextErrors: ErrorState = { ...initialErrors };
@@ -63,7 +63,10 @@ export function validateOrderDetails(
   }
 
   if (showOffCampusAddress && !offCampusAddress.trim()) {
-    nextErrors.address = "請填寫校外取貨地址";
+    nextErrors.address =
+      selectedPickupLocation === "校外"
+        ? "請填寫校外取貨地址"
+        : "請填寫教學區地址";
     hasError = true;
   }
 

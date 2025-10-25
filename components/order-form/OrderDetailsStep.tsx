@@ -254,11 +254,19 @@ export function OrderDetailsStep({
           {showOffCampusAddress ? (
             <Input
               isRequired
-              aria-label="校外地址"
+              aria-label={
+                selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"
+              }
               errorMessage={errors.address || undefined}
               isInvalid={Boolean(errors.address)}
-              label="校外地址"
-              placeholder="請輸入校外地址"
+              label={
+                selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"
+              }
+              placeholder={
+                selectedPickupLocation === "校外"
+                  ? "請輸入校外地址"
+                  : "請輸入教學區地址"
+              }
               value={offCampusAddress}
               onValueChange={onOffCampusAddressChange}
             />

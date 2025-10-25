@@ -103,7 +103,9 @@ export function useOrderSubmit() {
         store_id: params.selectedStore,
         order_type: "delivery",
         pickup_location: params.showOffCampusAddress
-          ? params.offCampusAddress
+          ? params.selectedPickupLocation === "校內教學區"
+            ? `[校內教學區] ${params.offCampusAddress}`
+            : `[校外] ${params.offCampusAddress}`
           : params.selectedPickupLocation,
         pickup_name: params.pickupName,
         pickup_code: pickupCode,
