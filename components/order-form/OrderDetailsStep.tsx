@@ -79,18 +79,6 @@ export function OrderDetailsStep({
         </p>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">
-        {wasSubmitted ? (
-          <Alert color="success" title="提交成功" variant="flat">
-            我們已收到您的訂購需求,請留意後續通知。
-          </Alert>
-        ) : null}
-
-        {submitError ? (
-          <Alert color="danger" title="提交失敗" variant="flat">
-            {submitError}
-          </Alert>
-        ) : null}
-
         <form className="flex flex-col gap-6" onSubmit={onSubmit}>
           <div className="flex flex-col gap-2">
             <p className="text-sm text-default-600">
@@ -290,6 +278,18 @@ export function OrderDetailsStep({
               送出訂單
             </Button>
           </div>
+
+          {wasSubmitted ? (
+            <Alert color="success" title="提交成功" variant="flat">
+              我們已收到您的訂購需求,請留意後續通知。
+            </Alert>
+          ) : null}
+
+          {submitError ? (
+            <Alert color="danger" title="提交失敗" variant="flat">
+              {submitError}
+            </Alert>
+          ) : null}
         </form>
       </CardBody>
     </Card>

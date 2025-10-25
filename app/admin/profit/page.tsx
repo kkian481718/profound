@@ -72,6 +72,7 @@ export default function ProfitPage() {
         // 週模式：設定為週日結束時間
         const dayOfWeek = now.getDay();
         const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
         endDate.setDate(now.getDate() + daysToSunday);
       }
 
@@ -90,7 +91,7 @@ export default function ProfitPage() {
           stores (
             name
           )
-        `
+        `,
         )
         .gte("order_time", startDate.toISOString())
         .lte("order_time", endDate.toISOString())
@@ -186,22 +187,22 @@ export default function ProfitPage() {
       const summary: ProfitSummary = {
         total_shipping_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_shipping_fee,
-          0
+          0,
         ),
         total_dev_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_dev_fee,
-          0
+          0,
         ),
         total_amount: profitDataArray.reduce(
           (sum, item) => sum + item.total_amount,
-          0
+          0,
         ),
         total_orders: profitDataArray.reduce(
           (sum, item) => sum + item.order_count,
-          0
+          0,
         ),
         profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount
+          (a, b) => b.total_amount - a.total_amount,
         ),
         daily_profit_data: dailyProfitData,
       };
@@ -315,7 +316,7 @@ export default function ProfitPage() {
               <Divider />
               <CardBody>
                 {profitData.daily_profit_data.some(
-                  (day) => day.order_count > 0
+                  (day) => day.order_count > 0,
                 ) ? (
                   <DailyProfitChart data={profitData.daily_profit_data} />
                 ) : (

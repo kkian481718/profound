@@ -6,6 +6,8 @@ import { calculateOrderPricing } from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
 import { trackOrderEvent } from "@/lib/gtag";
+import { validateAndCloseExpiredStore } from "@/lib/validateStore";
+import { checkOrderLimits } from "@/lib/checkOrderLimits";
 
 type SubmitOrderParams = {
   selectedStore: string;
@@ -73,6 +75,28 @@ export function useOrderSubmit() {
     trackOrderEvent("order_started");
 
     try {
+      // 1. 驗證店家是否仍可接單（包含自動關閉過期店家）
+      const storeValidation = await validateAndCloseExpiredStore(
+        params.selectedStore
+      );
+
+      if (!storeValidation.isValid) {
+        setSubmitError(
+          storeValidation.message || "店家驗證失敗，請重新選擇店家"
+        );
+
+        return false;
+      }
+
+      // 2. 檢查訂單限制（全站限制 + 店家限制）
+      const limitCheck = await checkOrderLimits(params.selectedStore);
+
+      if (!limitCheck.canOrder) {
+        setSubmitError(limitCheck.reason || "訂單數已達上限，無法下單");
+
+        return false;
+      }
+
       const pickupCode = generatePickupCode();
       let menuImageUrl: string | null = null;
 
@@ -148,14 +172,24 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`,
+        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`
       );
 
       return true;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("提交訂單失敗:", error);
-      setSubmitError("提交訂單時發生錯誤，請稍後再試。");
+
+      // 根據錯誤類型提供更具體的錯誤訊息
+      if (error instanceof Error) {
+        if (error.message.includes("店家") || error.message.includes("限制")) {
+          setSubmitError(error.message);
+        } else {
+          setSubmitError("提交訂單時發生錯誤，請稍後再試。");
+        }
+      } else {
+        setSubmitError("提交訂單時發生錯誤，請稍後再試。");
+      }
 
       // 追蹤訂單失敗事件
       trackOrderEvent("order_failed", {
