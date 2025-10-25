@@ -1,6 +1,20 @@
 import type { ErrorState } from "./types";
 
+// 用戶下單時的取貨地點選項（不包含新宿、舊宿）
 export const pickupLocations = [
+  { label: "【校外】", value: "校外" },
+  { label: "【校內教學區】", value: "校內教學區" },
+  { label: "沁月", value: "沁月" },
+  { label: "迎曦", value: "迎曦" },
+  { label: "行雲", value: "行雲" },
+  { label: "向晴", value: "向晴" },
+  { label: "仰山", value: "仰山" },
+  { label: "涵星", value: "涵星" },
+  { label: "擷雲", value: "擷雲" },
+] as const;
+
+// 管理員篩選用的取貨地點選項（包含新宿、舊宿）
+export const adminPickupLocations = [
   { label: "【校外】", value: "校外" },
   { label: "【校內教學區】", value: "校內教學區" },
   { label: "【新宿】", value: "新宿" },

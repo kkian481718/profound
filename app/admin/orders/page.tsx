@@ -15,7 +15,7 @@ import OrderList from "@/components/admin/orders/order-list";
 import OrderCard from "@/components/admin/orders/order-card";
 import OrderContentModal from "@/components/admin/orders/order-content-modal";
 import {
-  pickupLocations,
+  adminPickupLocations,
   newDormitories,
   oldDormitories,
 } from "@/components/order-form/constants";
@@ -155,7 +155,7 @@ function OrdersContent() {
     // 取貨地點過濾
     if (filterLocation) {
       // 從 constants 中提取宿舍地點（排除校外、校內教學區、新宿、舊宿選項）
-      const dormLocations: string[] = pickupLocations
+      const dormLocations: string[] = adminPickupLocations
         .filter(
           (loc) =>
             loc.value !== "校外" &&

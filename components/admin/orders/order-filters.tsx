@@ -5,7 +5,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 
-import { pickupLocations } from "@/components/order-form/constants";
+import { adminPickupLocations } from "@/components/order-form/constants";
 
 interface OrderFiltersProps {
   searchQuery: string;
@@ -81,7 +81,7 @@ export default function OrderFilters({
             selectedKeys={filterLocation ? [filterLocation] : []}
             onChange={(e) => onFilterLocationChange(e.target.value)}
           >
-            {pickupLocations.map((location) => (
+            {adminPickupLocations.map((location) => (
               <SelectItem key={location.value}>{location.label}</SelectItem>
             ))}
           </Select>
