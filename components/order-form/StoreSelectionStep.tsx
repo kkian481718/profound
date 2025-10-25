@@ -12,6 +12,7 @@ import {
   checkOrderLimits,
   type OrderLimitCheck,
 } from "@/lib/checkOrderLimits";
+import { trackStoreEvent } from "@/lib/gtag";
 
 type StoreSelectionStepProps = {
   storeOptions: StoreOption[];
@@ -149,7 +150,22 @@ export function StoreSelectionStep({
             selectedKeys={
               selectedStore ? new Set([selectedStore]) : new Set([])
             }
-            onSelectionChange={onStoreChange}
+            onSelectionChange={(keys) => {
+              onStoreChange(keys);
+              // 追蹤店家選擇事件
+              const selectedKeys = Array.from(keys);
+
+              if (selectedKeys.length > 0) {
+                const selectedStoreId = selectedKeys[0] as string;
+                const selectedStoreOption = storeOptions.find(
+                  (store) => store.value === selectedStoreId,
+                );
+
+                if (selectedStoreOption) {
+                  trackStoreEvent("store_selected", selectedStoreOption.label);
+                }
+              }
+            }}
           >
             {storeOptions.map((store) => (
               <SelectItem key={store.value}>{store.label}</SelectItem>

@@ -5,6 +5,7 @@ import { DEFAULT_PICKUP_HOURS } from "../constants";
 import { calculateOrderPricing } from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
+import { trackOrderEvent } from "@/lib/gtag";
 
 type SubmitOrderParams = {
   selectedStore: string;
@@ -67,6 +68,9 @@ export function useOrderSubmit() {
     setWasSubmitted(false);
     setSubmitError(null);
     setIsSubmitting(true);
+
+    // 追蹤訂單開始事件
+    trackOrderEvent("order_started");
 
     try {
       const pickupCode = generatePickupCode();
@@ -133,6 +137,17 @@ export function useOrderSubmit() {
       // 成功提交
       setWasSubmitted(true);
 
+      // 追蹤訂單完成事件
+      trackOrderEvent("order_completed", {
+        store_name: params.selectedStore,
+        order_total: pricing.totalAmount,
+        pickup_location: params.showOffCampusAddress
+          ? params.selectedPickupLocation === "校內教學區"
+            ? `[校內教學區] ${params.offCampusAddress}`
+            : `[校外] ${params.offCampusAddress}`
+          : params.selectedPickupLocation,
+      });
+
       // 導航到訂單確認頁面
       router.push(
         `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`,
@@ -143,6 +158,11 @@ export function useOrderSubmit() {
       // eslint-disable-next-line no-console
       console.error("提交訂單失敗:", error);
       setSubmitError("提交訂單時發生錯誤，請稍後再試。");
+
+      // 追蹤訂單失敗事件
+      trackOrderEvent("order_failed", {
+        store_name: params.selectedStore,
+      });
 
       return false;
     } finally {

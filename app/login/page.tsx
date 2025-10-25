@@ -7,6 +7,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
+import { trackAdminEvent } from "@/lib/gtag";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,6 +29,9 @@ export default function LoginPage() {
       });
 
       if (error) throw error;
+
+      // 追蹤管理員登入事件
+      trackAdminEvent("admin_login", email);
 
       router.push("/admin/stores");
       router.refresh();
