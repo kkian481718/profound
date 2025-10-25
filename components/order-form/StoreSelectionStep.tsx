@@ -122,8 +122,12 @@ export function StoreSelectionStep({
           </Alert>
         ) : storeOptions.length === 0 ? (
           <div className="flex flex-col gap-4">
-            <Alert color="danger" title="無法載入店家資料" variant="flat">
-              無法連接到伺服器,請檢查網路連線或稍後再試。
+            <Alert
+              color="warning"
+              title="目前沒有開放下單的店家"
+              variant="flat"
+            >
+              本次的接單已截止，下次請早~
             </Alert>
             <Button
               className="w-full md:w-auto"
