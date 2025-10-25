@@ -34,6 +34,7 @@ function OrdersContent() {
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showTodayOnly, setShowTodayOnly] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedOrderForContent, setSelectedOrderForContent] =
     useState<Order | null>(null);
@@ -70,6 +71,7 @@ function OrdersContent() {
     filterLocation,
     filterDateFrom,
     filterDateTo,
+    showTodayOnly,
   ]);
 
   const fetchData = async () => {
@@ -93,7 +95,7 @@ function OrdersContent() {
           stores (
             name
           )
-        `,
+        `
         )
         .order("order_time", { ascending: false });
 
@@ -118,6 +120,30 @@ function OrdersContent() {
   const applyFilters = () => {
     let filtered = [...orders];
 
+    // 本日訂單過濾
+    if (showTodayOnly) {
+      const today = new Date();
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      const todayEnd = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23,
+        59,
+        59,
+        999
+      );
+
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.order_time);
+        return orderDate >= todayStart && orderDate <= todayEnd;
+      });
+    }
+
     // 搜尋過濾
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -127,7 +153,7 @@ function OrdersContent() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_code.toLowerCase().includes(query) ||
-          order.pickup_phone.includes(query),
+          order.pickup_phone.includes(query)
       );
     }
 
@@ -139,7 +165,7 @@ function OrdersContent() {
     // 訂單狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.order_status === filterDelivery,
+        (order) => order.order_status === filterDelivery
       );
     }
 
@@ -152,7 +178,7 @@ function OrdersContent() {
             loc.value !== "校外" &&
             loc.value !== "校內教學區" &&
             loc.value !== "新宿" &&
-            loc.value !== "舊宿",
+            loc.value !== "舊宿"
         )
         .map((loc) => loc.value);
 
@@ -162,27 +188,27 @@ function OrdersContent() {
           (order) =>
             order.pickup_location.startsWith("[校外]") ||
             (!dormLocations.includes(order.pickup_location) &&
-              !order.pickup_location.startsWith("[校內教學區]")),
+              !order.pickup_location.startsWith("[校內教學區]"))
         );
       } else if (filterLocation === "校內教學區") {
         // 過濾出校內教學區地址：以 [校內教學區] 開頭的地址
         filtered = filtered.filter((order) =>
-          order.pickup_location.startsWith("[校內教學區]"),
+          order.pickup_location.startsWith("[校內教學區]")
         );
       } else if (filterLocation === "新宿") {
         // 過濾出新宿地址：沁月、迎曦、行雲
         filtered = filtered.filter((order) =>
-          newDormitories.includes(order.pickup_location as any),
+          newDormitories.includes(order.pickup_location as any)
         );
       } else if (filterLocation === "舊宿") {
         // 過濾出舊宿地址：向晴、仰山、涵星、擷雲
         filtered = filtered.filter((order) =>
-          oldDormitories.includes(order.pickup_location as any),
+          oldDormitories.includes(order.pickup_location as any)
         );
       } else {
         // 過濾出指定宿舍：不包含前綴標識的宿舍名稱
         filtered = filtered.filter(
-          (order) => order.pickup_location === filterLocation,
+          (order) => order.pickup_location === filterLocation
         );
       }
     }
@@ -192,7 +218,7 @@ function OrdersContent() {
       const fromDate = new Date(filterDateFrom);
 
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate,
+        (order) => new Date(order.order_time) >= fromDate
       );
     }
 
@@ -201,7 +227,7 @@ function OrdersContent() {
 
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate,
+        (order) => new Date(order.order_time) <= toDate
       );
     }
 
@@ -215,6 +241,7 @@ function OrdersContent() {
     setFilterLocation("");
     setFilterDateFrom("");
     setFilterDateTo("");
+    setShowTodayOnly(true);
     router.push("/admin/orders");
   };
 
@@ -281,6 +308,7 @@ function OrdersContent() {
         filteredOrdersCount={filteredOrders.length}
         searchQuery={searchQuery}
         showAdvancedFilters={showAdvancedFilters}
+        showTodayOnly={showTodayOnly}
         stores={stores}
         totalOrders={orders.length}
         onClearFilters={clearFilters}
@@ -290,6 +318,7 @@ function OrdersContent() {
         onFilterLocationChange={setFilterLocation}
         onFilterStoreChange={setFilterStore}
         onSearchQueryChange={setSearchQuery}
+        onShowTodayOnlyChange={setShowTodayOnly}
         onToggleAdvancedFilters={() =>
           setShowAdvancedFilters(!showAdvancedFilters)
         }

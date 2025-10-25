@@ -4,6 +4,7 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
+import { Switch } from "@heroui/switch";
 
 import { adminPickupLocations } from "@/components/order-form/constants";
 
@@ -18,6 +19,7 @@ interface OrderFiltersProps {
   stores: any[];
   totalOrders: number;
   filteredOrdersCount: number;
+  showTodayOnly: boolean;
   onSearchQueryChange: (value: string) => void;
   onFilterStoreChange: (value: string) => void;
   onFilterDeliveryChange: (value: string) => void;
@@ -26,6 +28,7 @@ interface OrderFiltersProps {
   onFilterDateToChange: (value: string) => void;
   onToggleAdvancedFilters: () => void;
   onClearFilters: () => void;
+  onShowTodayOnlyChange: (value: boolean) => void;
 }
 
 export default function OrderFilters({
@@ -39,6 +42,7 @@ export default function OrderFilters({
   stores,
   totalOrders,
   filteredOrdersCount,
+  showTodayOnly,
   onSearchQueryChange,
   onFilterStoreChange,
   onFilterDeliveryChange,
@@ -47,13 +51,15 @@ export default function OrderFilters({
   onFilterDateToChange,
   onToggleAdvancedFilters,
   onClearFilters,
+  onShowTodayOnlyChange,
 }: OrderFiltersProps) {
   const hasActiveFilters =
     filterStore ||
     filterDelivery ||
     filterLocation ||
     filterDateFrom ||
-    filterDateTo;
+    filterDateTo ||
+    !showTodayOnly;
 
   return (
     <Card>
@@ -80,6 +86,15 @@ export default function OrderFilters({
               <SelectItem key={location.value}>{location.label}</SelectItem>
             ))}
           </Select>
+        </div>
+
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+          <Switch
+            isSelected={showTodayOnly}
+            onValueChange={onShowTodayOnlyChange}
+          >
+            僅顯示本日訂單
+          </Switch>
         </div>
 
         <div className="flex items-center justify-between">
