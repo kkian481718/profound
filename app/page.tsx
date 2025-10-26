@@ -30,6 +30,15 @@ export default function Home() {
         >
           🔍 查詢訂單
         </Button>
+        <Button
+          as={Link}
+          color="secondary"
+          href="/faq"
+          size="lg"
+          variant="faded"
+        >
+          ❓ 常見問題
+        </Button>
       </div>
     </section>
   );
