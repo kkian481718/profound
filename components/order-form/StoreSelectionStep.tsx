@@ -13,6 +13,7 @@ import {
   type OrderLimitCheck,
 } from "@/lib/checkOrderLimits";
 import { trackStoreEvent } from "@/lib/gtag";
+import { StoreInfoDisplay } from "./StoreInfoDisplay";
 
 type StoreSelectionStepProps = {
   storeOptions: StoreOption[];
@@ -154,7 +155,7 @@ export function StoreSelectionStep({
               if (selectedKeys.length > 0) {
                 const selectedStoreId = selectedKeys[0] as string;
                 const selectedStoreOption = storeOptions.find(
-                  (store) => store.value === selectedStoreId,
+                  (store) => store.value === selectedStoreId
                 );
 
                 if (selectedStoreOption) {
@@ -167,6 +168,14 @@ export function StoreSelectionStep({
               <SelectItem key={store.value}>{store.label}</SelectItem>
             ))}
           </Select>
+        )}
+
+        {/* 顯示選中店家的詳細資訊 */}
+        {selectedStore && !isLoadingStores && storeOptions.length > 0 && (
+          <StoreInfoDisplay
+            selectedStore={selectedStore}
+            storeOptions={storeOptions}
+          />
         )}
 
         <div className="flex gap-3">
