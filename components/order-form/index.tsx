@@ -105,7 +105,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       pickupName,
       selectedPickupLocation,
       offCampusAddress,
-      showOffCampusAddress
+      showOffCampusAddress,
     );
 
     if (!validation.isValid) {

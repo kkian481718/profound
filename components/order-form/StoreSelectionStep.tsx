@@ -122,17 +122,13 @@ export function StoreSelectionStep({
             {globalLimitCheck.reason}
           </Alert>
         ) : storeOptions.length === 0 ? (
-          <div className="flex flex-col gap-4">
-            <Alert
-              color="warning"
-              title="目前沒有開放下單的店家"
-              variant="flat"
-            >
-              本次的接單已截止，下次請早~
+          <div className="flex flex-col gap-1">
+            <Alert color="warning" title="下次請早：（" variant="flat">
+              目前沒有開放下單的店家
             </Alert>
             <Button
               className="w-full md:w-auto"
-              color="primary"
+              color="warning"
               variant="flat"
               onPress={onRetry}
             >

@@ -31,7 +31,7 @@ export default function DailyProfitChart({
 
     // 找出最大利潤用於計算比例
     const maxProfit = Math.max(
-      ...dataWithProfit.map((item) => item.total_profit)
+      ...dataWithProfit.map((item) => item.total_profit),
     );
 
     return dataWithProfit.map((item) => ({
@@ -64,7 +64,7 @@ export default function DailyProfitChart({
             (item) =>
               timeRange === "week" ||
               item.total_profit > 0 ||
-              item.order_count > 0
+              item.order_count > 0,
           )
           .map((item) => (
             <div key={item.date} className="space-y-2">
@@ -114,8 +114,8 @@ export default function DailyProfitChart({
                 data.reduce(
                   (sum, item) =>
                     sum + item.total_shipping_fee + item.total_dev_fee,
-                  0
-                )
+                  0,
+                ),
               )}
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function DailyProfitChart({
                     item.total_shipping_fee + item.total_dev_fee >
                     max.total_shipping_fee + max.total_dev_fee
                       ? item
-                      : max
+                      : max,
                   ).day_name
                 : "無"}
             </p>

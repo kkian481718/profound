@@ -40,7 +40,7 @@ export default function ProfitPage() {
   const [profitData, setProfitData] = useState<ProfitSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"today" | "week" | "month">(
-    "today"
+    "today",
   );
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function ProfitPage() {
           stores (
             name
           )
-        `
+        `,
         )
         .gte("order_time", startDate.toISOString())
         .lte("order_time", endDate.toISOString())
@@ -237,22 +237,22 @@ export default function ProfitPage() {
       const summary: ProfitSummary = {
         total_shipping_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_shipping_fee,
-          0
+          0,
         ),
         total_dev_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_dev_fee,
-          0
+          0,
         ),
         total_amount: profitDataArray.reduce(
           (sum, item) => sum + item.total_amount,
-          0
+          0,
         ),
         total_orders: profitDataArray.reduce(
           (sum, item) => sum + item.order_count,
-          0
+          0,
         ),
         profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount
+          (a, b) => b.total_amount - a.total_amount,
         ),
         daily_profit_data: dailyProfitData,
       };
@@ -284,25 +284,25 @@ export default function ProfitPage() {
         <h1 className="text-3xl font-bold">利潤分析</h1>
         <ButtonGroup size="sm">
           <Button
-        color={timeRange === "today" ? "primary" : "default"}
-        variant={timeRange === "today" ? "solid" : "flat"}
-        onPress={() => setTimeRange("today")}
+            color={timeRange === "today" ? "primary" : "default"}
+            variant={timeRange === "today" ? "solid" : "flat"}
+            onPress={() => setTimeRange("today")}
           >
-        今日
+            今日
           </Button>
           <Button
-        color={timeRange === "week" ? "primary" : "default"}
-        variant={timeRange === "week" ? "solid" : "flat"}
-        onPress={() => setTimeRange("week")}
+            color={timeRange === "week" ? "primary" : "default"}
+            variant={timeRange === "week" ? "solid" : "flat"}
+            onPress={() => setTimeRange("week")}
           >
-        本週
+            本週
           </Button>
           <Button
-        color={timeRange === "month" ? "primary" : "default"}
-        variant={timeRange === "month" ? "solid" : "flat"}
-        onPress={() => setTimeRange("month")}
+            color={timeRange === "month" ? "primary" : "default"}
+            variant={timeRange === "month" ? "solid" : "flat"}
+            onPress={() => setTimeRange("month")}
           >
-        本月
+            本月
           </Button>
         </ButtonGroup>
       </div>
@@ -374,7 +374,7 @@ export default function ProfitPage() {
                 <Divider />
                 <CardBody>
                   {profitData.daily_profit_data.some(
-                    (day) => day.order_count > 0
+                    (day) => day.order_count > 0,
                   ) ? (
                     <DailyProfitChart
                       data={profitData.daily_profit_data}

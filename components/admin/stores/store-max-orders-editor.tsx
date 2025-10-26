@@ -18,7 +18,7 @@ export default function StoreMaxOrdersEditor({
   onSuccess,
 }: StoreMaxOrdersEditorProps) {
   const [maxOrders, setMaxOrders] = useState<string>(
-    currentMaxOrders?.toString() || "",
+    currentMaxOrders?.toString() || ""
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -75,34 +75,91 @@ export default function StoreMaxOrdersEditor({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Input
-        className="flex-1"
-        placeholder="不限制"
-        size="sm"
-        type="number"
-        value={maxOrders}
-        onChange={(e) => setMaxOrders(e.target.value)}
-      />
-      <Button
-        color="primary"
-        isLoading={isSaving}
-        size="sm"
-        onPress={handleSave}
-      >
-        儲存
-      </Button>
-      {currentMaxOrders !== null && (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Input
+          className="flex-1"
+          placeholder="不限制"
+          size="sm"
+          startContent={
+            <svg
+              className="h-4 w-4 text-default-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+          }
+          type="number"
+          value={maxOrders}
+          onChange={(e) => setMaxOrders(e.target.value)}
+        />
         <Button
-          color="default"
+          color="success"
           isLoading={isSaving}
           size="sm"
-          variant="light"
-          onPress={handleClear}
+          onPress={handleSave}
+          variant={currentMaxOrders ? "flat" : "solid"}
         >
-          清除
+          {currentMaxOrders ? "更新" : "儲存"}
         </Button>
-      )}
+        {currentMaxOrders !== null && (
+          <Button
+            color="default"
+            isLoading={isSaving}
+            size="sm"
+            variant="bordered"
+            onPress={handleClear}
+          >
+            清除
+          </Button>
+        )}
+      </div>
+
+      {/* 狀態顯示 */}
+      <div className="text-xs text-default-500">
+        {currentMaxOrders !== null ? (
+          <span className="flex items-center gap-1">
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+            目前限制：每日最多 {currentMaxOrders} 單
+          </span>
+        ) : (
+          <span className="flex items-center gap-1">
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+            無限制訂單數
+          </span>
+        )}
+      </div>
     </div>
   );
 }

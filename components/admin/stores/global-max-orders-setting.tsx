@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
+import { addToast } from "@heroui/toast";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,11 +19,21 @@ export default function GlobalMaxOrdersSetting({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchGlobalSetting();
     fetchTodayOrderCount();
   }, []);
+
+  // 清理 timeout
+  useEffect(() => {
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+      }
+    };
+  }, [saveTimeout]);
 
   const fetchGlobalSetting = async () => {
     try {
@@ -68,38 +79,72 @@ export default function GlobalMaxOrdersSetting({
     }
   };
 
-  const handleSave = async () => {
-    if (!maxOrders || isNaN(Number(maxOrders)) || Number(maxOrders) < 0) {
-      alert("請輸入有效的最大訂單數");
+  const autoSave = useCallback(
+    async (value: string) => {
+      if (!value || isNaN(Number(value)) || Number(value) < 0) {
+        addToast({
+          title: "輸入錯誤",
+          description: "請輸入有效的最大訂單數",
+          color: "danger",
+        });
 
-      return;
-    }
+        return;
+      }
 
-    setIsSaving(true);
+      setIsSaving(true);
 
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.from("global_settings").upsert(
-        {
-          setting_key: "max_daily_orders",
-          setting_value: maxOrders,
-        },
-        {
-          onConflict: "setting_key",
-        },
-      );
+      try {
+        const supabase = createClient();
+        const { error } = await supabase.from("global_settings").upsert(
+          {
+            setting_key: "max_daily_orders",
+            setting_value: value,
+          },
+          {
+            onConflict: "setting_key",
+          }
+        );
 
-      if (error) throw error;
+        if (error) throw error;
 
-      alert("全域設定已儲存");
-      onSuccess?.();
-    } catch (err) {
-      console.error("Failed to save global setting:", err);
-      alert("儲存失敗，請稍後再試");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+        addToast({
+          title: "設定已儲存",
+          description: `每日訂單上限已更新為 ${value} 單`,
+          color: "success",
+        });
+        onSuccess?.();
+      } catch (err) {
+        console.error("Failed to save global setting:", err);
+        addToast({
+          title: "儲存失敗",
+          description: "請稍後再試",
+          color: "danger",
+        });
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [onSuccess]
+  );
+
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setMaxOrders(value);
+
+      // 清除之前的 timeout
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+      }
+
+      // 設置新的 timeout，1.5 秒後自動儲存
+      const newTimeout = setTimeout(() => {
+        autoSave(value);
+      }, 1500);
+
+      setSaveTimeout(newTimeout);
+    },
+    [saveTimeout, autoSave]
+  );
 
   if (isLoading) {
     return (
@@ -116,62 +161,136 @@ export default function GlobalMaxOrdersSetting({
   const isOverLimit = todayOrderCount >= maxOrdersNum;
 
   return (
-    <Card>
-      <CardHeader>
-        <h2 className="text-xl font-semibold">本日最大訂單數設定</h2>
-      </CardHeader>
-      <CardBody className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-4">
-            <Input
-              className="flex-1"
-              label="本日最大訂單數"
-              placeholder="輸入最大訂單數"
-              type="number"
-              value={maxOrders}
-              onChange={(e) => setMaxOrders(e.target.value)}
-            />
-            <Button color="primary" isLoading={isSaving} onPress={handleSave}>
-              儲存
-            </Button>
+    <Card className="border-l-4 border-l-primary">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-primary-100 p-2">
+            <svg
+              className="h-5 w-5 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
           </div>
+          <div>
+            <h2 className="text-md font-semibold text-foreground">
+              每日訂單上限
+            </h2>
+            <p className="text-sm text-default-500">超過後，系統會停止接單</p>
+          </div>
+        </div>
+      </CardHeader>
 
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-default-600">
-              今日已下單數：
-              <span
-                className={`font-semibold ${
-                  isOverLimit
-                    ? "text-danger"
-                    : isNearLimit
-                      ? "text-warning"
-                      : "text-success"
-                }`}
-              >
+      <CardBody className="space-y-4 pt-0">
+        {/* 當前狀態指示器 */}
+        <div className="flex items-center justify-between rounded-lg bg-primary-50 border border-primary-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary">
+              <span className="text-lg font-bold text-white">
                 {todayOrderCount}
               </span>
-              / {maxOrders}
-            </span>
-            <Button size="sm" variant="light" onPress={fetchTodayOrderCount}>
-              重新整理
-            </Button>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">今日訂單數</p>
+              <p className="text-xs text-default-500">
+                上限 {maxOrders} 單 • 剩餘{" "}
+                {Math.max(0, Number(maxOrders) - todayOrderCount)} 單
+              </p>
+            </div>
           </div>
+        </div>
 
-          {isNearLimit && !isOverLimit && (
-            <div className="rounded-lg bg-warning-50 p-3">
+        {/* 狀態警告 */}
+        {isNearLimit && !isOverLimit && (
+          <div className="flex gap-3 rounded-lg bg-warning-50 border border-warning-200 p-4">
+            <svg
+              className="h-5 w-5 text-warning flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-warning-800">接近上限</p>
               <p className="text-sm text-warning-600">
-                ⚠️ 警告：今日訂單數已接近上限，請留意訂單狀況
+                今日訂單數已接近設定上限，請密切關注訂單狀況
               </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {isOverLimit && (
-            <div className="rounded-lg bg-danger-50 p-3">
+        {isOverLimit && (
+          <div className="flex gap-3 rounded-lg bg-danger-50 border border-danger-200 p-4">
+            <svg
+              className="h-5 w-5 text-danger flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-danger-800">已達上限</p>
               <p className="text-sm text-danger-600">
-                🚫 注意：今日訂單數已達上限，新訂單將被阻擋
+                今日訂單數已達到設定上限，系統將暫停接受新訂單
               </p>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* 設定區域 */}
+        <div className="flex gap-3">
+          <Input
+            variant="bordered"
+            description={isSaving ? "正在儲存..." : "更改後將自動儲存"}
+            endContent={
+              isSaving && (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+                  <span className="text-xs text-default-500">儲存中</span>
+                </div>
+              )
+            }
+            isDisabled={isSaving}
+            label="設定上限"
+            placeholder="輸入最大訂單數"
+            startContent={
+              <svg
+                className="h-4 w-4 text-default-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                />
+              </svg>
+            }
+            type="number"
+            value={maxOrders}
+            onChange={(e) => handleInputChange(e.target.value)}
+          />
         </div>
       </CardBody>
     </Card>
