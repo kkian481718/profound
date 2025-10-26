@@ -40,6 +40,15 @@ export default function Home() {
           ❓ 常見問題
         </Button>
       </div>
+      <div className="mt-1 text-center text-sm text-gray-600">
+        使用本服務表示您同意我們的
+        <Link
+          href="/policy"
+          className="underline hover:text-gray-100 transition-colors"
+        >
+          隱私權政策
+        </Link>
+      </div>
     </section>
   );
 }
