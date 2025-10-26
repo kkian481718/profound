@@ -1,6 +1,7 @@
 "use client";
-import { subtitle, title } from "@/components/primitives";
 import { Snippet } from "@heroui/snippet";
+
+import { subtitle, title } from "@/components/primitives";
 
 const Page = () => {
   return (

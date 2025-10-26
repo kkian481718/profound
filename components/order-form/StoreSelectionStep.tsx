@@ -7,13 +7,14 @@ import { Button } from "@heroui/button";
 import { Alert } from "@heroui/alert";
 import { Select, SelectItem } from "@heroui/select";
 
+import { StoreInfoDisplay } from "./StoreInfoDisplay";
+
 import {
   checkGlobalOrderLimit,
   checkOrderLimits,
   type OrderLimitCheck,
 } from "@/lib/checkOrderLimits";
 import { trackStoreEvent } from "@/lib/gtag";
-import { StoreInfoDisplay } from "./StoreInfoDisplay";
 
 type StoreSelectionStepProps = {
   storeOptions: StoreOption[];
@@ -155,7 +156,7 @@ export function StoreSelectionStep({
               if (selectedKeys.length > 0) {
                 const selectedStoreId = selectedKeys[0] as string;
                 const selectedStoreOption = storeOptions.find(
-                  (store) => store.value === selectedStoreId
+                  (store) => store.value === selectedStoreId,
                 );
 
                 if (selectedStoreOption) {

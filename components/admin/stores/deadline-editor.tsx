@@ -111,7 +111,7 @@ export default function DeadlineEditor({
                     const now = new Date();
                     const diffHours = Math.round(
                       (deadlineDate.getTime() - now.getTime()) /
-                        (1000 * 60 * 60)
+                        (1000 * 60 * 60),
                     );
 
                     if (diffHours < 0) {
@@ -212,7 +212,7 @@ export default function DeadlineEditor({
 
                           oneHour.setHours(oneHour.getHours() + 1);
                           setDeadline(
-                            convertToDatetimeLocal(oneHour.toISOString())
+                            convertToDatetimeLocal(oneHour.toISOString()),
                           );
                         }}
                       >
@@ -227,7 +227,7 @@ export default function DeadlineEditor({
                           tomorrow.setDate(tomorrow.getDate() + 1);
                           tomorrow.setHours(12, 0, 0, 0);
                           setDeadline(
-                            convertToDatetimeLocal(tomorrow.toISOString())
+                            convertToDatetimeLocal(tomorrow.toISOString()),
                           );
                         }}
                       >

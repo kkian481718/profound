@@ -18,7 +18,7 @@ export default function StoreMaxOrdersEditor({
   onSuccess,
 }: StoreMaxOrdersEditorProps) {
   const [maxOrders, setMaxOrders] = useState<string>(
-    currentMaxOrders?.toString() || ""
+    currentMaxOrders?.toString() || "",
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -104,8 +104,8 @@ export default function StoreMaxOrdersEditor({
           color="success"
           isLoading={isSaving}
           size="sm"
-          onPress={handleSave}
           variant={currentMaxOrders ? "flat" : "solid"}
+          onPress={handleSave}
         >
           {currentMaxOrders ? "更新" : "儲存"}
         </Button>

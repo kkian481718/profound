@@ -383,10 +383,10 @@ export default function StoresPage() {
                   <CardHeader className="flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Switch
-                        color="success"
                         classNames={{
                           wrapper: "mr-0",
                         }}
+                        color="success"
                         isSelected={store.is_open}
                         size="sm"
                         onValueChange={() =>

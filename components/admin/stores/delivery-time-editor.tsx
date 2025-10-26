@@ -47,7 +47,7 @@ export default function DeliveryTimeEditor({
         // 轉換為 datetime-local 格式
         const date = new Date(data.next_delivery_time);
         const localDateTime = new Date(
-          date.getTime() - date.getTimezoneOffset() * 60000
+          date.getTime() - date.getTimezoneOffset() * 60000,
         )
           .toISOString()
           .slice(0, 16);
@@ -125,7 +125,7 @@ export default function DeliveryTimeEditor({
         setIsSavingDeliveryTime(false);
       }
     },
-    [onSuccess]
+    [onSuccess],
   );
 
   const handleTimeChange = useCallback(
@@ -144,7 +144,7 @@ export default function DeliveryTimeEditor({
 
       setSaveTimeout(newTimeout);
     },
-    [saveTimeout, autoSaveDeliveryTime]
+    [saveTimeout, autoSaveDeliveryTime],
   );
 
   return (
@@ -215,7 +215,7 @@ export default function DeliveryTimeEditor({
                     const now = new Date();
                     const diffHours = Math.round(
                       (deliveryDate.getTime() - now.getTime()) /
-                        (1000 * 60 * 60)
+                        (1000 * 60 * 60),
                     );
 
                     if (diffHours < 0) {
@@ -256,27 +256,27 @@ export default function DeliveryTimeEditor({
           )}
 
         {/* 時間設定區域 */}
-          <Input
-            description={
-              isSavingDeliveryTime ? "正在儲存..." : "更改後將自動儲存"
-            }
-            endContent={
-              isSavingDeliveryTime && (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
-                  <span className="text-xs text-default-500">儲存中</span>
-                </div>
-              )
-            }
-            id="global-delivery-time"
-            isDisabled={isSavingDeliveryTime}
-            label="設定出貨時間"
-            size="md"
-            type="datetime-local"
-            value={globalNextDeliveryTime}
-            variant="bordered"
-            onChange={(e) => handleTimeChange(e.target.value)}
-          />
+        <Input
+          description={
+            isSavingDeliveryTime ? "正在儲存..." : "更改後將自動儲存"
+          }
+          endContent={
+            isSavingDeliveryTime && (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+                <span className="text-xs text-default-500">儲存中</span>
+              </div>
+            )
+          }
+          id="global-delivery-time"
+          isDisabled={isSavingDeliveryTime}
+          label="設定出貨時間"
+          size="md"
+          type="datetime-local"
+          value={globalNextDeliveryTime}
+          variant="bordered"
+          onChange={(e) => handleTimeChange(e.target.value)}
+        />
       </CardBody>
     </Card>
   );

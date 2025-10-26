@@ -16,7 +16,7 @@ export function StoreInfoDisplay({
   selectedStore,
 }: StoreInfoDisplayProps) {
   const selectedStoreData = storeOptions.find(
-    (store) => store.value === selectedStore
+    (store) => store.value === selectedStore,
   );
 
   if (!selectedStoreData) {
@@ -40,10 +40,10 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-xl text-default-800">{store.label}</h3>
         <Chip
+          className="font-semibold"
           color={isExpired ? "danger" : "success"}
           size="md"
           variant="shadow"
-          className="font-semibold"
         >
           {isExpired ? "已截止" : "可下單"}
         </Chip>
@@ -64,10 +64,10 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
               </span>
               {isTodayDelivery && (
                 <Chip
+                  className="font-medium"
                   color="primary"
                   size="sm"
                   variant="solid"
-                  className="font-medium"
                 >
                   今日送達
                 </Chip>
@@ -96,6 +96,7 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
                   {timeLeft}
                 </span>
                 <Chip
+                  className="font-medium"
                   color={
                     isExpired
                       ? "danger"
@@ -105,7 +106,6 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
                   }
                   size="sm"
                   variant="dot"
-                  className="font-medium"
                 >
                   {isExpired ? "已截止" : "進行中"}
                 </Chip>

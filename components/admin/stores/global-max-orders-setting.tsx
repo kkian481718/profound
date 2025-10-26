@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
@@ -102,7 +101,7 @@ export default function GlobalMaxOrdersSetting({
           },
           {
             onConflict: "setting_key",
-          }
+          },
         );
 
         if (error) throw error;
@@ -124,7 +123,7 @@ export default function GlobalMaxOrdersSetting({
         setIsSaving(false);
       }
     },
-    [onSuccess]
+    [onSuccess],
   );
 
   const handleInputChange = useCallback(
@@ -143,7 +142,7 @@ export default function GlobalMaxOrdersSetting({
 
       setSaveTimeout(newTimeout);
     },
-    [saveTimeout, autoSave]
+    [saveTimeout, autoSave],
   );
 
   if (isLoading) {
@@ -259,7 +258,6 @@ export default function GlobalMaxOrdersSetting({
         {/* 設定區域 */}
         <div className="flex gap-3">
           <Input
-            variant="bordered"
             description={isSaving ? "正在儲存..." : "更改後將自動儲存"}
             endContent={
               isSaving && (
@@ -289,6 +287,7 @@ export default function GlobalMaxOrdersSetting({
             }
             type="number"
             value={maxOrders}
+            variant="bordered"
             onChange={(e) => handleInputChange(e.target.value)}
           />
         </div>

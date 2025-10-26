@@ -13,6 +13,7 @@ export function useCountdown(deadline: string | null): CountdownResult {
     if (!deadline) {
       setTimeLeft("無期限");
       setIsExpired(false);
+
       return;
     }
 
@@ -24,6 +25,7 @@ export function useCountdown(deadline: string | null): CountdownResult {
       if (distance < 0) {
         setTimeLeft("已截止");
         setIsExpired(true);
+
         return;
       }
 
