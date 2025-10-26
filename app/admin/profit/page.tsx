@@ -39,7 +39,9 @@ interface ProfitSummary {
 export default function ProfitPage() {
   const [profitData, setProfitData] = useState<ProfitSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"today" | "week">("today");
+  const [timeRange, setTimeRange] = useState<"today" | "week" | "month">(
+    "today"
+  );
 
   useEffect(() => {
     fetchProfitData();
@@ -56,13 +58,17 @@ export default function ProfitPage() {
 
       if (timeRange === "today") {
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else {
+      } else if (timeRange === "week") {
         // 本週（週一到週日）
         const dayOfWeek = now.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
         startDate = new Date(now);
         startDate.setDate(now.getDate() - daysToMonday);
+        startDate.setHours(0, 0, 0, 0);
+      } else {
+        // 本月（月初到月底）
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         startDate.setHours(0, 0, 0, 0);
       }
 
@@ -74,6 +80,9 @@ export default function ProfitPage() {
         const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
 
         endDate.setDate(now.getDate() + daysToSunday);
+      } else if (timeRange === "month") {
+        // 月模式：設定為月底結束時間
+        endDate.setMonth(now.getMonth() + 1, 0); // 下個月的第0天，即本月最後一天
       }
 
       endDate.setHours(23, 59, 59, 999);
@@ -91,7 +100,7 @@ export default function ProfitPage() {
           stores (
             name
           )
-        `,
+        `
         )
         .gte("order_time", startDate.toISOString())
         .lte("order_time", endDate.toISOString())
@@ -131,7 +140,7 @@ export default function ProfitPage() {
       // 計算總計
       const profitDataArray = Object.values(groupedData);
 
-      // 如果是週模式，計算每日利潤數據
+      // 如果是週模式或月模式，計算每日利潤數據
       let dailyProfitData: DailyProfitData[] = [];
 
       if (timeRange === "week") {
@@ -182,27 +191,68 @@ export default function ProfitPage() {
         });
 
         dailyProfitData = Object.values(dailyGroupedData);
+      } else if (timeRange === "month") {
+        const dailyGroupedData: Record<string, DailyProfitData> = {};
+
+        // 初始化本月每一天的數據
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, month, day);
+          const dateStr = date.toISOString().split("T")[0];
+          const dayName = `${month + 1}/${day}`;
+
+          dailyGroupedData[dateStr] = {
+            date: dateStr,
+            day_name: dayName,
+            total_shipping_fee: 0,
+            total_dev_fee: 0,
+            total_amount: 0,
+            order_count: 0,
+          };
+        }
+
+        // 統計每日數據
+        processedData.forEach((order: any) => {
+          if (order.order_time) {
+            const orderDate = new Date(order.order_time)
+              .toISOString()
+              .split("T")[0];
+
+            if (dailyGroupedData[orderDate]) {
+              dailyGroupedData[orderDate].total_shipping_fee +=
+                order.shipping_fee;
+              dailyGroupedData[orderDate].total_dev_fee += order.dev_fee;
+              dailyGroupedData[orderDate].total_amount += order.total_amount;
+              dailyGroupedData[orderDate].order_count += 1;
+            }
+          }
+        });
+
+        dailyProfitData = Object.values(dailyGroupedData);
       }
 
       const summary: ProfitSummary = {
         total_shipping_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_shipping_fee,
-          0,
+          0
         ),
         total_dev_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_dev_fee,
-          0,
+          0
         ),
         total_amount: profitDataArray.reduce(
           (sum, item) => sum + item.total_amount,
-          0,
+          0
         ),
         total_orders: profitDataArray.reduce(
           (sum, item) => sum + item.order_count,
-          0,
+          0
         ),
         profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount,
+          (a, b) => b.total_amount - a.total_amount
         ),
         daily_profit_data: dailyProfitData,
       };
@@ -231,21 +281,28 @@ export default function ProfitPage() {
   return (
     <div className="flex flex-col gap-6 mt-0l">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">利潤查詢</h1>
-        <ButtonGroup>
+        <h1 className="text-3xl font-bold">利潤分析</h1>
+        <ButtonGroup size="sm">
           <Button
-            color={timeRange === "today" ? "primary" : "default"}
-            variant={timeRange === "today" ? "solid" : "flat"}
-            onPress={() => setTimeRange("today")}
+        color={timeRange === "today" ? "primary" : "default"}
+        variant={timeRange === "today" ? "solid" : "flat"}
+        onPress={() => setTimeRange("today")}
           >
-            今日
+        今日
           </Button>
           <Button
-            color={timeRange === "week" ? "primary" : "default"}
-            variant={timeRange === "week" ? "solid" : "flat"}
-            onPress={() => setTimeRange("week")}
+        color={timeRange === "week" ? "primary" : "default"}
+        variant={timeRange === "week" ? "solid" : "flat"}
+        onPress={() => setTimeRange("week")}
           >
-            本週
+        本週
+          </Button>
+          <Button
+        color={timeRange === "month" ? "primary" : "default"}
+        variant={timeRange === "month" ? "solid" : "flat"}
+        onPress={() => setTimeRange("month")}
+          >
+        本月
           </Button>
         </ButtonGroup>
       </div>
@@ -307,26 +364,32 @@ export default function ProfitPage() {
             </Card>
           </div>
 
-          {/* 每日利潤圖表 (僅週模式顯示) */}
-          {timeRange === "week" && profitData.daily_profit_data && (
-            <Card>
-              <CardHeader>
-                <h4 className="text-lg font-semibold">每日利潤分析</h4>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                {profitData.daily_profit_data.some(
-                  (day) => day.order_count > 0,
-                ) ? (
-                  <DailyProfitChart data={profitData.daily_profit_data} />
-                ) : (
-                  <div className="flex items-center justify-center py-12">
-                    <p className="text-default-500">本週暫無利潤資料</p>
-                  </div>
-                )}
-              </CardBody>
-            </Card>
-          )}
+          {/* 每日利潤圖表 (週模式和月模式顯示) */}
+          {(timeRange === "week" || timeRange === "month") &&
+            profitData.daily_profit_data && (
+              <Card>
+                <CardHeader>
+                  <h4 className="text-lg font-semibold">每日利潤分析</h4>
+                </CardHeader>
+                <Divider />
+                <CardBody>
+                  {profitData.daily_profit_data.some(
+                    (day) => day.order_count > 0
+                  ) ? (
+                    <DailyProfitChart
+                      data={profitData.daily_profit_data}
+                      timeRange={timeRange as "week" | "month"}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center py-12">
+                      <p className="text-default-500">
+                        {timeRange === "week" ? "本週" : "本月"}暫無利潤資料
+                      </p>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            )}
 
           {/* 圖表區域 */}
           <Card>
@@ -340,7 +403,12 @@ export default function ProfitPage() {
               ) : (
                 <div className="flex items-center justify-center py-12">
                   <p className="text-default-500">
-                    {timeRange === "today" ? "今日" : "本週"}暫無利潤資料
+                    {timeRange === "today"
+                      ? "今日"
+                      : timeRange === "week"
+                        ? "本週"
+                        : "本月"}
+                    暫無利潤資料
                   </p>
                 </div>
               )}
