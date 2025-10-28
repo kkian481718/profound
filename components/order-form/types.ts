@@ -2,7 +2,6 @@ export type StoreOption = {
   label: string;
   value: string;
   order_deadline?: string | null;
-  next_delivery_time?: string | null;
 };
 
 export type ErrorState = {

@@ -31,19 +31,18 @@ CREATE POLICY "Allow public to insert delivery orders" ON orders
     -- 確保有店家ID
     store_id IS NOT NULL AND
     -- 確保有必要的外送資訊
-    pickup_time IS NOT NULL AND
     pickup_location IS NOT NULL AND
     pickup_name IS NOT NULL AND
     pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
   );
 
--- 2. 允許所有人透過取貨密碼和手機號碼查詢外送訂單
+-- 2. 允許所有人透過訂單密碼和手機號碼查詢外送訂單
 CREATE POLICY "Allow public to read delivery orders by code" ON orders
   FOR SELECT
   TO public
   USING (
-    -- 必須提供取貨密碼和手機號碼
+    -- 必須提供訂單密碼和手機號碼
     pickup_code IS NOT NULL AND 
     pickup_phone IS NOT NULL
   );
@@ -63,7 +62,6 @@ CREATE POLICY "Allow authenticated users to update orders" ON orders
     -- 更新後仍必須有店家ID
     store_id IS NOT NULL AND
     -- 更新後仍必須有必要的外送資訊
-    pickup_time IS NOT NULL AND
     pickup_location IS NOT NULL AND
     pickup_name IS NOT NULL AND
     pickup_code IS NOT NULL AND

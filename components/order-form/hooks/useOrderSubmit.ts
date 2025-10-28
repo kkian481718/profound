@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { DEFAULT_PICKUP_HOURS } from "../constants";
 import { calculateOrderPricing } from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
@@ -105,24 +104,6 @@ export function useOrderSubmit() {
         menuImageUrl = await uploadImageToStorage(params.uploadedImage);
       }
 
-      // 取得店家的 next_delivery_time
-      const { data: storeData } = await supabase
-        .from("stores")
-        .select("next_delivery_time")
-        .eq("id", params.selectedStore)
-        .single();
-
-      // 使用店家設定的出貨時間，如果沒有設定則使用預設值
-      let pickupTime: Date;
-
-      if (storeData?.next_delivery_time) {
-        pickupTime = new Date(storeData.next_delivery_time);
-      } else {
-        // 預設取貨時間為下單後 8 小時
-        pickupTime = new Date();
-        pickupTime.setHours(pickupTime.getHours() + DEFAULT_PICKUP_HOURS);
-      }
-
       // 使用統一的價格計算函數
       const costNum = parseFloat(params.cost);
       const pricing = calculateOrderPricing(costNum);
@@ -144,7 +125,6 @@ export function useOrderSubmit() {
         shipping_fee: pricing.shippingFee,
         total_amount: pricing.totalAmount,
         order_status: "pending",
-        pickup_time: pickupTime.toISOString(),
       };
 
       // 儲存訂單到資料庫

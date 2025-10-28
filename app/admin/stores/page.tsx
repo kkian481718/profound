@@ -17,7 +17,6 @@ import {
 
 import AddStoreModal from "@/components/admin/stores/add-store-modal";
 import DeadlineEditor from "@/components/admin/stores/deadline-editor";
-import DeliveryTimeEditor from "@/components/admin/stores/delivery-time-editor";
 import GlobalMaxOrdersSetting from "@/components/admin/stores/global-max-orders-setting";
 import StoreMaxOrdersEditor from "@/components/admin/stores/store-max-orders-editor";
 import { createClient } from "@/lib/supabase/client";
@@ -28,7 +27,6 @@ interface Store {
   name: string;
   is_open: boolean;
   order_deadline: string | null;
-  next_delivery_time: string | null;
   max_daily_orders: number | null;
   created_at: string;
 }
@@ -269,9 +267,8 @@ export default function StoresPage() {
           <div className="h-6 w-1 bg-primary rounded-full" />
           <h2 className="text-xl font-semibold text-foreground">全域設定</h2>
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
           <GlobalMaxOrdersSetting onSuccess={fetchStores} />
-          <DeliveryTimeEditor onSuccess={fetchStores} />
         </div>
       </div>
 

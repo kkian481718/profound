@@ -26,7 +26,7 @@ Customer Order → Store Validation → Order Limits Check → Price Calculation
 
 ### Core Tables
 
-- `stores`: `is_open`, `order_deadline`, `next_delivery_time`, `max_daily_orders`
+- `stores`: `is_open`, `order_deadline`, `max_daily_orders`
 - `orders`: Complete delivery info with pickup codes, pricing breakdown, dual status tracking
 - `global_settings`: System-wide configs like `max_daily_orders`
 
@@ -34,7 +34,7 @@ Customer Order → Store Validation → Order Limits Check → Price Calculation
 
 - Store auto-closure when `order_deadline` passes (via `validateStore.ts`)
 - Pickup codes are 4-digit unique identifiers for customer lookup
-- Orders inherit `pickup_time` from store's `next_delivery_time` or default +8 hours
+- Orders no longer have pickup time, as it will be announced in community channels
 
 ## Component Architecture
 

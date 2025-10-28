@@ -12,7 +12,6 @@ import { createClient } from "@/lib/supabase/client";
 type OrderData = {
   id: string;
   store_id: string;
-  pickup_time: string | null;
   pickup_location: string | null;
   pickup_name: string;
   menu_items: string | null;
@@ -41,13 +40,13 @@ export function OrderLookup() {
     setStoreName("");
 
     if (!pickupCode.trim() || !phoneNumber.trim()) {
-      setError("請輸入取貨密碼和手機號碼");
+      setError("請輸入訂單密碼和手機號碼");
 
       return;
     }
 
     if (pickupCode.trim().length !== 4) {
-      setError("取貨密碼必須是4位數");
+      setError("訂單密碼必須是4位數");
 
       return;
     }
@@ -72,7 +71,6 @@ export function OrderLookup() {
           `
           id,
           store_id,
-          pickup_time,
           pickup_location,
           pickup_name,
           menu_items,
@@ -93,7 +91,7 @@ export function OrderLookup() {
       if (queryError) {
         if (queryError.code === "PGRST116") {
           setError(
-            "找不到訂單，請確認取貨密碼和手機號碼是否正確，或訂單可能已超過24小時",
+            "找不到訂單，請確認訂單密碼和手機號碼是否正確，或訂單可能已超過24小時",
           );
         } else {
           throw queryError;
@@ -171,8 +169,8 @@ export function OrderLookup() {
           <InputOtp
             isRequired
             allowedKeys="^[0-9]*$"
-            aria-label="取貨密碼"
-            description="取貨密碼"
+            aria-label="訂單密碼"
+            description="訂單密碼"
             length={4}
             value={pickupCode}
             onValueChange={setPickupCode}
@@ -224,20 +222,7 @@ export function OrderLookup() {
                       })}
                     </p>
                   </div>
-                  {order.pickup_time && (
-                    <div>
-                      <span className="text-default-500">預計取貨時間:</span>
-                      <p className="font-medium">
-                        {new Date(order.pickup_time).toLocaleString("zh-TW", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  )}
+
                   {order.pickup_location && (
                     <div>
                       <span className="text-default-500">取貨地點:</span>

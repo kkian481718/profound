@@ -1,5 +1,4 @@
 "use client";
-import { Snippet } from "@heroui/snippet";
 
 import { subtitle, title } from "@/components/primitives";
 
@@ -106,14 +105,6 @@ const Page = () => {
             七、隱私權保護政策之修正
           </h1>
           本網站隱私權保護政策將因應需求隨時進行修正，修正後的條款將刊登於網站上。
-          <h1 className={subtitle({ class: "mt-10" })}>八、聯繫管道</h1>
-          <h2>
-            對於本站之隱私權政策有任何疑問，或者想提出變更、移除個人資料之請求，請
-            Email 至：
-            <Snippet symbol="" variant="bordered">
-              miffyptmail@gmail.com
-            </Snippet>
-          </h2>
         </div>
       </section>
     </main>

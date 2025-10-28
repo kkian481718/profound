@@ -26,7 +26,6 @@ export interface Order {
   store_id: string;
   store_name: string;
   order_time: string;
-  pickup_time: string;
   pickup_location: string;
   pickup_name: string;
   pickup_code: string;
@@ -45,7 +44,6 @@ export interface Store {
   name: string;
   is_open: boolean;
   order_deadline: string | null;
-  next_delivery_time: string | null;
   max_daily_orders: number | null;
   created_at: string;
 }

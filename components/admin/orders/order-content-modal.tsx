@@ -102,7 +102,7 @@ export default function OrderContentModal({
                         </div>
                         <Divider />
                         <div className="flex justify-between">
-                          <span className="text-default-600">取貨密碼:</span>
+                          <span className="text-default-600">訂單密碼:</span>
                           <span className="font-mono font-bold">
                             {order.pickup_code}
                           </span>
@@ -114,22 +114,6 @@ export default function OrderContentModal({
                         <div className="flex justify-between">
                           <span className="text-default-600">取貨地點:</span>
                           <span>{order.pickup_location}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-default-600">取貨時間:</span>
-                          <span>
-                            {new Date(order.pickup_time).toLocaleString(
-                              "zh-TW",
-                              {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
-                            )}
-                          </span>
                         </div>
                         <Divider />
                         <div className="flex justify-between">

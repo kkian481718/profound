@@ -12,7 +12,6 @@ CREATE TABLE stores (
   name VARCHAR(255) NOT NULL,
   is_open BOOLEAN DEFAULT false,
   order_deadline TIMESTAMP WITH TIME ZONE,
-  next_delivery_time TIMESTAMP WITH TIME ZONE,
   max_daily_orders INTEGER DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -21,7 +20,6 @@ CREATE TABLE stores (
 -- 建立索引以提升查詢效能
 CREATE INDEX idx_stores_is_open ON stores(is_open);
 CREATE INDEX idx_stores_created_at ON stores(created_at);
-CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 ```
 
 **欄位說明：**
@@ -30,7 +28,6 @@ CREATE INDEX idx_stores_next_delivery_time ON stores(next_delivery_time);
 - `name`: 店家名稱
 - `is_open`: 是否開放接單
 - `order_deadline`: 最後下單時間
-- `next_delivery_time`: 下次出貨時間（所有外送訂單將使用此時間作為預設取貨時間）
 - `max_daily_orders`: 每日最大訂單數限制（NULL 表示無限制）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
@@ -48,7 +45,6 @@ CREATE TABLE orders (
   order_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
   -- 外送訂單欄位
-  pickup_time TIMESTAMP WITH TIME ZONE NOT NULL,
   pickup_location VARCHAR(500) NOT NULL,
   pickup_name VARCHAR(100) NOT NULL,
   pickup_code VARCHAR(4) NOT NULL,
@@ -67,7 +63,6 @@ CREATE TABLE orders (
 
   -- 確保外送訂單必須有相關欄位
   CONSTRAINT check_delivery_required_fields CHECK (
-    pickup_time IS NOT NULL AND
     pickup_location IS NOT NULL AND
     store_id IS NOT NULL AND
     pickup_name IS NOT NULL AND
@@ -79,7 +74,6 @@ CREATE TABLE orders (
 -- 建立索引以提升查詢效能
 CREATE INDEX idx_orders_store_id ON orders(store_id);
 CREATE INDEX idx_orders_order_time ON orders(order_time);
-CREATE INDEX idx_orders_pickup_time ON orders(pickup_time);
 CREATE INDEX idx_orders_order_status ON orders(order_status);
 CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 ```
@@ -92,10 +86,9 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 
 **外送訂單欄位：**
 
-- `pickup_time`: 預計取貨時間（必填）
 - `pickup_location`: 取貨地點（必填）
 - `pickup_name`: 取貨人暱稱（必填）
-- `pickup_code`: 取貨密碼（四碼，必填）
+- `pickup_code`: 訂單密碼（四碼，必填）
 - `pickup_phone`: 取貨人手機（必填）
 - `menu_items`: 餐點內容描述
 - `menu_image_url`: 菜單圖片 URL
@@ -209,7 +202,7 @@ CREATE POLICY "Allow public to insert orders" ON orders
   TO public
   WITH CHECK (true);
 
--- 允許所有人（包括匿名用戶）透過取貨密碼和手機號碼查詢訂單
+-- 允許所有人（包括匿名用戶）透過訂單密碼和手機號碼查詢訂單
 CREATE POLICY "Allow public to read orders by code" ON orders
   FOR SELECT
   TO public
@@ -303,10 +296,10 @@ CREATE TRIGGER update_global_settings_updated_at BEFORE UPDATE ON global_setting
 
 ```sql
 -- 新增測試店家
-INSERT INTO stores (name, is_open, order_deadline, next_delivery_time, max_daily_orders) VALUES
-('麥當勞', true, now() + interval '7 days', now() + interval '2 days', 50),
-('肯德基', true, now() + interval '5 days', now() + interval '3 days', 30),
-('星巴克', false, null, null, null);
+INSERT INTO stores (name, is_open, order_deadline, max_daily_orders) VALUES
+('麥當勞', true, now() + interval '7 days', 50),
+('肯德基', true, now() + interval '5 days', 30),
+('星巴克', false, null, null);
 
 -- 新增全域設定測試資料
 INSERT INTO global_settings (setting_key, setting_value) VALUES
@@ -316,7 +309,6 @@ ON CONFLICT (setting_key) DO NOTHING;
 -- 新增測試外送訂單（請先確認 store_id）
 INSERT INTO orders (
   store_id,
-  pickup_time,
   pickup_location,
   pickup_name,
   pickup_code,
@@ -329,7 +321,6 @@ INSERT INTO orders (
   order_status
 ) VALUES (
   '您的-store-id-在這裡',
-  now() + interval '2 hours',
   '志學車站',
   '王小明',
   '1234',
