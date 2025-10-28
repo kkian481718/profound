@@ -326,6 +326,17 @@ function OrdersContent() {
         }
       />
 
+      {filteredOrders.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination
+            showControls
+            page={currentPage}
+            total={totalPages}
+            onChange={setCurrentPage}
+          />
+        </div>
+      )}
+
       {filteredOrders.length === 0 ? (
         <Card>
           <CardBody className="py-12 text-center">
@@ -348,17 +359,6 @@ function OrdersContent() {
               onViewContent={handleViewContent}
             />
           ))}
-        </div>
-      )}
-
-      {filteredOrders.length > 0 && totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination
-            showControls
-            page={currentPage}
-            total={totalPages}
-            onChange={setCurrentPage}
-          />
         </div>
       )}
 
