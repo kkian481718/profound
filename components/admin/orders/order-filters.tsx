@@ -68,7 +68,7 @@ export default function OrderFilters({
           <Input
             isClearable
             className="flex-1"
-            placeholder="搜尋店家、社群名稱、密碼、手機..."
+            placeholder="搜尋店家、社群名稱、密碼、手機、訂購內容..."
             size="lg"
             value={searchQuery}
             onClear={() => onSearchQueryChange("")}
