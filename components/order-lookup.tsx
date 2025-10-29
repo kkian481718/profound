@@ -4,7 +4,6 @@ import { useState, type FormEvent } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { InputOtp } from "@heroui/input-otp";
 import { Alert } from "@heroui/alert";
 
 import { createClient } from "@/lib/supabase/client";
@@ -25,7 +24,6 @@ type OrderData = {
 };
 
 export function OrderLookup() {
-  const [pickupCode, setPickupCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [order, setOrder] = useState<OrderData | null>(null);
   const [storeName, setStoreName] = useState<string>("");
@@ -39,14 +37,8 @@ export function OrderLookup() {
     setOrder(null);
     setStoreName("");
 
-    if (!pickupCode.trim() || !phoneNumber.trim()) {
-      setError("請輸入訂單密碼和手機號碼");
-
-      return;
-    }
-
-    if (pickupCode.trim().length !== 4) {
-      setError("訂單密碼必須是4位數");
+    if (!phoneNumber.trim()) {
+      setError("請輸入手機號碼");
 
       return;
     }
@@ -81,17 +73,18 @@ export function OrderLookup() {
           total_amount,
           order_status,
           created_at
-        `,
+        `
         )
-        .eq("pickup_code", pickupCode.trim())
         .eq("pickup_phone", phoneNumber.trim())
         .gte("created_at", twentyFourHoursAgo.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
         .single();
 
       if (queryError) {
         if (queryError.code === "PGRST116") {
           setError(
-            "找不到訂單，請確認訂單密碼和手機號碼是否正確，或訂單可能已超過24小時",
+            "找不到訂單，請確認手機號碼是否正確，或訂單可能已超過24小時"
           );
         } else {
           throw queryError;
@@ -164,16 +157,6 @@ export function OrderLookup() {
             type="tel"
             value={phoneNumber}
             onValueChange={setPhoneNumber}
-          />
-
-          <InputOtp
-            isRequired
-            allowedKeys="^[0-9]*$"
-            aria-label="訂單密碼"
-            description="訂單密碼"
-            length={4}
-            value={pickupCode}
-            onValueChange={setPickupCode}
           />
 
           {error && (

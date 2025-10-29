@@ -17,10 +17,6 @@ export const siteConfig = {
       label: "常見問題",
       href: "/faq",
     },
-    {
-      label: "隱私權政策",
-      href: "/policy",
-    },
   ],
   adminNavItems: [
     {

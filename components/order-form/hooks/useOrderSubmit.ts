@@ -27,10 +27,6 @@ export function useOrderSubmit() {
   const router = useRouter();
   const supabase = createClient();
 
-  const generatePickupCode = () => {
-    return Math.floor(1000 + Math.random() * 9000).toString();
-  };
-
   const uploadImageToStorage = async (image: File): Promise<string | null> => {
     try {
       const fileExt = image.name.split(".").pop();
@@ -76,12 +72,12 @@ export function useOrderSubmit() {
     try {
       // 1. 驗證店家是否仍可接單（包含自動關閉過期店家）
       const storeValidation = await validateAndCloseExpiredStore(
-        params.selectedStore,
+        params.selectedStore
       );
 
       if (!storeValidation.isValid) {
         setSubmitError(
-          storeValidation.message || "店家驗證失敗，請重新選擇店家",
+          storeValidation.message || "店家驗證失敗，請重新選擇店家"
         );
 
         return false;
@@ -96,7 +92,6 @@ export function useOrderSubmit() {
         return false;
       }
 
-      const pickupCode = generatePickupCode();
       let menuImageUrl: string | null = null;
 
       // 如果有上傳圖片，先上傳到 Supabase Storage
@@ -116,7 +111,6 @@ export function useOrderSubmit() {
             : `[校外] ${params.offCampusAddress}`
           : params.selectedPickupLocation,
         pickup_name: params.pickupName,
-        pickup_code: pickupCode,
         pickup_phone: params.phoneNumber,
         menu_items: params.menuItems,
         menu_image_url: menuImageUrl,
@@ -152,7 +146,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?pickupCode=${pickupCode}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`,
+        `/orders/confirmation?phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`
       );
 
       return true;

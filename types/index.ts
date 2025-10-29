@@ -16,7 +16,7 @@ declare global {
         event_label?: string;
         value?: number;
         [key: string]: any;
-      },
+      }
     ) => void;
   }
 }
@@ -28,7 +28,6 @@ export interface Order {
   order_time: string;
   pickup_location: string;
   pickup_name: string;
-  pickup_code: string;
   pickup_phone: string;
   menu_items?: string;
   menu_image_url?: string;

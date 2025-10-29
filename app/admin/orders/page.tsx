@@ -153,7 +153,6 @@ function OrdersContent() {
         (order) =>
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
-          order.pickup_code.toLowerCase().includes(query) ||
           order.pickup_phone.includes(query) ||
           (order.menu_items && order.menu_items.toLowerCase().includes(query))
       );
@@ -370,7 +369,6 @@ function OrdersContent() {
           orderInfo={{
             storeName: selectedOrder.store_name,
             pickupName: selectedOrder.pickup_name,
-            pickupCode: selectedOrder.pickup_code,
           }}
           onOpenChange={onOpenChange}
           onSuccess={handleStatusUpdateSuccess}

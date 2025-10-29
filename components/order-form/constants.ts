@@ -48,4 +48,3 @@ export const initialErrors: ErrorState = {
 };
 
 export const IMAGE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
-export const PICKUP_CODE_LENGTH = 4;

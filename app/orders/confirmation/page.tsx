@@ -11,19 +11,16 @@ function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [orderInfo, setOrderInfo] = useState<{
-    pickupCode: string;
     phoneNumber: string;
     totalAmount: string;
   } | null>(null);
 
   useEffect(() => {
-    const pickupCode = searchParams.get("pickupCode");
     const phoneNumber = searchParams.get("phoneNumber");
     const totalAmount = searchParams.get("totalAmount");
 
-    if (pickupCode && phoneNumber) {
+    if (phoneNumber) {
       setOrderInfo({
-        pickupCode,
         phoneNumber,
         totalAmount: totalAmount || "0",
       });
@@ -65,18 +62,6 @@ function OrderConfirmationContent() {
           <Divider />
           <CardBody className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-                <span className="text-sm font-medium">訂單密碼</span>
-                <Chip
-                  className="text-2xl font-bold px-4 py-2"
-                  color="warning"
-                  size="lg"
-                  variant="flat"
-                >
-                  {orderInfo.pickupCode}
-                </Chip>
-              </div>
-
               <div className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                 <span className="text-sm font-medium">手機號碼</span>
                 <span className="text-lg font-semibold">
@@ -99,7 +84,7 @@ function OrderConfirmationContent() {
               <p className="font-semibold text-warning">💡 重要提示</p>
               <ul className="text-sm space-y-1 text-default-700 dark:text-default-600">
                 <li>• 建議立即截圖保存此頁面</li>
-                <li>• 您可以用「手機 + 訂單密碼」隨時查詢訂單狀態</li>
+                <li>• 您可以用「手機號碼」隨時查詢訂單狀態</li>
                 <li>• 訂單處理中，配送時間請注意LINE社群</li>
               </ul>
             </div>

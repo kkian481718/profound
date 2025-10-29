@@ -101,12 +101,7 @@ export default function OrderContentModal({
                           </span>
                         </div>
                         <Divider />
-                        <div className="flex justify-between">
-                          <span className="text-default-600">訂單密碼:</span>
-                          <span className="font-mono font-bold">
-                            {order.pickup_code}
-                          </span>
-                        </div>
+
                         <div className="flex justify-between">
                           <span className="text-default-600">聯絡電話:</span>
                           <span>{order.pickup_phone}</span>

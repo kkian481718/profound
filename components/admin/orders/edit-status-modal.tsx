@@ -25,7 +25,6 @@ interface EditStatusModalProps {
   orderInfo: {
     storeName: string;
     pickupName: string;
-    pickupCode: string;
   };
 }
 
@@ -126,7 +125,6 @@ export default function EditStatusModal({
                   <div className="space-y-1 text-xs text-default-600">
                     <div>店家：{orderInfo.storeName}</div>
                     <div>社群名稱：{orderInfo.pickupName}</div>
-                    <div>訂單密碼：{orderInfo.pickupCode}</div>
                   </div>
                 </div>
 
@@ -141,7 +139,7 @@ export default function EditStatusModal({
                     selectedKeys={[orderStatus]}
                     onChange={(e) =>
                       setOrderStatus(
-                        e.target.value as "pending" | "preparing" | "completed",
+                        e.target.value as "pending" | "preparing" | "completed"
                       )
                     }
                   >
@@ -248,7 +246,6 @@ export default function EditStatusModal({
                     <div className="space-y-1 text-xs text-danger-600">
                       <div>店家：{orderInfo.storeName}</div>
                       <div>社群名稱：{orderInfo.pickupName}</div>
-                      <div>訂單密碼：{orderInfo.pickupCode}</div>
                     </div>
                   </div>
 
