@@ -16,7 +16,7 @@ export function useStores(providedStores?: StoreOption[]) {
 
       const { data, error } = await supabase
         .from("stores")
-        .select("id, name, order_deadline")
+        .select("id, name, order_deadline, max_daily_orders")
         .eq("is_open", true)
         .order("name");
 
@@ -35,6 +35,7 @@ export function useStores(providedStores?: StoreOption[]) {
           label: store.name,
           value: store.id,
           order_deadline: store.order_deadline,
+          max_daily_orders: store.max_daily_orders,
         }));
 
         setStoresFromDB(formattedStores);

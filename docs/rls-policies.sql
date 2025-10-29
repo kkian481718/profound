@@ -33,17 +33,15 @@ CREATE POLICY "Allow public to insert delivery orders" ON orders
     -- 確保有必要的外送資訊
     pickup_location IS NOT NULL AND
     pickup_name IS NOT NULL AND
-    pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
   );
 
--- 2. 允許所有人透過訂單密碼和手機號碼查詢外送訂單
-CREATE POLICY "Allow public to read delivery orders by code" ON orders
+-- 2. 允許所有人透過手機號碼查詢外送訂單
+CREATE POLICY "Allow public to read delivery orders by phone" ON orders
   FOR SELECT
   TO public
   USING (
-    -- 必須提供訂單密碼和手機號碼
-    pickup_code IS NOT NULL AND 
+    -- 只需要手機號碼
     pickup_phone IS NOT NULL
   );
 
@@ -64,7 +62,6 @@ CREATE POLICY "Allow authenticated users to update orders" ON orders
     -- 更新後仍必須有必要的外送資訊
     pickup_location IS NOT NULL AND
     pickup_name IS NOT NULL AND
-    pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
   );
 
@@ -78,8 +75,8 @@ CREATE POLICY "Allow authenticated users to delete orders" ON orders
 -- 完成!
 -- ============================================
 -- 執行完成後，您的 orders RLS policies 將確保：
--- 1. 所有新訂單都必須有完整的外送資訊
--- 2. 匿名用戶只能查詢有效的訂單
+-- 1. 所有新訂單都必須有完整的外送資訊（不再需要訂單密碼）
+-- 2. 匿名用戶只能透過手機號碼查詢訂單
 -- 3. 管理員可以管理所有訂單
 -- 
 -- stores 的 policies 不需要修改，因為沒有相關變更

@@ -2,6 +2,7 @@ export type StoreOption = {
   label: string;
   value: string;
   order_deadline?: string | null;
+  max_daily_orders?: number | null;
 };
 
 export type ErrorState = {

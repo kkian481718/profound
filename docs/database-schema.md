@@ -47,7 +47,6 @@ CREATE TABLE orders (
   -- 外送訂單欄位
   pickup_location VARCHAR(500) NOT NULL,
   pickup_name VARCHAR(100) NOT NULL,
-  pickup_code VARCHAR(4) NOT NULL,
   pickup_phone VARCHAR(20) NOT NULL,
   menu_items TEXT,
   menu_image_url TEXT,
@@ -66,7 +65,6 @@ CREATE TABLE orders (
     pickup_location IS NOT NULL AND
     store_id IS NOT NULL AND
     pickup_name IS NOT NULL AND
-    pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
   )
 );
@@ -75,7 +73,7 @@ CREATE TABLE orders (
 CREATE INDEX idx_orders_store_id ON orders(store_id);
 CREATE INDEX idx_orders_order_time ON orders(order_time);
 CREATE INDEX idx_orders_order_status ON orders(order_status);
-CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
+CREATE INDEX idx_orders_pickup_phone ON orders(pickup_phone);
 ```
 
 **欄位說明：**
@@ -88,7 +86,6 @@ CREATE INDEX idx_orders_pickup_code ON orders(pickup_code);
 
 - `pickup_location`: 取貨地點（必填）
 - `pickup_name`: 取貨人暱稱（必填）
-- `pickup_code`: 訂單密碼（四碼，必填）
 - `pickup_phone`: 取貨人手機（必填）
 - `menu_items`: 餐點內容描述
 - `menu_image_url`: 菜單圖片 URL
@@ -196,18 +193,24 @@ CREATE POLICY "Allow public to close expired stores" ON stores
   );
 
 -- orders 資料表政策
--- 允許所有人（包括匿名用戶）新增訂單
-CREATE POLICY "Allow public to insert orders" ON orders
+-- 允許所有人（包括匿名用戶）新增外送訂單
+CREATE POLICY "Allow public to insert delivery orders" ON orders
   FOR INSERT
   TO public
-  WITH CHECK (true);
+  WITH CHECK (
+    -- 確保有店家ID
+    store_id IS NOT NULL AND
+    -- 確保有必要的外送資訊
+    pickup_location IS NOT NULL AND
+    pickup_name IS NOT NULL AND
+    pickup_phone IS NOT NULL
+  );
 
--- 允許所有人（包括匿名用戶）透過訂單密碼和手機號碼查詢訂單
-CREATE POLICY "Allow public to read orders by code" ON orders
+-- 允許所有人（包括匿名用戶）透過手機號碼查詢訂單
+CREATE POLICY "Allow public to read orders by phone" ON orders
   FOR SELECT
   TO public
   USING (
-    pickup_code IS NOT NULL AND
     pickup_phone IS NOT NULL
   );
 
@@ -222,7 +225,14 @@ CREATE POLICY "Allow authenticated users to update orders" ON orders
   FOR UPDATE
   TO authenticated
   USING (true)
-  WITH CHECK (true);
+  WITH CHECK (
+    -- 更新後仍必須有店家ID
+    store_id IS NOT NULL AND
+    -- 更新後仍必須有必要的外送資訊
+    pickup_location IS NOT NULL AND
+    pickup_name IS NOT NULL AND
+    pickup_phone IS NOT NULL
+  );
 
 -- global_settings 資料表政策
 -- 允許已驗證用戶查看全域設定
@@ -311,7 +321,6 @@ INSERT INTO orders (
   store_id,
   pickup_location,
   pickup_name,
-  pickup_code,
   pickup_phone,
   menu_items,
   cost,
@@ -323,7 +332,6 @@ INSERT INTO orders (
   '您的-store-id-在這裡',
   '志學車站',
   '王小明',
-  '1234',
   '0912345678',
   '大麥克套餐 x1, 薯條(大) x1',
   150.00,

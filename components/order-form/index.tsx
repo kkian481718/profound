@@ -9,9 +9,11 @@ import { initialErrors } from "./constants";
 import { useStores } from "./hooks/useStores";
 import { useImageUpload } from "./hooks/useImageUpload";
 import { useOrderSubmit } from "./hooks/useOrderSubmit";
+import { useOrderLimits } from "./hooks/useOrderLimits";
 import { validateStore, validateOrderDetails } from "./utils/validation";
 import { StoreSelectionStep } from "./StoreSelectionStep";
 import { OrderDetailsStep } from "./OrderDetailsStep";
+import { GlobalOrderProgress } from "./GlobalOrderProgress";
 
 export function OrderForm({ stores }: OrderFormProps) {
   // Step 管理 - 直接從店家選擇開始
@@ -41,6 +43,11 @@ export function OrderForm({ stores }: OrderFormProps) {
   } = useImageUpload();
   const { isSubmitting, wasSubmitted, submitError, submitOrder } =
     useOrderSubmit();
+  const {
+    globalLimitInfo,
+    isLoading: isLoadingLimits,
+    refetchAll,
+  } = useOrderLimits();
 
   const showOffCampusAddress =
     selectedPickupLocation === "校外" ||
@@ -105,7 +112,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       pickupName,
       selectedPickupLocation,
       offCampusAddress,
-      showOffCampusAddress,
+      showOffCampusAddress
     );
 
     if (!validation.isValid) {
@@ -128,71 +135,93 @@ export function OrderForm({ stores }: OrderFormProps) {
 
     if (success) {
       resetForm();
+      // 重新載入訂單限制資料
+      await refetchAll();
     }
   };
 
   // 渲染對應的 Step - 移除服務類型選擇，直接從店家選擇開始
   if (currentStep === 1) {
     return (
-      <StoreSelectionStep
-        error={errors.store}
-        isLoadingStores={isLoadingStores}
-        selectedStore={selectedStore}
-        showBackButton={false} // 第一步，不顯示返回按鈕
-        storeOptions={storeOptions}
-        onBack={() => {}}
-        onGlobalLimitError={(reason) => {
-          setErrors((prev) => ({ ...prev, store: reason }));
-        }}
-        onNext={handleStep1Next}
-        onRetry={refetchStores}
-        onStoreChange={handleStoreChange}
-      />
+      <div className="w-full max-w-2xl space-y-6">
+        {/* 全域訂單進度條 */}
+        <GlobalOrderProgress
+          limitInfo={globalLimitInfo}
+          isLoading={isLoadingLimits}
+          storeOptions={storeOptions}
+          isLoadingStores={isLoadingStores}
+        />
+
+        <StoreSelectionStep
+          error={errors.store}
+          isLoadingStores={isLoadingStores}
+          selectedStore={selectedStore}
+          showBackButton={false} // 第一步，不顯示返回按鈕
+          storeOptions={storeOptions}
+          onBack={() => {}}
+          onGlobalLimitError={(reason) => {
+            setErrors((prev) => ({ ...prev, store: reason }));
+          }}
+          onNext={handleStep1Next}
+          onRetry={refetchStores}
+          onStoreChange={handleStoreChange}
+        />
+      </div>
     );
   }
 
   return (
-    <OrderDetailsStep
-      cost={cost}
-      errors={{ ...errors, image: imageError }}
-      fileInputRef={fileInputRef}
-      imagePreview={imagePreview}
-      isSubmitting={isSubmitting}
-      menuItems={menuItems}
-      offCampusAddress={offCampusAddress}
-      phoneNumber={phoneNumber}
-      pickupName={pickupName}
-      selectedPickupLocation={selectedPickupLocation}
-      selectedStore={selectedStore}
-      showOffCampusAddress={showOffCampusAddress}
-      storeOptions={storeOptions}
-      submitError={submitError}
-      wasSubmitted={wasSubmitted}
-      onBack={() => setCurrentStep(1)}
-      onCostChange={(value) => {
-        setCost(value);
-        setErrors((prev) => ({ ...prev, cost: "" }));
-      }}
-      onImageChange={handleImageChange}
-      onMenuItemsChange={(value) => {
-        setMenuItems(value);
-        setErrors((prev) => ({ ...prev, menuItems: "" }));
-      }}
-      onOffCampusAddressChange={(value) => {
-        setOffCampusAddress(value);
-        setErrors((prev) => ({ ...prev, address: "" }));
-      }}
-      onPhoneNumberChange={(value) => {
-        setPhoneNumber(value);
-        setErrors((prev) => ({ ...prev, phone: "" }));
-      }}
-      onPickupLocationChange={handlePickupLocationChange}
-      onPickupNameChange={(value) => {
-        setPickupName(value);
-        setErrors((prev) => ({ ...prev, pickupName: "" }));
-      }}
-      onRemoveImage={handleRemoveImage}
-      onSubmit={handleSubmit}
-    />
+    <div className="w-full max-w-2xl space-y-6">
+      {/* 全域訂單進度條 - 在第二步也顯示 */}
+      <GlobalOrderProgress
+        limitInfo={globalLimitInfo}
+        isLoading={isLoadingLimits}
+        storeOptions={storeOptions}
+        isLoadingStores={isLoadingStores}
+      />
+
+      <OrderDetailsStep
+        cost={cost}
+        errors={{ ...errors, image: imageError }}
+        fileInputRef={fileInputRef}
+        imagePreview={imagePreview}
+        isSubmitting={isSubmitting}
+        menuItems={menuItems}
+        offCampusAddress={offCampusAddress}
+        phoneNumber={phoneNumber}
+        pickupName={pickupName}
+        selectedPickupLocation={selectedPickupLocation}
+        selectedStore={selectedStore}
+        showOffCampusAddress={showOffCampusAddress}
+        storeOptions={storeOptions}
+        submitError={submitError}
+        wasSubmitted={wasSubmitted}
+        onBack={() => setCurrentStep(1)}
+        onCostChange={(value) => {
+          setCost(value);
+          setErrors((prev) => ({ ...prev, cost: "" }));
+        }}
+        onImageChange={handleImageChange}
+        onMenuItemsChange={(value) => {
+          setMenuItems(value);
+          setErrors((prev) => ({ ...prev, menuItems: "" }));
+        }}
+        onOffCampusAddressChange={(value) => {
+          setOffCampusAddress(value);
+          setErrors((prev) => ({ ...prev, address: "" }));
+        }}
+        onPhoneNumberChange={(value) => {
+          setPhoneNumber(value);
+          setErrors((prev) => ({ ...prev, phone: "" }));
+        }}
+        onPickupLocationChange={handlePickupLocationChange}
+        onPickupNameChange={(value) => {
+          setPickupName(value);
+          setErrors((prev) => ({ ...prev, pickupName: "" }));
+        }}
+        onRemoveImage={handleRemoveImage}
+        onSubmit={handleSubmit}
+      />
+    </div>
   );
 }
