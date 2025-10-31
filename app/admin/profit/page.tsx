@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { Input } from "@heroui/input";
 
 import { createClient } from "@/lib/supabase/client";
 import ProfitChart from "@/components/admin/profit/profit-chart";
@@ -39,13 +40,18 @@ interface ProfitSummary {
 export default function ProfitPage() {
   const [profitData, setProfitData] = useState<ProfitSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"today" | "week" | "month">(
-    "today",
+  const [timeRange, setTimeRange] = useState<"single" | "week" | "month">(
+    "single",
   );
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+
+    return today.toISOString().split("T")[0];
+  });
 
   useEffect(() => {
     fetchProfitData();
-  }, [timeRange]);
+  }, [timeRange, selectedDate]);
 
   const fetchProfitData = async () => {
     try {
@@ -56,8 +62,15 @@ export default function ProfitPage() {
       const now = new Date();
       let startDate: Date;
 
-      if (timeRange === "today") {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (timeRange === "single") {
+        // 使用選擇的日期
+        const selectedDateObj = new Date(selectedDate);
+
+        startDate = new Date(
+          selectedDateObj.getFullYear(),
+          selectedDateObj.getMonth(),
+          selectedDateObj.getDate(),
+        );
       } else if (timeRange === "week") {
         // 本週（週一到週日）
         const dayOfWeek = now.getDay();
@@ -72,20 +85,34 @@ export default function ProfitPage() {
         startDate.setHours(0, 0, 0, 0);
       }
 
-      const endDate = new Date(now);
+      let endDate: Date;
 
-      if (timeRange === "week") {
-        // 週模式：設定為週日結束時間
-        const dayOfWeek = now.getDay();
-        const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+      if (timeRange === "single") {
+        // 單日模式：設定為選擇日期的結束時間
+        const selectedDateObj = new Date(selectedDate);
 
-        endDate.setDate(now.getDate() + daysToSunday);
-      } else if (timeRange === "month") {
-        // 月模式：設定為月底結束時間
-        endDate.setMonth(now.getMonth() + 1, 0); // 下個月的第0天，即本月最後一天
+        endDate = new Date(
+          selectedDateObj.getFullYear(),
+          selectedDateObj.getMonth(),
+          selectedDateObj.getDate(),
+        );
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        endDate = new Date(now);
+
+        if (timeRange === "week") {
+          // 週模式：設定為週日結束時間
+          const dayOfWeek = now.getDay();
+          const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+          endDate.setDate(now.getDate() + daysToSunday);
+        } else if (timeRange === "month") {
+          // 月模式：設定為月底結束時間
+          endDate.setMonth(now.getMonth() + 1, 0); // 下個月的第0天，即本月最後一天
+        }
+
+        endDate.setHours(23, 59, 59, 999);
       }
-
-      endDate.setHours(23, 59, 59, 999);
 
       // 查詢利潤資料
       const { data: ordersData, error } = await supabase
@@ -284,30 +311,43 @@ export default function ProfitPage() {
     <div className="flex flex-col gap-6 mt-0l">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">利潤分析</h1>
-        <ButtonGroup size="sm">
-          <Button
-            color={timeRange === "today" ? "primary" : "default"}
-            variant={timeRange === "today" ? "solid" : "flat"}
-            onPress={() => setTimeRange("today")}
-          >
-            今日
-          </Button>
-          <Button
-            color={timeRange === "week" ? "primary" : "default"}
-            variant={timeRange === "week" ? "solid" : "flat"}
-            onPress={() => setTimeRange("week")}
-          >
-            本週
-          </Button>
-          <Button
-            color={timeRange === "month" ? "primary" : "default"}
-            variant={timeRange === "month" ? "solid" : "flat"}
-            onPress={() => setTimeRange("month")}
-          >
-            本月
-          </Button>
-        </ButtonGroup>
+        <div className="flex items-center gap-4">
+          <ButtonGroup size="sm">
+            <Button
+              color={timeRange === "single" ? "primary" : "default"}
+              variant={timeRange === "single" ? "solid" : "flat"}
+              onPress={() => setTimeRange("single")}
+            >
+              單日
+            </Button>
+            <Button
+              color={timeRange === "week" ? "primary" : "default"}
+              variant={timeRange === "week" ? "solid" : "flat"}
+              onPress={() => setTimeRange("week")}
+            >
+              本週
+            </Button>
+            <Button
+              color={timeRange === "month" ? "primary" : "default"}
+              variant={timeRange === "month" ? "solid" : "flat"}
+              onPress={() => setTimeRange("month")}
+            >
+              本月
+            </Button>
+          </ButtonGroup>
+        </div>
       </div>
+
+      {timeRange === "single" && (
+        <Input
+          className=""
+          label="選擇日期"
+          size="sm"
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
+      )}
 
       {profitData && (
         <>
@@ -405,8 +445,8 @@ export default function ProfitPage() {
               ) : (
                 <div className="flex items-center justify-center py-12">
                   <p className="text-default-500">
-                    {timeRange === "today"
-                      ? "今日"
+                    {timeRange === "single"
+                      ? "該日"
                       : timeRange === "week"
                         ? "本週"
                         : "本月"}
