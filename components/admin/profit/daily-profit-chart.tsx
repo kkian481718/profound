@@ -36,6 +36,10 @@ export default function DailyProfitChart({
 
     return dataWithProfit.map((item) => ({
       ...item,
+      shippingPercentage:
+        maxProfit > 0 ? (item.total_shipping_fee / maxProfit) * 100 : 0,
+      devFeePercentage:
+        maxProfit > 0 ? (item.total_dev_fee / maxProfit) * 100 : 0,
       profitPercentage:
         maxProfit > 0 ? (item.total_profit / maxProfit) * 100 : 0,
     }));
@@ -55,10 +59,20 @@ export default function DailyProfitChart({
 
   return (
     <div className="space-y-6">
-      {/* 簡單直方圖 */}
-      <div
-        className={`space-y-3 ${timeRange === "month" ? "max-h-96 overflow-y-auto" : ""}`}
-      >
+      {/* 圖例 */}
+      <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-success rounded" />
+          <span>運費</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-warning rounded" />
+          <span>開發費</span>
+        </div>
+      </div>
+
+      {/* 堆疊長條圖 */}
+      <div className="space-y-3">
         {chartData
           .filter(
             (item) =>
@@ -76,34 +90,49 @@ export default function DailyProfitChart({
               </div>
 
               <div className="relative">
-                {/* 簡單長條 */}
-                <div className="w-full h-6 bg-default-100 rounded overflow-hidden">
-                  <div
-                    className="bg-primary h-full flex items-center justify-end pr-2 text-white text-xs font-medium transition-all duration-500"
-                    style={{
-                      width: `${item.profitPercentage}%`,
-                      minWidth: item.total_profit > 0 ? "30px" : "0",
-                    }}
-                  >
-                    {item.profitPercentage > 25 && (
-                      <span>{formatCurrency(item.total_profit)}</span>
-                    )}
+                {/* 堆疊長條圖 */}
+                <div className="w-full h-8 bg-default-100 rounded-lg overflow-hidden">
+                  <div className="h-full flex">
+                    {/* 運費部分 */}
+                    <div
+                      className="bg-success h-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300"
+                      style={{
+                        width: `${item.shippingPercentage}%`,
+                        minWidth: item.total_shipping_fee > 0 ? "20px" : "0",
+                      }}
+                    >
+                      {item.shippingPercentage > 15 && (
+                        <span>NT$ {item.total_shipping_fee}</span>
+                      )}
+                    </div>
+                    {/* 開發費部分 */}
+                    <div
+                      className="bg-warning h-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300"
+                      style={{
+                        width: `${item.devFeePercentage}%`,
+                        minWidth: item.total_dev_fee > 0 ? "20px" : "0",
+                      }}
+                    >
+                      {item.devFeePercentage > 15 && (
+                        <span>NT$ {item.total_dev_fee}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* 顯示金額 */}
-                {item.profitPercentage <= 25 && item.total_profit > 0 && (
-                  <div className="mt-1 text-xs text-default-600 text-right">
-                    {formatCurrency(item.total_profit)}
-                  </div>
-                )}
+                {/* 詳細數據提示 */}
+                <div className="mt-1 flex justify-end text-xs text-default-600">
+                  <span>運費: {formatCurrency(item.total_shipping_fee)}</span>
+                  <span>&nbsp;•&nbsp;</span>
+                  <span>開發費: {formatCurrency(item.total_dev_fee)}</span>
+                </div>
               </div>
             </div>
           ))}
       </div>
 
-      {/* 簡化統計摘要 */}
-      <div className="mt-6 p-3 bg-default-50 rounded-lg">
+      {/* 統計摘要 */}
+      <div className="mt-6 p-4 bg-default-50 rounded-lg">
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-default-600">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+
 import { createClient } from "@/lib/supabase/client";
 
 export interface OrderLimitInfo {
@@ -16,7 +17,7 @@ export interface StoreOrderInfo {
 
 export function useOrderLimits() {
   const [globalLimitInfo, setGlobalLimitInfo] = useState<OrderLimitInfo | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,7 +69,7 @@ export function useOrderLimits() {
         const today = new Date();
         const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
         const endOfDay = new Date(
-          today.setHours(23, 59, 59, 999)
+          today.setHours(23, 59, 59, 999),
         ).toISOString();
 
         // 獲取店家設定
@@ -95,10 +96,11 @@ export function useOrderLimits() {
         };
       } catch (error) {
         console.error("Error fetching store order info:", error);
+
         return null;
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {

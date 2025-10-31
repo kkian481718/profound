@@ -33,7 +33,6 @@ Customer Order → Store Validation → Order Limits Check → Price Calculation
 ### Critical Business Rules
 
 - Store auto-closure when `order_deadline` passes (via `validateStore.ts`)
-- Pickup codes are 4-digit unique identifiers for customer lookup
 - Orders no longer have pickup time, as it will be announced in community channels
 
 ## Component Architecture

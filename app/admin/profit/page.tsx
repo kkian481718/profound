@@ -161,7 +161,8 @@ export default function ProfitPage() {
           const date = new Date(startDate);
 
           date.setDate(startDate.getDate() + i);
-          const dateStr = date.toISOString().split("T")[0];
+          // 使用本地時間格式化日期
+          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
           dailyGroupedData[dateStr] = {
             date: dateStr,
@@ -176,16 +177,16 @@ export default function ProfitPage() {
         // 統計每日數據
         processedData.forEach((order: any) => {
           if (order.order_time) {
-            const orderDate = new Date(order.order_time)
-              .toISOString()
-              .split("T")[0];
+            // 使用本地時間而非 UTC 時間來避免時區問題
+            const orderDate = new Date(order.order_time);
+            const localDateStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${String(orderDate.getDate()).padStart(2, "0")}`;
 
-            if (dailyGroupedData[orderDate]) {
-              dailyGroupedData[orderDate].total_shipping_fee +=
+            if (dailyGroupedData[localDateStr]) {
+              dailyGroupedData[localDateStr].total_shipping_fee +=
                 order.shipping_fee;
-              dailyGroupedData[orderDate].total_dev_fee += order.dev_fee;
-              dailyGroupedData[orderDate].total_amount += order.total_amount;
-              dailyGroupedData[orderDate].order_count += 1;
+              dailyGroupedData[localDateStr].total_dev_fee += order.dev_fee;
+              dailyGroupedData[localDateStr].total_amount += order.total_amount;
+              dailyGroupedData[localDateStr].order_count += 1;
             }
           }
         });
@@ -201,7 +202,8 @@ export default function ProfitPage() {
 
         for (let day = 1; day <= daysInMonth; day++) {
           const date = new Date(year, month, day);
-          const dateStr = date.toISOString().split("T")[0];
+          // 使用本地時間格式化日期
+          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
           const dayName = `${month + 1}/${day}`;
 
           dailyGroupedData[dateStr] = {
@@ -217,16 +219,16 @@ export default function ProfitPage() {
         // 統計每日數據
         processedData.forEach((order: any) => {
           if (order.order_time) {
-            const orderDate = new Date(order.order_time)
-              .toISOString()
-              .split("T")[0];
+            // 使用本地時間而非 UTC 時間來避免時區問題
+            const orderDate = new Date(order.order_time);
+            const localDateStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${String(orderDate.getDate()).padStart(2, "0")}`;
 
-            if (dailyGroupedData[orderDate]) {
-              dailyGroupedData[orderDate].total_shipping_fee +=
+            if (dailyGroupedData[localDateStr]) {
+              dailyGroupedData[localDateStr].total_shipping_fee +=
                 order.shipping_fee;
-              dailyGroupedData[orderDate].total_dev_fee += order.dev_fee;
-              dailyGroupedData[orderDate].total_amount += order.total_amount;
-              dailyGroupedData[orderDate].order_count += 1;
+              dailyGroupedData[localDateStr].total_dev_fee += order.dev_fee;
+              dailyGroupedData[localDateStr].total_amount += order.total_amount;
+              dailyGroupedData[localDateStr].order_count += 1;
             }
           }
         });
@@ -364,7 +366,7 @@ export default function ProfitPage() {
             </Card>
           </div>
 
-          {/* 每日利潤圖表 (週模式和月模式顯示) */}
+          {/* 每日利潤圖表 (週/月) */}
           {(timeRange === "week" || timeRange === "month") &&
             profitData.daily_profit_data && (
               <Card>
@@ -391,10 +393,10 @@ export default function ProfitPage() {
               </Card>
             )}
 
-          {/* 圖表區域 */}
+          {/* 店家利潤圖表 */}
           <Card>
             <CardHeader>
-              <h4 className="text-lg font-semibold">各店家利潤分析</h4>
+              <h4 className="text-lg font-semibold">店家利潤分析</h4>
             </CardHeader>
             <Divider />
             <CardBody>
@@ -415,10 +417,10 @@ export default function ProfitPage() {
             </CardBody>
           </Card>
 
-          {/* 詳細數據表格 */}
+          {/* 店家詳細數據表格 */}
           <Card>
             <CardHeader>
-              <h4 className="text-lg font-semibold">詳細數據</h4>
+              <h4 className="text-lg font-semibold">店家詳細數據</h4>
             </CardHeader>
             <Divider />
             <CardBody>
@@ -426,10 +428,8 @@ export default function ProfitPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-divider">
-                      <th className="text-left py-2 px-2">店家名稱</th>
-                      <th className="text-right py-2 px-2">訂單數</th>
-                      <th className="text-right py-2 px-2">運費</th>
-                      <th className="text-right py-2 px-2">開發費</th>
+                      <th className="text-left py-2 px-2">店家</th>
+                      <th className="text-right py-2 px-2">單</th>
                       <th className="text-right py-2 px-2">總金額</th>
                     </tr>
                   </thead>
@@ -444,12 +444,6 @@ export default function ProfitPage() {
                         </td>
                         <td className="py-2 px-2 text-right">
                           {item.order_count}
-                        </td>
-                        <td className="py-2 px-2 text-right text-success">
-                          {formatCurrency(item.total_shipping_fee)}
-                        </td>
-                        <td className="py-2 px-2 text-right text-warning">
-                          {formatCurrency(item.total_dev_fee)}
                         </td>
                         <td className="py-2 px-2 text-right font-bold">
                           {formatCurrency(item.total_amount)}

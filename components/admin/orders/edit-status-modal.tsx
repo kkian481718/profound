@@ -139,7 +139,7 @@ export default function EditStatusModal({
                     selectedKeys={[orderStatus]}
                     onChange={(e) =>
                       setOrderStatus(
-                        e.target.value as "pending" | "preparing" | "completed"
+                        e.target.value as "pending" | "preparing" | "completed",
                       )
                     }
                   >

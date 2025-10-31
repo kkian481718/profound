@@ -19,7 +19,7 @@ export function StoreInfoDisplay({
   selectedStore,
 }: StoreInfoDisplayProps) {
   const selectedStoreData = storeOptions.find(
-    (store) => store.value === selectedStore
+    (store) => store.value === selectedStore,
   );
 
   if (!selectedStoreData) {
@@ -37,7 +37,7 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
   const { timeLeft, isExpired } = useCountdown(store.order_deadline || null);
   const { fetchStoreOrderInfo } = useOrderLimits();
   const [storeOrderInfo, setStoreOrderInfo] = useState<StoreOrderInfo | null>(
-    null
+    null,
   );
   const [isLoadingOrderInfo, setIsLoadingOrderInfo] = useState(false);
 
@@ -46,6 +46,7 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
       setIsLoadingOrderInfo(true);
       try {
         const orderInfo = await fetchStoreOrderInfo(store.value);
+
         setStoreOrderInfo(orderInfo);
       } catch (error) {
         console.error("Error loading store order info:", error);
@@ -191,10 +192,10 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
 
                 {orderProgress.isOverLimit && (
                   <Chip
+                    className="mt-2"
                     color="danger"
                     size="sm"
                     variant="flat"
-                    className="mt-2"
                   >
                     此店家今日已滿額
                   </Chip>

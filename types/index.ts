@@ -16,7 +16,7 @@ declare global {
         event_label?: string;
         value?: number;
         [key: string]: any;
-      }
+      },
     ) => void;
   }
 }

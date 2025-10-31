@@ -112,7 +112,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       pickupName,
       selectedPickupLocation,
       offCampusAddress,
-      showOffCampusAddress
+      showOffCampusAddress,
     );
 
     if (!validation.isValid) {
@@ -146,10 +146,10 @@ export function OrderForm({ stores }: OrderFormProps) {
       <div className="w-full max-w-2xl space-y-6">
         {/* 全域訂單進度條 */}
         <GlobalOrderProgress
-          limitInfo={globalLimitInfo}
           isLoading={isLoadingLimits}
-          storeOptions={storeOptions}
           isLoadingStores={isLoadingStores}
+          limitInfo={globalLimitInfo}
+          storeOptions={storeOptions}
         />
 
         <StoreSelectionStep
@@ -174,10 +174,10 @@ export function OrderForm({ stores }: OrderFormProps) {
     <div className="w-full max-w-2xl space-y-6">
       {/* 全域訂單進度條 - 在第二步也顯示 */}
       <GlobalOrderProgress
-        limitInfo={globalLimitInfo}
         isLoading={isLoadingLimits}
-        storeOptions={storeOptions}
         isLoadingStores={isLoadingStores}
+        limitInfo={globalLimitInfo}
+        storeOptions={storeOptions}
       />
 
       <OrderDetailsStep

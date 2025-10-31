@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Divider } from "@heroui/divider";
-import { Chip } from "@heroui/chip";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();

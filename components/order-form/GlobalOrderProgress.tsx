@@ -1,9 +1,9 @@
+import type { OrderLimitInfo } from "./hooks/useOrderLimits";
+import type { StoreOption } from "./types";
+
 import { Card, CardBody } from "@heroui/card";
 import { Progress } from "@heroui/progress";
 import { Chip } from "@heroui/chip";
-
-import type { OrderLimitInfo } from "./hooks/useOrderLimits";
-import type { StoreOption } from "./types";
 
 interface GlobalOrderProgressProps {
   limitInfo: OrderLimitInfo | null;
@@ -64,6 +64,7 @@ export function GlobalOrderProgress({
   const getProgressColor = () => {
     if (isOverLimit) return "danger";
     if (isNearLimit) return "warning";
+
     return "success";
   };
 
@@ -82,6 +83,7 @@ export function GlobalOrderProgress({
         </Chip>
       );
     }
+
     return (
       <Chip color="success" size="sm" variant="shadow">
         可接單
@@ -106,7 +108,7 @@ export function GlobalOrderProgress({
         />
 
         {isOverLimit && (
-          <Chip color="danger" size="sm" variant="flat" className="mt-2">
+          <Chip className="mt-2" color="danger" size="sm" variant="flat">
             今日已滿額，請明日再試
           </Chip>
         )}

@@ -72,12 +72,12 @@ export function useOrderSubmit() {
     try {
       // 1. 驗證店家是否仍可接單（包含自動關閉過期店家）
       const storeValidation = await validateAndCloseExpiredStore(
-        params.selectedStore
+        params.selectedStore,
       );
 
       if (!storeValidation.isValid) {
         setSubmitError(
-          storeValidation.message || "店家驗證失敗，請重新選擇店家"
+          storeValidation.message || "店家驗證失敗，請重新選擇店家",
         );
 
         return false;
@@ -146,7 +146,7 @@ export function useOrderSubmit() {
 
       // 導航到訂單確認頁面
       router.push(
-        `/orders/confirmation?phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`
+        `/orders/confirmation?phoneNumber=${encodeURIComponent(params.phoneNumber)}&totalAmount=${pricing.totalAmount.toFixed(0)}`,
       );
 
       return true;

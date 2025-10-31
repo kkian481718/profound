@@ -73,7 +73,7 @@ export function OrderLookup() {
           total_amount,
           order_status,
           created_at
-        `
+        `,
         )
         .eq("pickup_phone", phoneNumber.trim())
         .gte("created_at", twentyFourHoursAgo.toISOString())
@@ -84,7 +84,7 @@ export function OrderLookup() {
       if (queryError) {
         if (queryError.code === "PGRST116") {
           setError(
-            "找不到訂單，請確認手機號碼是否正確，或訂單可能已超過24小時"
+            "找不到訂單，請確認手機號碼是否正確，或訂單可能已超過24小時",
           );
         } else {
           throw queryError;
