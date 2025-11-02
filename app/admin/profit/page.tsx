@@ -41,9 +41,19 @@ export default function ProfitPage() {
   const [profitData, setProfitData] = useState<ProfitSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"single" | "week" | "month">(
-    "single",
+    "single"
   );
   const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+
+    return today.toISOString().split("T")[0];
+  });
+  const [selectedWeekDate, setSelectedWeekDate] = useState(() => {
+    const today = new Date();
+
+    return today.toISOString().split("T")[0];
+  });
+  const [selectedMonthDate, setSelectedMonthDate] = useState(() => {
     const today = new Date();
 
     return today.toISOString().split("T")[0];
@@ -51,7 +61,7 @@ export default function ProfitPage() {
 
   useEffect(() => {
     fetchProfitData();
-  }, [timeRange, selectedDate]);
+  }, [timeRange, selectedDate, selectedWeekDate, selectedMonthDate]);
 
   const fetchProfitData = async () => {
     try {
@@ -59,8 +69,8 @@ export default function ProfitPage() {
       const supabase = createClient();
 
       // 計算日期範圍
-      const now = new Date();
       let startDate: Date;
+      let referenceDate: Date;
 
       if (timeRange === "single") {
         // 使用選擇的日期
@@ -69,20 +79,30 @@ export default function ProfitPage() {
         startDate = new Date(
           selectedDateObj.getFullYear(),
           selectedDateObj.getMonth(),
-          selectedDateObj.getDate(),
+          selectedDateObj.getDate()
         );
+        referenceDate = startDate;
       } else if (timeRange === "week") {
-        // 本週（週一到週日）
-        const dayOfWeek = now.getDay();
+        // 使用選擇的週日期（週一到週日）
+        const selectedDateObj = new Date(selectedWeekDate);
+        const dayOfWeek = selectedDateObj.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-        startDate = new Date(now);
-        startDate.setDate(now.getDate() - daysToMonday);
+        startDate = new Date(selectedDateObj);
+        startDate.setDate(selectedDateObj.getDate() - daysToMonday);
         startDate.setHours(0, 0, 0, 0);
+        referenceDate = selectedDateObj;
       } else {
-        // 本月（月初到月底）
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        // 使用選擇的月份日期（月初到月底）
+        const selectedDateObj = new Date(selectedMonthDate);
+
+        startDate = new Date(
+          selectedDateObj.getFullYear(),
+          selectedDateObj.getMonth(),
+          1
+        );
         startDate.setHours(0, 0, 0, 0);
+        referenceDate = selectedDateObj;
       }
 
       let endDate: Date;
@@ -94,21 +114,21 @@ export default function ProfitPage() {
         endDate = new Date(
           selectedDateObj.getFullYear(),
           selectedDateObj.getMonth(),
-          selectedDateObj.getDate(),
+          selectedDateObj.getDate()
         );
         endDate.setHours(23, 59, 59, 999);
       } else {
-        endDate = new Date(now);
+        endDate = new Date(referenceDate);
 
         if (timeRange === "week") {
           // 週模式：設定為週日結束時間
-          const dayOfWeek = now.getDay();
+          const dayOfWeek = referenceDate.getDay();
           const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
 
-          endDate.setDate(now.getDate() + daysToSunday);
+          endDate.setDate(referenceDate.getDate() + daysToSunday);
         } else if (timeRange === "month") {
           // 月模式：設定為月底結束時間
-          endDate.setMonth(now.getMonth() + 1, 0); // 下個月的第0天，即本月最後一天
+          endDate.setMonth(referenceDate.getMonth() + 1, 0); // 下個月的第0天，即本月最後一天
         }
 
         endDate.setHours(23, 59, 59, 999);
@@ -127,7 +147,7 @@ export default function ProfitPage() {
           stores (
             name
           )
-        `,
+        `
         )
         .gte("order_time", startDate.toISOString())
         .lte("order_time", endDate.toISOString())
@@ -223,8 +243,8 @@ export default function ProfitPage() {
         const dailyGroupedData: Record<string, DailyProfitData> = {};
 
         // 初始化本月每一天的數據
-        const year = now.getFullYear();
-        const month = now.getMonth();
+        const year = referenceDate.getFullYear();
+        const month = referenceDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
         for (let day = 1; day <= daysInMonth; day++) {
@@ -266,22 +286,22 @@ export default function ProfitPage() {
       const summary: ProfitSummary = {
         total_shipping_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_shipping_fee,
-          0,
+          0
         ),
         total_dev_fee: profitDataArray.reduce(
           (sum, item) => sum + item.total_dev_fee,
-          0,
+          0
         ),
         total_amount: profitDataArray.reduce(
           (sum, item) => sum + item.total_amount,
-          0,
+          0
         ),
         total_orders: profitDataArray.reduce(
           (sum, item) => sum + item.order_count,
-          0,
+          0
         ),
         profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount,
+          (a, b) => b.total_amount - a.total_amount
         ),
         daily_profit_data: dailyProfitData,
       };
@@ -299,6 +319,34 @@ export default function ProfitPage() {
     return `NT$ ${amount.toLocaleString()}`;
   };
 
+  const getDateRangeDisplay = () => {
+    if (timeRange === "single") {
+      return null;
+    } else if (timeRange === "week") {
+      const selectedDateObj = new Date(selectedWeekDate);
+      const dayOfWeek = selectedDateObj.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+      const monday = new Date(selectedDateObj);
+
+      monday.setDate(selectedDateObj.getDate() - daysToMonday);
+
+      const sunday = new Date(monday);
+
+      sunday.setDate(monday.getDate() + 6);
+
+      const formatDate = (date: Date) => {
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+      };
+
+      return `${formatDate(monday)}~${formatDate(sunday)}`;
+    } else {
+      const selectedDateObj = new Date(selectedMonthDate);
+
+      return `${selectedDateObj.getFullYear()} ${selectedDateObj.getMonth() + 1}月`;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -310,7 +358,14 @@ export default function ProfitPage() {
   return (
     <div className="flex flex-col gap-6 mt-0l">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">利潤分析</h1>
+        <div>
+          <h1 className="text-3xl font-bold">利潤分析</h1>
+          {getDateRangeDisplay() && (
+            <p className="text-sm text-default-500 mt-1">
+              {getDateRangeDisplay()}
+            </p>
+          )}
+        </div>
         <div className="flex items-center gap-4">
           <ButtonGroup size="sm">
             <Button
@@ -346,6 +401,28 @@ export default function ProfitPage() {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
+        />
+      )}
+
+      {timeRange === "week" && (
+        <Input
+          className=""
+          label="選擇週內任一日期"
+          size="sm"
+          type="date"
+          value={selectedWeekDate}
+          onChange={(e) => setSelectedWeekDate(e.target.value)}
+        />
+      )}
+
+      {timeRange === "month" && (
+        <Input
+          className=""
+          label="選擇月份"
+          size="sm"
+          type="month"
+          value={selectedMonthDate.substring(0, 7)}
+          onChange={(e) => setSelectedMonthDate(e.target.value + "-01")}
         />
       )}
 
@@ -416,7 +493,7 @@ export default function ProfitPage() {
                 <Divider />
                 <CardBody>
                   {profitData.daily_profit_data.some(
-                    (day) => day.order_count > 0,
+                    (day) => day.order_count > 0
                   ) ? (
                     <DailyProfitChart
                       data={profitData.daily_profit_data}
