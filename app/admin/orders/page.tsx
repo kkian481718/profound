@@ -40,6 +40,9 @@ function OrdersContent() {
     useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"table" | "card">("card");
+  const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">(
+    "order_time"
+  );
   const itemsPerPage = 15;
 
   const router = useRouter();
@@ -72,6 +75,7 @@ function OrdersContent() {
     filterDateFrom,
     filterDateTo,
     showTodayOnly,
+    sortBy,
   ]);
 
   const fetchData = async () => {
@@ -95,7 +99,7 @@ function OrdersContent() {
           stores (
             name
           )
-        `,
+        `
         )
         .order("order_time", { ascending: false });
 
@@ -126,7 +130,7 @@ function OrdersContent() {
       const todayStart = new Date(
         today.getFullYear(),
         today.getMonth(),
-        today.getDate(),
+        today.getDate()
       );
       const todayEnd = new Date(
         today.getFullYear(),
@@ -135,7 +139,7 @@ function OrdersContent() {
         23,
         59,
         59,
-        999,
+        999
       );
 
       filtered = filtered.filter((order) => {
@@ -154,7 +158,7 @@ function OrdersContent() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_phone.includes(query) ||
-          (order.menu_items && order.menu_items.toLowerCase().includes(query)),
+          (order.menu_items && order.menu_items.toLowerCase().includes(query))
       );
     }
 
@@ -166,7 +170,7 @@ function OrdersContent() {
     // 訂單狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.order_status === filterDelivery,
+        (order) => order.order_status === filterDelivery
       );
     }
 
@@ -179,7 +183,7 @@ function OrdersContent() {
             loc.value !== "校外" &&
             loc.value !== "校內教學區" &&
             loc.value !== "新宿" &&
-            loc.value !== "舊宿",
+            loc.value !== "舊宿"
         )
         .map((loc) => loc.value);
 
@@ -189,27 +193,27 @@ function OrdersContent() {
           (order) =>
             order.pickup_location.startsWith("[校外]") ||
             (!dormLocations.includes(order.pickup_location) &&
-              !order.pickup_location.startsWith("[校內教學區]")),
+              !order.pickup_location.startsWith("[校內教學區]"))
         );
       } else if (filterLocation === "校內教學區") {
         // 過濾出校內教學區地址：以 [校內教學區] 開頭的地址
         filtered = filtered.filter((order) =>
-          order.pickup_location.startsWith("[校內教學區]"),
+          order.pickup_location.startsWith("[校內教學區]")
         );
       } else if (filterLocation === "新宿") {
         // 過濾出新宿地址：沁月、迎曦、行雲
         filtered = filtered.filter((order) =>
-          newDormitories.includes(order.pickup_location as any),
+          newDormitories.includes(order.pickup_location as any)
         );
       } else if (filterLocation === "舊宿") {
         // 過濾出舊宿地址：向晴、仰山、涵星、擷雲
         filtered = filtered.filter((order) =>
-          oldDormitories.includes(order.pickup_location as any),
+          oldDormitories.includes(order.pickup_location as any)
         );
       } else {
         // 過濾出指定宿舍：不包含前綴標識的宿舍名稱
         filtered = filtered.filter(
-          (order) => order.pickup_location === filterLocation,
+          (order) => order.pickup_location === filterLocation
         );
       }
     }
@@ -219,7 +223,7 @@ function OrdersContent() {
       const fromDate = new Date(filterDateFrom);
 
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate,
+        (order) => new Date(order.order_time) >= fromDate
       );
     }
 
@@ -228,8 +232,23 @@ function OrdersContent() {
 
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate,
+        (order) => new Date(order.order_time) <= toDate
       );
+    }
+
+    // 排序
+    if (sortBy === "order_time") {
+      // 依照下單時間排序（最新到最舊）
+      filtered.sort((a, b) => {
+        return (
+          new Date(b.order_time).getTime() - new Date(a.order_time).getTime()
+        );
+      });
+    } else if (sortBy === "pickup_location") {
+      // 依照取貨地點排序（字母順序）
+      filtered.sort((a, b) => {
+        return a.pickup_location.localeCompare(b.pickup_location, "zh-TW");
+      });
     }
 
     setFilteredOrders(filtered);
@@ -243,6 +262,7 @@ function OrdersContent() {
     setFilterDateFrom("");
     setFilterDateTo("");
     setShowTodayOnly(true);
+    setSortBy("order_time");
     router.push("/admin/orders");
   };
 
@@ -310,6 +330,7 @@ function OrdersContent() {
         searchQuery={searchQuery}
         showAdvancedFilters={showAdvancedFilters}
         showTodayOnly={showTodayOnly}
+        sortBy={sortBy}
         stores={stores}
         totalOrders={orders.length}
         onClearFilters={clearFilters}
@@ -320,6 +341,7 @@ function OrdersContent() {
         onFilterStoreChange={setFilterStore}
         onSearchQueryChange={setSearchQuery}
         onShowTodayOnlyChange={setShowTodayOnly}
+        onSortByChange={setSortBy}
         onToggleAdvancedFilters={() =>
           setShowAdvancedFilters(!showAdvancedFilters)
         }

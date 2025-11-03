@@ -20,6 +20,7 @@ interface OrderFiltersProps {
   totalOrders: number;
   filteredOrdersCount: number;
   showTodayOnly: boolean;
+  sortBy: "order_time" | "pickup_location";
   onSearchQueryChange: (value: string) => void;
   onFilterStoreChange: (value: string) => void;
   onFilterDeliveryChange: (value: string) => void;
@@ -29,6 +30,7 @@ interface OrderFiltersProps {
   onToggleAdvancedFilters: () => void;
   onClearFilters: () => void;
   onShowTodayOnlyChange: (value: boolean) => void;
+  onSortByChange: (value: "order_time" | "pickup_location") => void;
 }
 
 export default function OrderFilters({
@@ -43,6 +45,7 @@ export default function OrderFilters({
   totalOrders,
   filteredOrdersCount,
   showTodayOnly,
+  sortBy,
   onSearchQueryChange,
   onFilterStoreChange,
   onFilterDeliveryChange,
@@ -52,6 +55,7 @@ export default function OrderFilters({
   onToggleAdvancedFilters,
   onClearFilters,
   onShowTodayOnlyChange,
+  onSortByChange,
 }: OrderFiltersProps) {
   const hasActiveFilters =
     filterStore ||
@@ -85,6 +89,18 @@ export default function OrderFilters({
             {adminPickupLocations.map((location) => (
               <SelectItem key={location.value}>{location.label}</SelectItem>
             ))}
+          </Select>
+
+          <Select
+            className="md:w-48"
+            label="排序方式"
+            selectedKeys={[sortBy]}
+            onChange={(e) =>
+              onSortByChange(e.target.value as "order_time" | "pickup_location")
+            }
+          >
+            <SelectItem key="order_time">下單時間</SelectItem>
+            <SelectItem key="pickup_location">取貨地點</SelectItem>
           </Select>
         </div>
 
