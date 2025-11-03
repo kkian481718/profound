@@ -245,9 +245,29 @@ function OrdersContent() {
         );
       });
     } else if (sortBy === "pickup_location") {
-      // 依照取貨地點排序（字母順序）
+      // 依照取貨地點排序（新宿、舊宿分組）
       filtered.sort((a, b) => {
-        return a.pickup_location.localeCompare(b.pickup_location, "zh-TW");
+        const getLocationOrder = (location: string) => {
+          // 校外地址
+          if (location.startsWith("[校外]")) return 0;
+          // 校內教學區
+          if (location.startsWith("[校內教學區]")) return 1;
+          // 新宿（沁月、迎曦、行雲）
+          if (newDormitories.includes(location as any)) {
+            return 2 + newDormitories.indexOf(location as any) * 0.1;
+          }
+          // 舊宿（向晴、仰山、涵星、擷雲）
+          if (oldDormitories.includes(location as any)) {
+            return 3 + oldDormitories.indexOf(location as any) * 0.1;
+          }
+          // 其他（兜底）
+          return 999;
+        };
+
+        const orderA = getLocationOrder(a.pickup_location);
+        const orderB = getLocationOrder(b.pickup_location);
+
+        return orderA - orderB;
       });
     }
 
