@@ -31,9 +31,6 @@ function OrdersContent() {
   const [filterStore, setFilterStore] = useState("");
   const [filterDelivery, setFilterDelivery] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
-  const [filterDateFrom, setFilterDateFrom] = useState("");
-  const [filterDateTo, setFilterDateTo] = useState("");
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showTodayOnly, setShowTodayOnly] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedOrderForContent, setSelectedOrderForContent] =
@@ -41,7 +38,7 @@ function OrdersContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"table" | "card">("card");
   const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">(
-    "order_time"
+    "order_time",
   );
   const itemsPerPage = 15;
 
@@ -65,15 +62,13 @@ function OrdersContent() {
 
   useEffect(() => {
     applyFilters();
-    setCurrentPage(1); // 當篩選條件改變時，重置到第一頁
+    setCurrentPage(1); // 當篩選條件改變時,重置到第一頁
   }, [
     orders,
     searchQuery,
     filterStore,
     filterDelivery,
     filterLocation,
-    filterDateFrom,
-    filterDateTo,
     showTodayOnly,
     sortBy,
   ]);
@@ -99,7 +94,7 @@ function OrdersContent() {
           stores (
             name
           )
-        `
+        `,
         )
         .order("order_time", { ascending: false });
 
@@ -130,7 +125,7 @@ function OrdersContent() {
       const todayStart = new Date(
         today.getFullYear(),
         today.getMonth(),
-        today.getDate()
+        today.getDate(),
       );
       const todayEnd = new Date(
         today.getFullYear(),
@@ -139,7 +134,7 @@ function OrdersContent() {
         23,
         59,
         59,
-        999
+        999,
       );
 
       filtered = filtered.filter((order) => {
@@ -158,7 +153,7 @@ function OrdersContent() {
           order.store_name.toLowerCase().includes(query) ||
           order.pickup_name.toLowerCase().includes(query) ||
           order.pickup_phone.includes(query) ||
-          (order.menu_items && order.menu_items.toLowerCase().includes(query))
+          (order.menu_items && order.menu_items.toLowerCase().includes(query)),
       );
     }
 
@@ -170,7 +165,7 @@ function OrdersContent() {
     // 訂單狀態過濾
     if (filterDelivery) {
       filtered = filtered.filter(
-        (order) => order.order_status === filterDelivery
+        (order) => order.order_status === filterDelivery,
       );
     }
 
@@ -183,7 +178,7 @@ function OrdersContent() {
             loc.value !== "校外" &&
             loc.value !== "校內教學區" &&
             loc.value !== "新宿" &&
-            loc.value !== "舊宿"
+            loc.value !== "舊宿",
         )
         .map((loc) => loc.value);
 
@@ -193,47 +188,29 @@ function OrdersContent() {
           (order) =>
             order.pickup_location.startsWith("[校外]") ||
             (!dormLocations.includes(order.pickup_location) &&
-              !order.pickup_location.startsWith("[校內教學區]"))
+              !order.pickup_location.startsWith("[校內教學區]")),
         );
       } else if (filterLocation === "校內教學區") {
         // 過濾出校內教學區地址：以 [校內教學區] 開頭的地址
         filtered = filtered.filter((order) =>
-          order.pickup_location.startsWith("[校內教學區]")
+          order.pickup_location.startsWith("[校內教學區]"),
         );
       } else if (filterLocation === "新宿") {
         // 過濾出新宿地址：沁月、迎曦、行雲
         filtered = filtered.filter((order) =>
-          newDormitories.includes(order.pickup_location as any)
+          newDormitories.includes(order.pickup_location as any),
         );
       } else if (filterLocation === "舊宿") {
         // 過濾出舊宿地址：向晴、仰山、涵星、擷雲
         filtered = filtered.filter((order) =>
-          oldDormitories.includes(order.pickup_location as any)
+          oldDormitories.includes(order.pickup_location as any),
         );
       } else {
         // 過濾出指定宿舍：不包含前綴標識的宿舍名稱
         filtered = filtered.filter(
-          (order) => order.pickup_location === filterLocation
+          (order) => order.pickup_location === filterLocation,
         );
       }
-    }
-
-    // 日期範圍過濾
-    if (filterDateFrom) {
-      const fromDate = new Date(filterDateFrom);
-
-      filtered = filtered.filter(
-        (order) => new Date(order.order_time) >= fromDate
-      );
-    }
-
-    if (filterDateTo) {
-      const toDate = new Date(filterDateTo);
-
-      toDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(
-        (order) => new Date(order.order_time) <= toDate
-      );
     }
 
     // 排序
@@ -260,6 +237,7 @@ function OrdersContent() {
           if (oldDormitories.includes(location as any)) {
             return 3 + oldDormitories.indexOf(location as any) * 0.1;
           }
+
           // 其他（兜底）
           return 999;
         };
@@ -279,8 +257,6 @@ function OrdersContent() {
     setFilterStore("");
     setFilterDelivery("");
     setFilterLocation("");
-    setFilterDateFrom("");
-    setFilterDateTo("");
     setShowTodayOnly(true);
     setSortBy("order_time");
     router.push("/admin/orders");
@@ -341,30 +317,22 @@ function OrdersContent() {
       </div>
 
       <OrderFilters
-        filterDateFrom={filterDateFrom}
-        filterDateTo={filterDateTo}
         filterDelivery={filterDelivery}
         filterLocation={filterLocation}
         filterStore={filterStore}
         filteredOrdersCount={filteredOrders.length}
         searchQuery={searchQuery}
-        showAdvancedFilters={showAdvancedFilters}
         showTodayOnly={showTodayOnly}
         sortBy={sortBy}
         stores={stores}
         totalOrders={orders.length}
         onClearFilters={clearFilters}
-        onFilterDateFromChange={setFilterDateFrom}
-        onFilterDateToChange={setFilterDateTo}
         onFilterDeliveryChange={setFilterDelivery}
         onFilterLocationChange={setFilterLocation}
         onFilterStoreChange={setFilterStore}
         onSearchQueryChange={setSearchQuery}
         onShowTodayOnlyChange={setShowTodayOnly}
         onSortByChange={setSortBy}
-        onToggleAdvancedFilters={() =>
-          setShowAdvancedFilters(!showAdvancedFilters)
-        }
       />
 
       {filteredOrders.length > 0 && totalPages > 1 && (

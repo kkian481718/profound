@@ -3,6 +3,7 @@
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
+import { Snippet } from "@heroui/snippet";
 
 import { LocationIcon, PhoneIcon, UserIcon } from "@/components/icons";
 import { Order } from "@/types";
@@ -78,12 +79,21 @@ export default function OrderCard({
       </CardHeader>
       <CardBody className="pt-2 flex flex-col gap-2">
         <div className="space-y-1">
-          <div className="flex items-center gap-1.5">
-            <UserIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-            <span className="text-xs md:text-sm font-medium truncate">
-              {order.pickup_name}
-            </span>
-          </div>
+          <Snippet
+            hideSymbol
+            classNames={{
+              base: "bg-transparent p-0 gap-1.5",
+              pre: "text-xs md:text-sm font-medium",
+              copyButton: "min-w-6 w-6 h-6",
+            }}
+            size="sm"
+            variant="flat"
+          >
+            <div className="flex items-center gap-1.5">
+              <UserIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
+              <span>{order.pickup_name}</span>
+            </div>
+          </Snippet>
           <div className="flex items-center gap-1.5">
             <PhoneIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
             <span className="text-xs text-default-500 truncate">
