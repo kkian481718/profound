@@ -56,7 +56,6 @@ export function GlobalOrderProgress({
 
   const { globalLimit, globalCount } = limitInfo;
   const percentage = Math.min((globalCount / globalLimit) * 100, 100);
-  const remaining = Math.max(0, globalLimit - globalCount);
   const isNearLimit = globalCount >= globalLimit * 0.8;
   const isOverLimit = globalCount >= globalLimit;
 

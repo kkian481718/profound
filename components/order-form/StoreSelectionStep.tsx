@@ -44,8 +44,6 @@ export function StoreSelectionStep({
   const [globalLimitCheck, setGlobalLimitCheck] =
     useState<OrderLimitCheck | null>(null);
   const [isCheckingGlobalLimits, setIsCheckingGlobalLimits] = useState(false);
-  const [storeLimitCheck, setStoreLimitCheck] =
-    useState<OrderLimitCheck | null>(null);
   const [isCheckingStoreLimits, setIsCheckingStoreLimits] = useState(false);
 
   // 檢查全站訂單限制
@@ -58,8 +56,7 @@ export function StoreSelectionStep({
         .then((limitCheck) => {
           setGlobalLimitCheck(limitCheck);
         })
-        .catch((err) => {
-          console.error("Error checking global order limits:", err);
+        .catch(() => {
           setGlobalLimitCheck({ canOrder: true });
         })
         .finally(() => {
@@ -85,8 +82,6 @@ export function StoreSelectionStep({
     try {
       const limitCheck = await checkOrderLimits(selectedStore);
 
-      setStoreLimitCheck(limitCheck);
-
       if (!limitCheck.canOrder) {
         onGlobalLimitError?.(limitCheck.reason || "無法下單");
 
@@ -95,8 +90,7 @@ export function StoreSelectionStep({
 
       // 所有檢查都通過，繼續下一步
       onNext();
-    } catch (err) {
-      console.error("Error checking store order limits:", err);
+    } catch {
       // 如果檢查失敗，允許繼續但記錄錯誤
       onNext();
     } finally {

@@ -48,8 +48,8 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
         const orderInfo = await fetchStoreOrderInfo(store.value);
 
         setStoreOrderInfo(orderInfo);
-      } catch (error) {
-        console.error("Error loading store order info:", error);
+      } catch {
+        // Error is handled by setting loading to false
       } finally {
         setIsLoadingOrderInfo(false);
       }

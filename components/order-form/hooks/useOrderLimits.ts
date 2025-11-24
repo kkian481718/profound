@@ -51,8 +51,7 @@ export function useOrderLimits() {
         globalLimit,
         globalCount: globalCount || 0,
       });
-    } catch (error) {
-      console.error("Error fetching global limit info:", error);
+    } catch {
       setGlobalLimitInfo({
         globalLimit: null,
         globalCount: 0,
@@ -94,9 +93,7 @@ export function useOrderLimits() {
           storeCount: storeCount || 0,
           storeLimit,
         };
-      } catch (error) {
-        console.error("Error fetching store order info:", error);
-
+      } catch {
         return null;
       }
     },

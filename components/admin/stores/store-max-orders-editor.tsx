@@ -43,8 +43,7 @@ export default function StoreMaxOrdersEditor({
       if (error) throw error;
 
       onSuccess();
-    } catch (err) {
-      console.error("Failed to update store max orders:", err);
+    } catch {
       alert("更新失敗，請稍後再試");
     } finally {
       setIsSaving(false);
@@ -66,8 +65,7 @@ export default function StoreMaxOrdersEditor({
       if (error) throw error;
 
       onSuccess();
-    } catch (err) {
-      console.error("Failed to clear store max orders:", err);
+    } catch {
       alert("清除失敗，請稍後再試");
     } finally {
       setIsSaving(false);

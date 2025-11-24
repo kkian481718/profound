@@ -51,8 +51,8 @@ export default function GlobalMaxOrdersSetting({
       if (data) {
         setMaxOrders(data.setting_value || "100");
       }
-    } catch (err) {
-      console.error("Failed to fetch global setting:", err);
+    } catch {
+      // Error is handled by setting loading to false
     } finally {
       setIsLoading(false);
     }
@@ -73,8 +73,8 @@ export default function GlobalMaxOrdersSetting({
 
       if (error) throw error;
       setTodayOrderCount(count || 0);
-    } catch (err) {
-      console.error("Failed to fetch today's order count:", err);
+    } catch {
+      // Error is handled silently, count remains 0
     }
   };
 
@@ -112,8 +112,7 @@ export default function GlobalMaxOrdersSetting({
           color: "success",
         });
         onSuccess?.();
-      } catch (err) {
-        console.error("Failed to save global setting:", err);
+      } catch {
         addToast({
           title: "儲存失敗",
           description: "請稍後再試",

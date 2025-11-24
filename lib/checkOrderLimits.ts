@@ -76,9 +76,7 @@ export async function checkOrderLimits(
     }
 
     return { canOrder: true };
-  } catch (error) {
-    console.error("Error checking order limits:", error);
-
+  } catch {
     // 如果檢查失敗，允許下單但記錄錯誤
     return { canOrder: true };
   }
@@ -124,9 +122,7 @@ export async function checkGlobalOrderLimit(): Promise<OrderLimitCheck> {
     }
 
     return { canOrder: true, globalLimit, globalCount: globalCount || 0 };
-  } catch (error) {
-    console.error("Error checking global order limit:", error);
-
+  } catch {
     // 如果檢查失敗，允許下單但記錄錯誤
     return { canOrder: true };
   }
@@ -163,9 +159,7 @@ export async function getOrderCounts(storeId?: string) {
       globalCount: globalCount || 0,
       storeCount: storeCount || 0,
     };
-  } catch (error) {
-    console.error("Error getting order counts:", error);
-
+  } catch {
     return {
       globalCount: 0,
       storeCount: 0,
