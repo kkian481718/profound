@@ -1,4 +1,5 @@
 import { Card, CardBody } from "@heroui/card";
+
 import { Order } from "@/types";
 
 interface OrderStatsCardsProps {
@@ -12,7 +13,7 @@ export default function OrderStatsCards({ orders }: OrderStatsCardsProps) {
     const todayStart = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
     const todayEnd = new Date(
       today.getFullYear(),
@@ -21,12 +22,13 @@ export default function OrderStatsCards({ orders }: OrderStatsCardsProps) {
       23,
       59,
       59,
-      999
+      999,
     );
 
     const calculateStats = (status: "pending" | "preparing") => {
       const filteredOrders = orders.filter((order) => {
         const orderDate = new Date(order.order_time);
+
         return (
           orderDate >= todayStart &&
           orderDate <= todayEnd &&
@@ -38,19 +40,19 @@ export default function OrderStatsCards({ orders }: OrderStatsCardsProps) {
         count: filteredOrders.length,
         totalAmount: filteredOrders.reduce(
           (sum, order) => sum + (order.total_amount || 0),
-          0
+          0,
         ),
         totalCost: filteredOrders.reduce(
           (sum, order) => sum + (order.cost || 0),
-          0
+          0,
         ),
         totalShipping: filteredOrders.reduce(
           (sum, order) => sum + (order.shipping_fee || 0),
-          0
+          0,
         ),
         totalDevFee: filteredOrders.reduce(
           (sum, order) => sum + (order.dev_fee || 0),
-          0
+          0,
         ),
       };
     };
