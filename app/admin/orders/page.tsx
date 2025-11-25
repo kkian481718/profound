@@ -11,7 +11,6 @@ import { Pagination } from "@heroui/pagination";
 import { createClient } from "@/lib/supabase/client";
 import EditStatusModal from "@/components/admin/orders/edit-status-modal";
 import OrderFilters from "@/components/admin/orders/order-filters";
-import OrderList from "@/components/admin/orders/order-list";
 import OrderCard from "@/components/admin/orders/order-card";
 import OrderContentModal from "@/components/admin/orders/order-content-modal";
 import OrderStatsCards from "@/components/admin/orders/order-stats-cards";
@@ -20,7 +19,7 @@ import {
   newDormitories,
   oldDormitories,
 } from "@/components/order-form/constants";
-import { GridIcon, TableIcon } from "@/components/icons";
+import { GridIcon, ListIcon } from "@/components/icons";
 import { Order } from "@/types";
 
 function OrdersContent() {
@@ -37,7 +36,7 @@ function OrdersContent() {
   const [selectedOrderForContent, setSelectedOrderForContent] =
     useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<"table" | "card">("card");
+  const [viewMode, setViewMode] = useState<"detailed" | "summary">("summary");
   const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">(
     "order_time",
   );
@@ -299,20 +298,20 @@ function OrdersContent() {
         </div>
         <ButtonGroup>
           <Button
-            color={viewMode === "table" ? "primary" : "default"}
-            variant={viewMode === "table" ? "solid" : "flat"}
-            onPress={() => setViewMode("table")}
-          >
-            <TableIcon className="w-5 h-5" />
-            列表
-          </Button>
-          <Button
-            color={viewMode === "card" ? "primary" : "default"}
-            variant={viewMode === "card" ? "solid" : "flat"}
-            onPress={() => setViewMode("card")}
+            color={viewMode === "detailed" ? "primary" : "default"}
+            variant={viewMode === "detailed" ? "solid" : "flat"}
+            onPress={() => setViewMode("detailed")}
           >
             <GridIcon className="w-5 h-5" />
-            卡片
+            詳細
+          </Button>
+          <Button
+            color={viewMode === "summary" ? "primary" : "default"}
+            variant={viewMode === "summary" ? "solid" : "flat"}
+            onPress={() => setViewMode("summary")}
+          >
+            <ListIcon className="w-5 h-5" />
+            摘要
           </Button>
         </ButtonGroup>
       </div>
@@ -356,19 +355,15 @@ function OrdersContent() {
             <p className="text-default-500">無符合條件的訂單</p>
           </CardBody>
         </Card>
-      ) : viewMode === "table" ? (
-        <OrderList
-          orders={paginatedOrders}
-          onEditOrder={handleEditOrder}
-          onViewContent={handleViewContent}
-        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {paginatedOrders.map((order) => (
             <OrderCard
               key={order.id}
+              isDetailed={viewMode === "detailed"}
               order={order}
               onEdit={handleEditOrder}
+              onStatusChange={handleStatusUpdateSuccess}
               onViewContent={handleViewContent}
             />
           ))}
