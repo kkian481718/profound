@@ -89,17 +89,6 @@ export default function OrderFilters({
           </Select>
 
           <Select
-            label="排序方式"
-            selectedKeys={[sortBy]}
-            onChange={(e) =>
-              onSortByChange(e.target.value as "order_time" | "pickup_location")
-            }
-          >
-            <SelectItem key="order_time">下單時間</SelectItem>
-            <SelectItem key="pickup_location">取貨地點</SelectItem>
-          </Select>
-
-          <Select
             label="店家"
             placeholder="選擇店家"
             selectedKeys={filterStore ? [filterStore] : []}
@@ -110,16 +99,79 @@ export default function OrderFilters({
             ))}
           </Select>
 
-          <Select
-            label="訂單狀態"
-            placeholder="選擇訂單狀態"
-            selectedKeys={filterDelivery ? [filterDelivery] : []}
-            onChange={(e) => onFilterDeliveryChange(e.target.value)}
-          >
-            <SelectItem key="pending">待處理</SelectItem>
-            <SelectItem key="preparing">準備中</SelectItem>
-            <SelectItem key="completed">已完成</SelectItem>
-          </Select>
+          {/* 排序方式 - 分段控制器樣式 */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-default-600">排序方式</span>
+            <div className="flex items-center gap-1 p-1 bg-default-100 rounded-lg h-10">
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  sortBy === "order_time"
+                    ? "bg-white dark:bg-default-50 shadow-sm text-default-700"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onSortByChange("order_time")}
+              >
+                下單時間
+              </button>
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  sortBy === "pickup_location"
+                    ? "bg-white dark:bg-default-50 shadow-sm text-default-700"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onSortByChange("pickup_location")}
+              >
+                取貨地點
+              </button>
+            </div>
+          </div>
+
+          {/* 訂單狀態 - 分段控制器樣式 */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-default-600">訂單狀態</span>
+            <div className="flex items-center gap-1 p-1 bg-default-100 rounded-lg h-10">
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  filterDelivery === ""
+                    ? "bg-white dark:bg-default-50 shadow-sm text-default-700"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onFilterDeliveryChange("")}
+              >
+                全部
+              </button>
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  filterDelivery === "pending"
+                    ? "bg-white dark:bg-default-50 shadow-sm text-default-700"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onFilterDeliveryChange("pending")}
+              >
+                待處理
+              </button>
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  filterDelivery === "preparing"
+                    ? "bg-white dark:bg-default-50 shadow-sm text-primary"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onFilterDeliveryChange("preparing")}
+              >
+                準備中
+              </button>
+              <button
+                className={`flex-1 h-full text-xs font-medium rounded-md transition-all ${
+                  filterDelivery === "completed"
+                    ? "bg-white dark:bg-default-50 shadow-sm text-success"
+                    : "text-default-500 hover:text-default-700"
+                }`}
+                onClick={() => onFilterDeliveryChange("completed")}
+              >
+                已完成
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* 清除篩選按鈕與統計 */}
