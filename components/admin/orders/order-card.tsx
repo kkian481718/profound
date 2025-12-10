@@ -5,8 +5,15 @@ import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Snippet } from "@heroui/snippet";
+import { Textarea } from "@heroui/input";
+import { Tooltip } from "@heroui/tooltip";
 
-import { LocationIcon, PhoneIcon, UserIcon } from "@/components/icons";
+import {
+  LocationIcon,
+  PhoneIcon,
+  UserIcon,
+  NoteIcon,
+} from "@/components/icons";
 import { Order } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 
@@ -28,9 +35,37 @@ export default function OrderCard({
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
   // 樂觀更新：本地狀態用於即時 UI 反饋
   const [optimisticStatus, setOptimisticStatus] = useState<string | null>(null);
+  // 管理員備註相關狀態
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [noteValue, setNoteValue] = useState(order.admin_note || "");
+  const [noteSaving, setNoteSaving] = useState(false);
 
   // 顯示的狀態：優先使用樂觀更新的狀態
   const displayStatus = optimisticStatus ?? order.order_status;
+
+  const handleSaveNote = async () => {
+    setNoteSaving(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("orders")
+        .update({ admin_note: noteValue.trim() || null })
+        .eq("id", order.id);
+
+      if (error) throw error;
+      setIsEditingNote(false);
+      onStatusChange?.();
+    } catch (err) {
+      console.error("儲存備註失敗:", err);
+    } finally {
+      setNoteSaving(false);
+    }
+  };
+
+  const handleCancelNote = () => {
+    setNoteValue(order.admin_note || "");
+    setIsEditingNote(false);
+  };
 
   const handleQuickStatusChange = async (
     newStatus: "pending" | "preparing" | "completed"
@@ -173,6 +208,61 @@ export default function OrderCard({
               />
             </div>
           )}
+
+          {/* 管理員備註區域 */}
+          <div className="mt-2 pt-2 border-t border-dashed border-default-200">
+            {isEditingNote ? (
+              <div className="space-y-2">
+                <Textarea
+                  minRows={2}
+                  placeholder="輸入管理員備註..."
+                  size="sm"
+                  value={noteValue}
+                  variant="bordered"
+                  onValueChange={setNoteValue}
+                />
+                <div className="flex gap-1.5 justify-end">
+                  <Button
+                    isDisabled={noteSaving}
+                    size="sm"
+                    variant="flat"
+                    onPress={handleCancelNote}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    color="primary"
+                    isLoading={noteSaving}
+                    size="sm"
+                    onPress={handleSaveNote}
+                  >
+                    儲存
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-1.5">
+                <NoteIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0 mt-0.5" />
+                {order.admin_note ? (
+                  <Tooltip content="點擊編輯備註">
+                    <button
+                      className="text-xs text-warning-600 dark:text-warning-400 text-left hover:underline cursor-pointer line-clamp-2"
+                      onClick={() => setIsEditingNote(true)}
+                    >
+                      {order.admin_note}
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <button
+                    className="text-xs text-default-400 hover:text-default-600 cursor-pointer"
+                    onClick={() => setIsEditingNote(true)}
+                  >
+                    + 新增備註
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mt-auto">

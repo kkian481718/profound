@@ -16,7 +16,7 @@ declare global {
         event_label?: string;
         value?: number;
         [key: string]: any;
-      },
+      }
     ) => void;
   }
 }
@@ -36,6 +36,7 @@ export interface Order {
   shipping_fee: number;
   total_amount: number;
   order_status: "pending" | "preparing" | "completed";
+  admin_note?: string;
 }
 
 export interface Store {

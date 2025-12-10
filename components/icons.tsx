@@ -201,6 +201,28 @@ export const LocationIcon = ({
   </svg>
 );
 
+export const NoteIcon = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}: IconSvgProps) => (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    focusable="false"
+    height={size || height}
+    role="presentation"
+    stroke="currentColor"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+    width={size || width}
+    {...props}
+  >
+    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+  </svg>
+);
+
 export const ClockIcon = ({
   size = 24,
   width,

@@ -75,7 +75,7 @@ export function OrderLookup() {
           total_amount,
           order_status,
           created_at
-        `
+        `,
         )
         .eq("pickup_phone", phoneNumber.trim())
         .gte("created_at", twentyFourHoursAgo.toISOString())
