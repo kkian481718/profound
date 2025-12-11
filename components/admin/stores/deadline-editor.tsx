@@ -196,31 +196,42 @@ export default function DeadlineEditor({
                   {/* 快速設定選項 */}
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-foreground">快速設定</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <Button
                         size="sm"
                         variant="flat"
                         onPress={() => {
-                          const oneHour = new Date();
+                          const time = new Date();
 
-                          oneHour.setHours(oneHour.getHours() + 1);
-                          setDeadline(convertToDatetimeLocal(oneHour.toISOString()));
+                          time.setHours(17, 0, 0, 0);
+                          setDeadline(convertToDatetimeLocal(time.toISOString()));
                         }}
                       >
-                        1小時後
+                        17:00
                       </Button>
                       <Button
                         size="sm"
                         variant="flat"
                         onPress={() => {
-                          const tomorrow = new Date();
+                          const time = new Date();
 
-                          tomorrow.setDate(tomorrow.getDate() + 1);
-                          tomorrow.setHours(12, 0, 0, 0);
-                          setDeadline(convertToDatetimeLocal(tomorrow.toISOString()));
+                          time.setHours(19, 0, 0, 0);
+                          setDeadline(convertToDatetimeLocal(time.toISOString()));
                         }}
                       >
-                        明天中午
+                        19:00
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        onPress={() => {
+                          const time = new Date();
+
+                          time.setHours(20, 0, 0, 0);
+                          setDeadline(convertToDatetimeLocal(time.toISOString()));
+                        }}
+                      >
+                        20:00
                       </Button>
                     </div>
                   </div>
