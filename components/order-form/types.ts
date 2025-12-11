@@ -3,6 +3,7 @@ export type StoreOption = {
   value: string;
   order_deadline?: string | null;
   max_daily_orders?: number | null;
+  menu_placeholder?: string | null;
 };
 
 export type ErrorState = {

@@ -70,6 +70,12 @@ export function OrderDetailsStep({
   const costNum = parseFloat(cost) || 0;
   const pricing = calculateOrderPricing(costNum);
 
+  // 取得選中店家的自訂 placeholder
+  const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
+  const menuPlaceholder =
+    selectedStoreData?.menu_placeholder ||
+    "例如：大麥克套餐 x2（去洋蔥）\n薯條大份 x1\n可樂中杯 x2";
+
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
@@ -95,7 +101,7 @@ export function OrderDetailsStep({
             isInvalid={Boolean(errors.menuItems)}
             label="點餐內容"
             minRows={4}
-            placeholder="例如：大麥克套餐 x2（去洋蔥）&#10;薯條大份 x1&#10;可樂中杯 x2"
+            placeholder={menuPlaceholder}
             value={menuItems}
             onValueChange={onMenuItemsChange}
           />

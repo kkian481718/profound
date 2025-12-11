@@ -45,6 +45,7 @@ export interface Store {
   is_open: boolean;
   order_deadline: string | null;
   max_daily_orders: number | null;
+  menu_placeholder: string | null;
   created_at: string;
 }
 

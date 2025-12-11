@@ -19,6 +19,7 @@ import AddStoreModal from "@/components/admin/stores/add-store-modal";
 import DeadlineEditor from "@/components/admin/stores/deadline-editor";
 import GlobalMaxOrdersSetting from "@/components/admin/stores/global-max-orders-setting";
 import StoreMaxOrdersEditor from "@/components/admin/stores/store-max-orders-editor";
+import StorePlaceholderEditor from "@/components/admin/stores/store-placeholder-editor";
 import { createClient } from "@/lib/supabase/client";
 import { closeAllExpiredStores } from "@/lib/validateStore";
 
@@ -28,6 +29,7 @@ interface Store {
   is_open: boolean;
   order_deadline: string | null;
   max_daily_orders: number | null;
+  menu_placeholder: string | null;
   created_at: string;
 }
 
@@ -454,6 +456,32 @@ export default function StoresPage() {
                           </div>
                           <StoreMaxOrdersEditor
                             currentMaxOrders={store.max_daily_orders}
+                            storeId={store.id}
+                            onSuccess={fetchStores}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <svg
+                              className="h-4 w-4 text-secondary"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M4 6h16M4 12h16M4 18h7"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
+                            </svg>
+                            <span className="font-medium text-foreground">
+                              點餐提示文字
+                            </span>
+                          </div>
+                          <StorePlaceholderEditor
+                            currentPlaceholder={store.menu_placeholder}
                             storeId={store.id}
                             onSuccess={fetchStores}
                           />
