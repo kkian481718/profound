@@ -166,7 +166,7 @@ export default function OrderCard({
           </div>
           <div className="flex items-center gap-1.5">
             <LocationIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-            <span className="text-xs text-default-500 truncate">{order.pickup_location}</span>
+            <span className="text-xs text-default-500">{order.pickup_location}</span>
           </div>
           {order.menu_items && (
             <div className="flex items-start gap-1.5 mt-2">
