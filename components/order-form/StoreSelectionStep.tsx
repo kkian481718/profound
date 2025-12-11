@@ -41,8 +41,7 @@ export function StoreSelectionStep({
   onRetry,
   onGlobalLimitError,
 }: StoreSelectionStepProps) {
-  const [globalLimitCheck, setGlobalLimitCheck] =
-    useState<OrderLimitCheck | null>(null);
+  const [globalLimitCheck, setGlobalLimitCheck] = useState<OrderLimitCheck | null>(null);
   const [isCheckingGlobalLimits, setIsCheckingGlobalLimits] = useState(false);
   const [isCheckingStoreLimits, setIsCheckingStoreLimits] = useState(false);
 
@@ -122,12 +121,7 @@ export function StoreSelectionStep({
             <Alert color="warning" title="下次請早：（" variant="flat">
               目前沒有開放下單的店家
             </Alert>
-            <Button
-              className="w-full md:w-auto"
-              color="warning"
-              variant="flat"
-              onPress={onRetry}
-            >
+            <Button className="w-full md:w-auto" color="warning" variant="flat" onPress={onRetry}>
               重新載入
             </Button>
           </div>
@@ -139,9 +133,7 @@ export function StoreSelectionStep({
             isInvalid={Boolean(error)}
             label="店家"
             placeholder="請選擇店家"
-            selectedKeys={
-              selectedStore ? new Set([selectedStore]) : new Set([])
-            }
+            selectedKeys={selectedStore ? new Set([selectedStore]) : new Set([])}
             onSelectionChange={(keys) => {
               onStoreChange(keys);
               // 追蹤店家選擇事件
@@ -167,20 +159,12 @@ export function StoreSelectionStep({
 
         {/* 顯示選中店家的詳細資訊 */}
         {selectedStore && !isLoadingStores && storeOptions.length > 0 && (
-          <StoreInfoDisplay
-            selectedStore={selectedStore}
-            storeOptions={storeOptions}
-          />
+          <StoreInfoDisplay selectedStore={selectedStore} storeOptions={storeOptions} />
         )}
 
         <div className="flex gap-3">
           {showBackButton && (
-            <Button
-              className="w-full md:w-auto"
-              color="default"
-              variant="flat"
-              onPress={onBack}
-            >
+            <Button className="w-full md:w-auto" color="default" variant="flat" onPress={onBack}>
               回上一步
             </Button>
           )}

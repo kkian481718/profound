@@ -61,9 +61,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
         {chartData.map((item) => (
           <div key={item.store_id} className="space-y-2">
             <div className="flex justify-begin items-center">
-              <h5 className="font-medium text-sm truncate flex-1 mr-1">
-                {item.store_name}
-              </h5>
+              <h5 className="font-medium text-sm truncate flex-1 mr-1">{item.store_name}</h5>
             </div>
 
             <div className="relative">
@@ -79,9 +77,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
                       minWidth: item.total_shipping_fee > 0 ? "20px" : "0",
                     }}
                   >
-                    {item.shippingPercentage > 15 && (
-                      <span>NT$ {item.total_shipping_fee}</span>
-                    )}
+                    {item.shippingPercentage > 15 && <span>NT$ {item.total_shipping_fee}</span>}
                   </div>
                   {/* 開發費部分 */}
                   <div
@@ -91,9 +87,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
                       minWidth: item.total_dev_fee > 0 ? "20px" : "0",
                     }}
                   >
-                    {item.devFeePercentage > 15 && (
-                      <span>NT$ {item.total_dev_fee}</span>
-                    )}
+                    {item.devFeePercentage > 15 && <span>NT$ {item.total_dev_fee}</span>}
                   </div>
                 </div>
               </div>
@@ -126,9 +120,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
             <p className="font-medium text-lg">
               {data.length > 0
                 ? data.reduce((max, item) =>
-                    item.total_shipping_fee > max.total_shipping_fee
-                      ? item
-                      : max,
+                    item.total_shipping_fee > max.total_shipping_fee ? item : max,
                   ).store_name
                 : "無"}
             </p>

@@ -104,10 +104,7 @@ export default function StoresPage() {
         updateData.order_deadline = null;
       }
 
-      const { error } = await supabase
-        .from("stores")
-        .update(updateData)
-        .eq("id", storeId);
+      const { error } = await supabase.from("stores").update(updateData).eq("id", storeId);
 
       if (error) throw error;
       fetchStores();
@@ -129,10 +126,7 @@ export default function StoresPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
-        .from("stores")
-        .delete()
-        .eq("id", storeToDelete.id);
+      const { error } = await supabase.from("stores").delete().eq("id", storeToDelete.id);
 
       if (error) {
         // eslint-disable-next-line no-console
@@ -257,9 +251,7 @@ export default function StoresPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">店家管理</h1>
-          <p className="mt-1 text-sm text-default-600">
-            管理店家狀態、出貨時間與訂單限制
-          </p>
+          <p className="mt-1 text-sm text-default-600">管理店家狀態、出貨時間與訂單限制</p>
         </div>
       </div>
 
@@ -290,12 +282,7 @@ export default function StoresPage() {
             color="success"
             size="sm"
             startContent={
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   strokeLinecap="round"
@@ -331,12 +318,8 @@ export default function StoresPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-foreground">
-                    還沒有店家
-                  </h3>
-                  <p className="mt-1 text-sm text-default-500">
-                    開始新增第一家店
-                  </p>
+                  <h3 className="text-lg font-medium text-foreground">還沒有店家</h3>
+                  <p className="mt-1 text-sm text-default-500">開始新增第一家店</p>
                 </div>
                 <Button color="success" size="lg" onPress={onOpen}>
                   立即新增店家
@@ -351,12 +334,7 @@ export default function StoresPage() {
               color="success"
               size="lg"
               startContent={
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     d="M12 4v16m8-8H4"
                     strokeLinecap="round"
@@ -388,13 +366,9 @@ export default function StoresPage() {
                         color="success"
                         isSelected={store.is_open}
                         size="sm"
-                        onValueChange={() =>
-                          toggleStoreStatus(store.id, store.is_open)
-                        }
+                        onValueChange={() => toggleStoreStatus(store.id, store.is_open)}
                       />
-                      <h3 className="text-lg font-bold text-foreground">
-                        {store.name}
-                      </h3>
+                      <h3 className="text-lg font-bold text-foreground">{store.name}</h3>
                     </div>
                     <Chip
                       className="font-medium"
@@ -424,9 +398,7 @@ export default function StoresPage() {
                                 strokeWidth={2}
                               />
                             </svg>
-                            <span className="font-medium text-foreground">
-                              截止時間
-                            </span>
+                            <span className="font-medium text-foreground">截止時間</span>
                           </div>
                           <DeadlineEditor
                             currentDeadline={store.order_deadline}
@@ -450,9 +422,7 @@ export default function StoresPage() {
                                 strokeWidth={2}
                               />
                             </svg>
-                            <span className="font-medium text-foreground">
-                              單量限制
-                            </span>
+                            <span className="font-medium text-foreground">單量限制</span>
                           </div>
                           <StoreMaxOrdersEditor
                             currentMaxOrders={store.max_daily_orders}
@@ -476,9 +446,7 @@ export default function StoresPage() {
                                 strokeWidth={2}
                               />
                             </svg>
-                            <span className="font-medium text-foreground">
-                              點餐提示文字
-                            </span>
+                            <span className="font-medium text-foreground">點餐提示文字</span>
                           </div>
                           <StorePlaceholderEditor
                             currentPlaceholder={store.menu_placeholder}
@@ -511,9 +479,7 @@ export default function StoresPage() {
                         </svg>
                       }
                       variant="flat"
-                      onPress={() =>
-                        router.push(`/admin/orders?store=${store.id}`)
-                      }
+                      onPress={() => router.push(`/admin/orders?store=${store.id}`)}
                     >
                       查看訂單
                     </Button>
@@ -547,11 +513,7 @@ export default function StoresPage() {
       </div>
 
       {/* Modals */}
-      <AddStoreModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onSuccess={fetchStores}
-      />
+      <AddStoreModal isOpen={isOpen} onOpenChange={onOpenChange} onSuccess={fetchStores} />
 
       <Modal isOpen={isDeleteModalOpen} onOpenChange={onDeleteModalOpenChange}>
         <ModalContent>
@@ -584,9 +546,7 @@ export default function StoresPage() {
                 <div className="space-y-4">
                   <p className="text-foreground">
                     確定要刪除店家「
-                    <span className="font-semibold text-danger">
-                      {storeToDelete?.name}
-                    </span>
+                    <span className="font-semibold text-danger">{storeToDelete?.name}</span>
                     」嗎？
                   </p>
                   <div className="rounded-lg bg-danger-50 border border-danger-200 p-4">
@@ -605,9 +565,7 @@ export default function StoresPage() {
                         />
                       </svg>
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-danger">
-                          刪除警告
-                        </p>
+                        <p className="text-sm font-medium text-danger">刪除警告</p>
                         <p className="text-sm text-danger-700">
                           刪除店家後，所有相關訂單也會一併被刪除，此操作無法復原。
                         </p>
@@ -617,19 +575,10 @@ export default function StoresPage() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  color="default"
-                  isDisabled={isDeleting}
-                  variant="flat"
-                  onPress={onClose}
-                >
+                <Button color="default" isDisabled={isDeleting} variant="flat" onPress={onClose}>
                   取消
                 </Button>
-                <Button
-                  color="danger"
-                  isLoading={isDeleting}
-                  onPress={confirmDeleteStore}
-                >
+                <Button color="danger" isLoading={isDeleting} onPress={confirmDeleteStore}>
                   確認刪除
                 </Button>
               </ModalFooter>

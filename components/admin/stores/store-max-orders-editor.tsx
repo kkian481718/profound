@@ -17,9 +17,7 @@ export default function StoreMaxOrdersEditor({
   currentMaxOrders,
   onSuccess,
 }: StoreMaxOrdersEditorProps) {
-  const [maxOrders, setMaxOrders] = useState<string>(
-    currentMaxOrders?.toString() || "",
-  );
+  const [maxOrders, setMaxOrders] = useState<string>(currentMaxOrders?.toString() || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -124,12 +122,7 @@ export default function StoreMaxOrdersEditor({
       <div className="text-xs text-default-500">
         {currentMaxOrders !== null ? (
           <span className="flex items-center gap-1">
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 strokeLinecap="round"
@@ -141,12 +134,7 @@ export default function StoreMaxOrdersEditor({
           </span>
         ) : (
           <span className="flex items-center gap-1">
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 strokeLinecap="round"

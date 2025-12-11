@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Image } from "@heroui/image";
@@ -20,22 +14,13 @@ interface OrderContentModalProps {
   order: Order | null;
 }
 
-export default function OrderContentModal({
-  isOpen,
-  onOpenChange,
-  order,
-}: OrderContentModalProps) {
+export default function OrderContentModal({ isOpen, onOpenChange, order }: OrderContentModalProps) {
   if (!order) return null;
 
   const hasContent = order.menu_items || order.menu_image_url;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      scrollBehavior="inside"
-      size="2xl"
-      onOpenChange={onOpenChange}
-    >
+    <Modal isOpen={isOpen} scrollBehavior="inside" size="2xl" onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>
@@ -58,9 +43,7 @@ export default function OrderContentModal({
                   {order.menu_image_url && (
                     <Card>
                       <CardBody>
-                        <h4 className="text-medium font-semibold mb-3">
-                          菜單圖片
-                        </h4>
+                        <h4 className="text-medium font-semibold mb-3">菜單圖片</h4>
                         <div className="flex justify-center">
                           <Image
                             alt="菜單圖片"
@@ -77,9 +60,7 @@ export default function OrderContentModal({
                   {order.menu_items && (
                     <Card>
                       <CardBody>
-                        <h4 className="text-medium font-semibold mb-3">
-                          餐點內容
-                        </h4>
+                        <h4 className="text-medium font-semibold mb-3">餐點內容</h4>
                         <div className="whitespace-pre-wrap text-sm leading-relaxed">
                           {order.menu_items}
                         </div>
@@ -90,15 +71,11 @@ export default function OrderContentModal({
                   {/* 訂單基本資訊 */}
                   <Card>
                     <CardBody>
-                      <h4 className="text-medium font-semibold mb-3">
-                        訂單資訊
-                      </h4>
+                      <h4 className="text-medium font-semibold mb-3">訂單資訊</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-default-600">訂單編號:</span>
-                          <span className="font-mono text-xs">
-                            {order.id.slice(-8)}
-                          </span>
+                          <span className="font-mono text-xs">{order.id.slice(-8)}</span>
                         </div>
                         <Divider />
 

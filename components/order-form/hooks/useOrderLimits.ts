@@ -16,9 +16,7 @@ export interface StoreOrderInfo {
 }
 
 export function useOrderLimits() {
-  const [globalLimitInfo, setGlobalLimitInfo] = useState<OrderLimitInfo | null>(
-    null,
-  );
+  const [globalLimitInfo, setGlobalLimitInfo] = useState<OrderLimitInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchGlobalLimitInfo = useCallback(async () => {
@@ -36,9 +34,7 @@ export function useOrderLimits() {
         .eq("setting_key", "max_daily_orders")
         .single();
 
-      const globalLimit = globalSetting?.setting_value
-        ? Number(globalSetting.setting_value)
-        : null;
+      const globalLimit = globalSetting?.setting_value ? Number(globalSetting.setting_value) : null;
 
       // 獲取今日全域訂單數
       const { count: globalCount } = await supabase
@@ -67,9 +63,7 @@ export function useOrderLimits() {
         const supabase = createClient();
         const today = new Date();
         const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
-        const endOfDay = new Date(
-          today.setHours(23, 59, 59, 999),
-        ).toISOString();
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString();
 
         // 獲取店家設定
         const { data: store } = await supabase

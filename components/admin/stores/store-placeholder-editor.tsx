@@ -17,9 +17,7 @@ export default function StorePlaceholderEditor({
   currentPlaceholder,
   onSuccess,
 }: StorePlaceholderEditorProps) {
-  const [placeholder, setPlaceholder] = useState<string>(
-    currentPlaceholder || ""
-  );
+  const [placeholder, setPlaceholder] = useState<string>(currentPlaceholder || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {

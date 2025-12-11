@@ -63,9 +63,7 @@ function OrderConfirmationContent() {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                 <span className="text-sm font-medium">手機號碼</span>
-                <span className="text-lg font-semibold">
-                  {orderInfo.phoneNumber}
-                </span>
+                <span className="text-lg font-semibold">{orderInfo.phoneNumber}</span>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-success-50 dark:bg-success-900/20 rounded-lg">

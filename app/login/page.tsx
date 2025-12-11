@@ -68,16 +68,9 @@ export default function LoginPage() {
               onValueChange={setPassword}
             />
             {error && (
-              <div className="text-danger text-sm bg-danger-50 p-3 rounded-lg">
-                {error}
-              </div>
+              <div className="text-danger text-sm bg-danger-50 p-3 rounded-lg">{error}</div>
             )}
-            <Button
-              className="w-full"
-              color="primary"
-              isLoading={loading}
-              type="submit"
-            >
+            <Button className="w-full" color="primary" isLoading={loading} type="submit">
               登入
             </Button>
           </form>

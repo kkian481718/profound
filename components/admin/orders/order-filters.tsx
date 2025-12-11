@@ -46,8 +46,7 @@ export default function OrderFilters({
   onShowTodayOnlyChange,
   onSortByChange,
 }: OrderFiltersProps) {
-  const hasActiveFilters =
-    filterStore || filterDelivery || filterLocation || !showTodayOnly;
+  const hasActiveFilters = filterStore || filterDelivery || filterLocation || !showTodayOnly;
 
   return (
     <Card>
@@ -177,20 +176,14 @@ export default function OrderFilters({
         {/* 清除篩選按鈕與統計 */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
           {hasActiveFilters && (
-            <Button
-              color="danger"
-              size="sm"
-              variant="flat"
-              onPress={onClearFilters}
-            >
+            <Button color="danger" size="sm" variant="flat" onPress={onClearFilters}>
               清除篩選
             </Button>
           )}
 
           <div className="text-sm text-default-500">
             共 {filteredOrdersCount} 筆訂單
-            {filteredOrdersCount !== totalOrders &&
-              ` (從 ${totalOrders} 筆中篩選)`}
+            {filteredOrdersCount !== totalOrders && ` (從 ${totalOrders} 筆中篩選)`}
           </div>
         </div>
       </CardBody>

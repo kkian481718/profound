@@ -25,9 +25,7 @@ export function OrderForm({ stores }: OrderFormProps) {
   const [cost, setCost] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pickupName, setPickupName] = useState("");
-  const [selectedPickupLocation, setSelectedPickupLocation] = useState<
-    string | null
-  >(null);
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState<string | null>(null);
   const [offCampusAddress, setOffCampusAddress] = useState("");
   const [errors, setErrors] = useState<ErrorState>(initialErrors);
 
@@ -41,17 +39,11 @@ export function OrderForm({ stores }: OrderFormProps) {
     handleImageChange,
     handleRemoveImage,
   } = useImageUpload();
-  const { isSubmitting, wasSubmitted, submitError, submitOrder } =
-    useOrderSubmit();
-  const {
-    globalLimitInfo,
-    isLoading: isLoadingLimits,
-    refetchAll,
-  } = useOrderLimits();
+  const { isSubmitting, wasSubmitted, submitError, submitOrder } = useOrderSubmit();
+  const { globalLimitInfo, isLoading: isLoadingLimits, refetchAll } = useOrderLimits();
 
   const showOffCampusAddress =
-    selectedPickupLocation === "校外" ||
-    selectedPickupLocation === "校內教學區";
+    selectedPickupLocation === "校外" || selectedPickupLocation === "校內教學區";
 
   // 重置表單
   const resetForm = () => {

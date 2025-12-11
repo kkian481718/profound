@@ -33,12 +33,10 @@ export function useOrderSubmit() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `order-images/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("orders")
-        .upload(filePath, image, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      const { error: uploadError } = await supabase.storage.from("orders").upload(filePath, image, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
       if (uploadError) {
         // eslint-disable-next-line no-console
@@ -71,14 +69,10 @@ export function useOrderSubmit() {
 
     try {
       // 1. 驗證店家是否仍可接單（包含自動關閉過期店家）
-      const storeValidation = await validateAndCloseExpiredStore(
-        params.selectedStore,
-      );
+      const storeValidation = await validateAndCloseExpiredStore(params.selectedStore);
 
       if (!storeValidation.isValid) {
-        setSubmitError(
-          storeValidation.message || "店家驗證失敗，請重新選擇店家",
-        );
+        setSubmitError(storeValidation.message || "店家驗證失敗，請重新選擇店家");
 
         return false;
       }

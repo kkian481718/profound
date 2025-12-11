@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 
 import { createClient } from "@/lib/supabase/client";
@@ -20,11 +14,7 @@ interface AddStoreModalProps {
   onSuccess: () => void;
 }
 
-export default function AddStoreModal({
-  isOpen,
-  onOpenChange,
-  onSuccess,
-}: AddStoreModalProps) {
+export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddStoreModalProps) {
   const [storeName, setStoreName] = useState("");
   const [isStoreOpen, setIsStoreOpen] = useState(false);
   const [deadline, setDeadline] = useState("");
@@ -77,15 +67,9 @@ export default function AddStoreModal({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
-              新增外送店家
-            </ModalHeader>
+            <ModalHeader className="flex flex-col gap-1">新增外送店家</ModalHeader>
             <ModalBody>
-              <form
-                className="flex flex-col gap-4"
-                id="add-store-form"
-                onSubmit={handleSubmit}
-              >
+              <form className="flex flex-col gap-4" id="add-store-form" onSubmit={handleSubmit}>
                 <Input
                   isRequired
                   label="店家名稱"
@@ -97,14 +81,9 @@ export default function AddStoreModal({
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium">是否開放接單</p>
-                    <p className="text-xs text-default-500">
-                      開啟後客戶可以向此店家下訂
-                    </p>
+                    <p className="text-xs text-default-500">開啟後客戶可以向此店家下訂</p>
                   </div>
-                  <Switch
-                    isSelected={isStoreOpen}
-                    onValueChange={setIsStoreOpen}
-                  />
+                  <Switch isSelected={isStoreOpen} onValueChange={setIsStoreOpen} />
                 </div>
 
                 {isStoreOpen && (
@@ -118,9 +97,7 @@ export default function AddStoreModal({
                 )}
 
                 {error && (
-                  <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">
-                    {error}
-                  </div>
+                  <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">{error}</div>
                 )}
               </form>
             </ModalBody>
@@ -128,12 +105,7 @@ export default function AddStoreModal({
               <Button color="default" variant="flat" onPress={onClose}>
                 取消
               </Button>
-              <Button
-                color="primary"
-                form="add-store-form"
-                isLoading={loading}
-                type="submit"
-              >
+              <Button color="primary" form="add-store-form" isLoading={loading} type="submit">
                 新增店家
               </Button>
             </ModalFooter>

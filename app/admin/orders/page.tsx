@@ -33,13 +33,10 @@ function OrdersContent() {
   const [filterLocation, setFilterLocation] = useState("");
   const [showTodayOnly, setShowTodayOnly] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [selectedOrderForContent, setSelectedOrderForContent] =
-    useState<Order | null>(null);
+  const [selectedOrderForContent, setSelectedOrderForContent] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"detailed" | "summary">("summary");
-  const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">(
-    "order_time",
-  );
+  const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">("order_time");
   const itemsPerPage = 15;
 
   const router = useRouter();
@@ -63,25 +60,14 @@ function OrdersContent() {
   useEffect(() => {
     applyFilters();
     setCurrentPage(1); // 當篩選條件改變時,重置到第一頁
-  }, [
-    orders,
-    searchQuery,
-    filterStore,
-    filterDelivery,
-    filterLocation,
-    showTodayOnly,
-    sortBy,
-  ]);
+  }, [orders, searchQuery, filterStore, filterDelivery, filterLocation, showTodayOnly, sortBy]);
 
   const fetchData = async () => {
     try {
       const supabase = createClient();
 
       // 獲取店家列表
-      const { data: storesData } = await supabase
-        .from("stores")
-        .select("*")
-        .order("name");
+      const { data: storesData } = await supabase.from("stores").select("*").order("name");
 
       setStores(storesData || []);
 
@@ -122,11 +108,7 @@ function OrdersContent() {
     // 本日訂單過濾
     if (showTodayOnly) {
       const today = new Date();
-      const todayStart = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-      );
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const todayEnd = new Date(
         today.getFullYear(),
         today.getMonth(),
@@ -164,9 +146,7 @@ function OrdersContent() {
 
     // 訂單狀態過濾
     if (filterDelivery) {
-      filtered = filtered.filter(
-        (order) => order.order_status === filterDelivery,
-      );
+      filtered = filtered.filter((order) => order.order_status === filterDelivery);
     }
 
     // 取貨地點過濾
@@ -192,9 +172,7 @@ function OrdersContent() {
         );
       } else if (filterLocation === "校內教學區") {
         // 過濾出校內教學區地址：以 [校內教學區] 開頭的地址
-        filtered = filtered.filter((order) =>
-          order.pickup_location.startsWith("[校內教學區]"),
-        );
+        filtered = filtered.filter((order) => order.pickup_location.startsWith("[校內教學區]"));
       } else if (filterLocation === "新宿") {
         // 過濾出新宿地址：沁月、迎曦、行雲
         filtered = filtered.filter((order) =>
@@ -207,9 +185,7 @@ function OrdersContent() {
         );
       } else {
         // 過濾出指定宿舍：不包含前綴標識的宿舍名稱
-        filtered = filtered.filter(
-          (order) => order.pickup_location === filterLocation,
-        );
+        filtered = filtered.filter((order) => order.pickup_location === filterLocation);
       }
     }
 
@@ -217,9 +193,7 @@ function OrdersContent() {
     if (sortBy === "order_time") {
       // 依照下單時間排序（最新到最舊）
       filtered.sort((a, b) => {
-        return (
-          new Date(b.order_time).getTime() - new Date(a.order_time).getTime()
-        );
+        return new Date(b.order_time).getTime() - new Date(a.order_time).getTime();
       });
     } else if (sortBy === "pickup_location") {
       // 依照取貨地點排序（新宿、舊宿分組）

@@ -64,9 +64,7 @@ export function validateOrderDetails(
 
   if (showOffCampusAddress && !offCampusAddress.trim()) {
     nextErrors.address =
-      selectedPickupLocation === "校外"
-        ? "請填寫校外取貨地址"
-        : "請填寫教學區地址";
+      selectedPickupLocation === "校外" ? "請填寫校外取貨地址" : "請填寫教學區地址";
     hasError = true;
   }
 

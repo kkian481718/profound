@@ -28,11 +28,7 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning lang="zh-TW">
       <head />
@@ -46,18 +42,10 @@ export default function RootLayout({
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
             <Navbar />
-            <main className="container mx-auto max-w-7xl pt-9 px-6 flex-grow">
-              {children}
-            </main>
+            <main className="container mx-auto max-w-7xl pt-9 px-6 flex-grow">{children}</main>
             <footer className="w-full flex items-center justify-center py-3">
-              <Link
-                className="flex items-center gap-1 text-current"
-                href="#"
-                title=""
-              >
-                <span className="text-default-400">
-                  玄 x MiffyStudio © 2025
-                </span>
+              <Link className="flex items-center gap-1 text-current" href="#" title="">
+                <span className="text-default-400">玄 x MiffyStudio © 2025</span>
               </Link>
             </footer>
           </div>

@@ -8,12 +8,7 @@ import { Snippet } from "@heroui/snippet";
 import { Textarea } from "@heroui/input";
 import { Tooltip } from "@heroui/tooltip";
 
-import {
-  LocationIcon,
-  PhoneIcon,
-  UserIcon,
-  NoteIcon,
-} from "@/components/icons";
+import { LocationIcon, PhoneIcon, UserIcon, NoteIcon } from "@/components/icons";
 import { Order } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 
@@ -67,9 +62,7 @@ export default function OrderCard({
     setIsEditingNote(false);
   };
 
-  const handleQuickStatusChange = async (
-    newStatus: "pending" | "preparing" | "completed"
-  ) => {
+  const handleQuickStatusChange = async (newStatus: "pending" | "preparing" | "completed") => {
     if (displayStatus === newStatus) return;
 
     // 樂觀更新：立即更新 UI
@@ -108,9 +101,7 @@ export default function OrderCard({
     });
   };
 
-  const getOrderStatusColor = (
-    status: string
-  ): "default" | "primary" | "success" => {
+  const getOrderStatusColor = (status: string): "default" | "primary" | "success" => {
     switch (status) {
       case "preparing":
         return "primary";
@@ -149,9 +140,7 @@ export default function OrderCard({
           </Chip>
         </div>
         <div className="flex justify-between items-center w-full">
-          <p className="text-xs text-default-500">
-            {formatDateTime(order.order_time)}
-          </p>
+          <p className="text-xs text-default-500">{formatDateTime(order.order_time)}</p>
         </div>
       </CardHeader>
       <CardBody className="pt-2 flex flex-col gap-2 h-full">
@@ -173,15 +162,11 @@ export default function OrderCard({
           </Snippet>
           <div className="flex items-center gap-1.5">
             <PhoneIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-            <span className="text-xs text-default-500 truncate">
-              {order.pickup_phone}
-            </span>
+            <span className="text-xs text-default-500 truncate">{order.pickup_phone}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <LocationIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-default-400 flex-shrink-0" />
-            <span className="text-xs text-default-500 truncate">
-              {order.pickup_location}
-            </span>
+            <span className="text-xs text-default-500 truncate">{order.pickup_location}</span>
           </div>
           {order.menu_items && (
             <div className="flex items-start gap-1.5 mt-2">
@@ -230,12 +215,7 @@ export default function OrderCard({
                   >
                     取消
                   </Button>
-                  <Button
-                    color="primary"
-                    isLoading={noteSaving}
-                    size="sm"
-                    onPress={handleSaveNote}
-                  >
+                  <Button color="primary" isLoading={noteSaving} size="sm" onPress={handleSaveNote}>
                     儲存
                   </Button>
                 </div>
@@ -285,9 +265,7 @@ export default function OrderCard({
             )}
             <div className="flex justify-between items-center font-bold">
               <span className="text-xs md:text-sm">總金額</span>
-              <span className="text-sm md:text-base">
-                ${order.total_amount}
-              </span>
+              <span className="text-sm md:text-base">${order.total_amount}</span>
             </div>
           </div>
 
@@ -334,11 +312,7 @@ export default function OrderCard({
               編輯訂單
             </Button>
             {onViewContent && (order.menu_items || order.menu_image_url) && (
-              <Button
-                size="sm"
-                variant="flat"
-                onPress={() => onViewContent(order)}
-              >
+              <Button size="sm" variant="flat" onPress={() => onViewContent(order)}>
                 查看內容
               </Button>
             )}

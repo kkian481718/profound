@@ -110,8 +110,7 @@ export default function DeadlineEditor({
                     const deadlineDate = new Date(currentDeadline);
                     const now = new Date();
                     const diffHours = Math.round(
-                      (deadlineDate.getTime() - now.getTime()) /
-                        (1000 * 60 * 60),
+                      (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60),
                     );
 
                     if (diffHours < 0) {
@@ -128,9 +127,7 @@ export default function DeadlineEditor({
               </div>
             ) : (
               <div>
-                <p className="text-sm font-medium text-default-500">
-                  未設定截止時間
-                </p>
+                <p className="text-sm font-medium text-default-500">未設定截止時間</p>
               </div>
             )}
           </div>
@@ -168,9 +165,7 @@ export default function DeadlineEditor({
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">設定截止時間</h3>
-                    <p className="text-sm text-default-500">
-                      設定此店家的接單截止時間
-                    </p>
+                    <p className="text-sm text-default-500">設定此店家的接單截止時間</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -200,9 +195,7 @@ export default function DeadlineEditor({
 
                   {/* 快速設定選項 */}
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-foreground">
-                      快速設定
-                    </p>
+                    <p className="text-sm font-medium text-foreground">快速設定</p>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         size="sm"
@@ -211,9 +204,7 @@ export default function DeadlineEditor({
                           const oneHour = new Date();
 
                           oneHour.setHours(oneHour.getHours() + 1);
-                          setDeadline(
-                            convertToDatetimeLocal(oneHour.toISOString()),
-                          );
+                          setDeadline(convertToDatetimeLocal(oneHour.toISOString()));
                         }}
                       >
                         1小時後
@@ -226,9 +217,7 @@ export default function DeadlineEditor({
 
                           tomorrow.setDate(tomorrow.getDate() + 1);
                           tomorrow.setHours(12, 0, 0, 0);
-                          setDeadline(
-                            convertToDatetimeLocal(tomorrow.toISOString()),
-                          );
+                          setDeadline(convertToDatetimeLocal(tomorrow.toISOString()));
                         }}
                       >
                         明天中午
@@ -259,11 +248,7 @@ export default function DeadlineEditor({
                 <Button color="default" variant="flat" onPress={onClose}>
                   取消
                 </Button>
-                <Button
-                  color="primary"
-                  isDisabled={!deadline}
-                  onPress={handleSave}
-                >
+                <Button color="primary" isDisabled={!deadline} onPress={handleSave}>
                   確認設定
                 </Button>
               </ModalFooter>

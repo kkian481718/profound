@@ -173,12 +173,7 @@ export function OrderLookup() {
             </Alert>
           )}
 
-          <Button
-            className="w-full md:w-auto"
-            color="primary"
-            isLoading={isLoading}
-            type="submit"
-          >
+          <Button className="w-full md:w-auto" color="primary" isLoading={isLoading} type="submit">
             查詢訂單
           </Button>
         </form>
@@ -195,9 +190,7 @@ export function OrderLookup() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-default-500">訂單編號:</span>
-                        <p className="font-medium font-mono text-xs">
-                          {order.id.slice(0, 8)}...
-                        </p>
+                        <p className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</p>
                       </div>
                       <div>
                         <span className="text-default-500">下單時間:</span>
@@ -220,9 +213,7 @@ export function OrderLookup() {
                       )}
                       <div>
                         <span className="text-default-500">訂單狀態:</span>
-                        <p
-                          className={`font-medium ${getStatusColor(order.order_status)}`}
-                        >
+                        <p className={`font-medium ${getStatusColor(order.order_status)}`}>
                           {getStatusText(order.order_status)}
                         </p>
                       </div>
@@ -243,18 +234,14 @@ export function OrderLookup() {
                       </div>
                       <div className="flex justify-between text-lg font-semibold border-t border-default-200 pt-2 mt-2">
                         <span>總金額:</span>
-                        <span className="text-primary">
-                          NT$ {order.total_amount}
-                        </span>
+                        <span className="text-primary">NT$ {order.total_amount}</span>
                       </div>
                     </div>
                   </div>
 
                   {order.menu_items && (
                     <div className="flex flex-col gap-2 border-t border-default-200 pt-4">
-                      <span className="text-default-500 text-sm font-medium">
-                        訂購內容:
-                      </span>
+                      <span className="text-default-500 text-sm font-medium">訂購內容:</span>
                       <p className="whitespace-pre-wrap text-sm bg-default-100 p-3 rounded-lg">
                         {order.menu_items}
                       </p>
@@ -263,9 +250,7 @@ export function OrderLookup() {
 
                   {order.menu_image_url && (
                     <div className="flex flex-col gap-2 border-t border-default-200 pt-4">
-                      <span className="text-default-500 text-sm font-medium">
-                        菜單圖片:
-                      </span>
+                      <span className="text-default-500 text-sm font-medium">菜單圖片:</span>
                       <div className="relative w-full max-w-md">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img

@@ -11,9 +11,7 @@ export default function Home() {
         <span className={title({ color: "violet" })}>食、衣、住、行&nbsp;</span>
         <br />
         <span className={title()}>從未如此簡單</span>
-        <div className={subtitle({ class: "mt-4" })}>
-          Profound | 花蓮志學共享服務平台
-        </div>
+        <div className={subtitle({ class: "mt-4" })}>Profound | 花蓮志學共享服務平台</div>
       </div>
 
       <div className="mt-12 w-full flex justify-center px-4">
@@ -21,31 +19,16 @@ export default function Home() {
       </div>
 
       <div className="flex gap-3 mt-4">
-        <Button
-          as={Link}
-          color="primary"
-          href="/orders/lookup"
-          size="lg"
-          variant="faded"
-        >
+        <Button as={Link} color="primary" href="/orders/lookup" size="lg" variant="faded">
           🔍 查詢訂單
         </Button>
-        <Button
-          as={Link}
-          color="secondary"
-          href="/faq"
-          size="lg"
-          variant="faded"
-        >
+        <Button as={Link} color="secondary" href="/faq" size="lg" variant="faded">
           ❓ 常見問題
         </Button>
       </div>
       <div className="mt-1 text-center text-sm text-gray-600">
         使用本服務表示您同意我們的
-        <Link
-          className="underline hover:text-gray-100 transition-colors"
-          href="/policy"
-        >
+        <Link className="underline hover:text-gray-100 transition-colors" href="/policy">
           隱私權政策
         </Link>
       </div>

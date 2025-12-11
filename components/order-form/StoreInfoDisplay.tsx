@@ -14,13 +14,8 @@ type StoreInfoDisplayProps = {
   selectedStore: string | null;
 };
 
-export function StoreInfoDisplay({
-  storeOptions,
-  selectedStore,
-}: StoreInfoDisplayProps) {
-  const selectedStoreData = storeOptions.find(
-    (store) => store.value === selectedStore,
-  );
+export function StoreInfoDisplay({ storeOptions, selectedStore }: StoreInfoDisplayProps) {
+  const selectedStoreData = storeOptions.find((store) => store.value === selectedStore);
 
   if (!selectedStoreData) {
     return null;
@@ -36,9 +31,7 @@ type StoreInfoCardProps = {
 function StoreInfoCard({ store }: StoreInfoCardProps) {
   const { timeLeft, isExpired } = useCountdown(store.order_deadline || null);
   const { fetchStoreOrderInfo } = useOrderLimits();
-  const [storeOrderInfo, setStoreOrderInfo] = useState<StoreOrderInfo | null>(
-    null,
-  );
+  const [storeOrderInfo, setStoreOrderInfo] = useState<StoreOrderInfo | null>(null);
   const [isLoadingOrderInfo, setIsLoadingOrderInfo] = useState(false);
 
   useEffect(() => {
@@ -146,9 +139,7 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
               <CardBody className="py-3">
                 <div className="flex items-center gap-3">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
-                  <span className="text-sm text-default-500">
-                    載入訂單資訊中...
-                  </span>
+                  <span className="text-sm text-default-500">載入訂單資訊中...</span>
                 </div>
               </CardBody>
             </Card>
@@ -191,12 +182,7 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
                 />
 
                 {orderProgress.isOverLimit && (
-                  <Chip
-                    className="mt-2"
-                    color="danger"
-                    size="sm"
-                    variant="flat"
-                  >
+                  <Chip className="mt-2" color="danger" size="sm" variant="flat">
                     此店家今日已滿額
                   </Chip>
                 )}

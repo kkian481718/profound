@@ -16,10 +16,7 @@ interface DailyProfitChartProps {
   timeRange?: "week" | "month";
 }
 
-export default function DailyProfitChart({
-  data,
-  timeRange = "week",
-}: DailyProfitChartProps) {
+export default function DailyProfitChart({ data, timeRange = "week" }: DailyProfitChartProps) {
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -30,18 +27,13 @@ export default function DailyProfitChart({
     }));
 
     // 找出最大利潤用於計算比例
-    const maxProfit = Math.max(
-      ...dataWithProfit.map((item) => item.total_profit),
-    );
+    const maxProfit = Math.max(...dataWithProfit.map((item) => item.total_profit));
 
     return dataWithProfit.map((item) => ({
       ...item,
-      shippingPercentage:
-        maxProfit > 0 ? (item.total_shipping_fee / maxProfit) * 100 : 0,
-      devFeePercentage:
-        maxProfit > 0 ? (item.total_dev_fee / maxProfit) * 100 : 0,
-      profitPercentage:
-        maxProfit > 0 ? (item.total_profit / maxProfit) * 100 : 0,
+      shippingPercentage: maxProfit > 0 ? (item.total_shipping_fee / maxProfit) * 100 : 0,
+      devFeePercentage: maxProfit > 0 ? (item.total_dev_fee / maxProfit) * 100 : 0,
+      profitPercentage: maxProfit > 0 ? (item.total_profit / maxProfit) * 100 : 0,
     }));
   }, [data]);
 
@@ -74,19 +66,12 @@ export default function DailyProfitChart({
       {/* 堆疊長條圖 */}
       <div className="space-y-3">
         {chartData
-          .filter(
-            (item) =>
-              timeRange === "week" ||
-              item.total_profit > 0 ||
-              item.order_count > 0,
-          )
+          .filter((item) => timeRange === "week" || item.total_profit > 0 || item.order_count > 0)
           .map((item) => (
             <div key={item.date} className="space-y-2">
               <div className="flex justify-between items-center">
                 <h5 className="font-medium text-sm w-16">{item.day_name}</h5>
-                <div className="text-xs text-default-600">
-                  {item.order_count} 筆
-                </div>
+                <div className="text-xs text-default-600">{item.order_count} 筆</div>
               </div>
 
               <div className="relative">
@@ -101,9 +86,7 @@ export default function DailyProfitChart({
                         minWidth: item.total_shipping_fee > 0 ? "20px" : "0",
                       }}
                     >
-                      {item.shippingPercentage > 15 && (
-                        <span>NT$ {item.total_shipping_fee}</span>
-                      )}
+                      {item.shippingPercentage > 15 && <span>NT$ {item.total_shipping_fee}</span>}
                     </div>
                     {/* 開發費部分 */}
                     <div
@@ -113,9 +96,7 @@ export default function DailyProfitChart({
                         minWidth: item.total_dev_fee > 0 ? "20px" : "0",
                       }}
                     >
-                      {item.devFeePercentage > 15 && (
-                        <span>NT$ {item.total_dev_fee}</span>
-                      )}
+                      {item.devFeePercentage > 15 && <span>NT$ {item.total_dev_fee}</span>}
                     </div>
                   </div>
                 </div>
@@ -140,11 +121,7 @@ export default function DailyProfitChart({
             </span>
             <p className="font-medium text-lg">
               {formatCurrency(
-                data.reduce(
-                  (sum, item) =>
-                    sum + item.total_shipping_fee + item.total_dev_fee,
-                  0,
-                ),
+                data.reduce((sum, item) => sum + item.total_shipping_fee + item.total_dev_fee, 0),
               )}
             </p>
           </div>

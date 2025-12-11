@@ -13,12 +13,7 @@ import {
 import { Link } from "@heroui/link";
 import { link as linkStyles } from "@heroui/theme";
 import { Button } from "@heroui/button";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
@@ -96,10 +91,7 @@ export const Navbar = () => {
         </ul>
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
+      <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
@@ -113,18 +105,11 @@ export const Navbar = () => {
             <DropdownMenu aria-label="Admin Menu">
               <>
                 {siteConfig.adminNavItems.map((item) => (
-                  <DropdownItem
-                    key={item.href}
-                    onPress={() => router.push(item.href)}
-                  >
+                  <DropdownItem key={item.href} onPress={() => router.push(item.href)}>
                     {item.label}
                   </DropdownItem>
                 ))}
-                <DropdownItem
-                  key="logout"
-                  color="danger"
-                  onPress={handleLogout}
-                >
+                <DropdownItem key="logout" color="danger" onPress={handleLogout}>
                   登出
                 </DropdownItem>
               </>
@@ -148,12 +133,7 @@ export const Navbar = () => {
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
-              <Link
-                color={"foreground"}
-                href={item.href}
-                size="lg"
-                onPress={handleLinkClick}
-              >
+              <Link color={"foreground"} href={item.href} size="lg" onPress={handleLinkClick}>
                 {item.label}
               </Link>
             </NavbarMenuItem>
@@ -163,23 +143,13 @@ export const Navbar = () => {
               <div className="my-2 border-t border-divider" />
               {siteConfig.adminNavItems.map((item, index) => (
                 <NavbarMenuItem key={`admin-${item}-${index}`}>
-                  <Link
-                    color={"primary"}
-                    href={item.href}
-                    size="lg"
-                    onPress={handleLinkClick}
-                  >
+                  <Link color={"primary"} href={item.href} size="lg" onPress={handleLinkClick}>
                     {item.label}
                   </Link>
                 </NavbarMenuItem>
               ))}
               <NavbarMenuItem>
-                <Button
-                  className="w-full"
-                  color="danger"
-                  variant="flat"
-                  onPress={handleLogout}
-                >
+                <Button className="w-full" color="danger" variant="flat" onPress={handleLogout}>
                   登出
                 </Button>
               </NavbarMenuItem>

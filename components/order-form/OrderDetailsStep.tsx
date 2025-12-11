@@ -80,9 +80,7 @@ export function OrderDetailsStep({
     <Card className="w-full max-w-2xl shadow-small p-3">
       <CardHeader className="flex flex-col items-start gap-1 pb-0">
         <h2 className="text-2xl font-semibold">Step 2. 訂單資訊</h2>
-        <p className="text-sm text-default-500">
-          商品為貨到付款,請確保聯絡資訊正確。
-        </p>
+        <p className="text-sm text-default-500">商品為貨到付款,請確保聯絡資訊正確。</p>
       </CardHeader>
       <CardBody className="flex flex-col gap-6">
         <form className="flex flex-col gap-6" onSubmit={onSubmit}>
@@ -128,9 +126,7 @@ export function OrderDetailsStep({
               <div className="text-sm text-default-600 space-y-1 px-1">
                 <div className="flex justify-between">
                   <span>餐點金額：</span>
-                  <span className="font-medium">
-                    NT$ {pricing.cost.toFixed(0)}
-                  </span>
+                  <span className="font-medium">NT$ {pricing.cost.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>服務費：</span>
@@ -148,12 +144,8 @@ export function OrderDetailsStep({
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-default-700">
-                圖片（選填）
-              </span>
-              <p className="text-xs text-default-500">
-                若有先訂購可上傳截圖，檔案大小限制 5MB
-              </p>
+              <span className="text-sm font-medium text-default-700">圖片（選填）</span>
+              <p className="text-xs text-default-500">若有先訂購可上傳截圖，檔案大小限制 5MB</p>
             </div>
             <input
               ref={fileInputRef}
@@ -193,9 +185,7 @@ export function OrderDetailsStep({
                 上傳菜單圖片
               </Button>
             )}
-            {errors.image && (
-              <p className="text-xs text-danger">{errors.image}</p>
-            )}
+            {errors.image && <p className="text-xs text-danger">{errors.image}</p>}
           </div>
 
           <Input
@@ -233,11 +223,7 @@ export function OrderDetailsStep({
             isInvalid={Boolean(errors.pickupLocation)}
             label="取貨地點"
             placeholder="請選擇取貨地點"
-            selectedKeys={
-              selectedPickupLocation
-                ? new Set([selectedPickupLocation])
-                : new Set([])
-            }
+            selectedKeys={selectedPickupLocation ? new Set([selectedPickupLocation]) : new Set([])}
             onSelectionChange={onPickupLocationChange}
           >
             {pickupLocations.map((location) => (
@@ -248,18 +234,12 @@ export function OrderDetailsStep({
           {showOffCampusAddress ? (
             <Input
               isRequired
-              aria-label={
-                selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"
-              }
+              aria-label={selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"}
               errorMessage={errors.address || undefined}
               isInvalid={Boolean(errors.address)}
-              label={
-                selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"
-              }
+              label={selectedPickupLocation === "校外" ? "校外地址" : "教學區地址"}
               placeholder={
-                selectedPickupLocation === "校外"
-                  ? "請輸入校外地址"
-                  : "請輸入教學區地址"
+                selectedPickupLocation === "校外" ? "請輸入校外地址" : "請輸入教學區地址"
               }
               value={offCampusAddress}
               onValueChange={onOffCampusAddressChange}
@@ -267,12 +247,7 @@ export function OrderDetailsStep({
           ) : null}
 
           <div className="flex gap-3">
-            <Button
-              className="w-full md:w-auto"
-              color="default"
-              variant="flat"
-              onPress={onBack}
-            >
+            <Button className="w-full md:w-auto" color="default" variant="flat" onPress={onBack}>
               回上一步
             </Button>
             <Button

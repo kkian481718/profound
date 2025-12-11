@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Select, SelectItem } from "@heroui/select";
 import { useDisclosure } from "@heroui/modal";
 
@@ -93,10 +87,7 @@ export default function EditStatusModal({
     try {
       const supabase = createClient();
 
-      const { error: deleteError } = await supabase
-        .from("orders")
-        .delete()
-        .eq("id", orderId);
+      const { error: deleteError } = await supabase.from("orders").delete().eq("id", orderId);
 
       if (deleteError) throw deleteError;
 
@@ -116,9 +107,7 @@ export default function EditStatusModal({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                編輯訂單狀態
-              </ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">編輯訂單狀態</ModalHeader>
               <ModalBody>
                 <div className="mb-4 rounded-lg bg-default-100 p-3">
                   <div className="mb-2 text-sm font-medium">訂單資訊</div>
@@ -128,30 +117,19 @@ export default function EditStatusModal({
                   </div>
                 </div>
 
-                <form
-                  className="flex flex-col gap-4"
-                  id="edit-status-form"
-                  onSubmit={handleSubmit}
-                >
+                <form className="flex flex-col gap-4" id="edit-status-form" onSubmit={handleSubmit}>
                   <Select
                     isRequired
                     label="訂單狀態"
                     selectedKeys={[orderStatus]}
                     onChange={(e) =>
-                      setOrderStatus(
-                        e.target.value as "pending" | "preparing" | "completed",
-                      )
+                      setOrderStatus(e.target.value as "pending" | "preparing" | "completed")
                     }
                   >
                     <SelectItem
                       key="pending"
                       startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="default"
-                          size="sm"
-                          variant="flat"
-                        >
+                        <Chip className="min-w-16" color="default" size="sm" variant="flat">
                           待處理
                         </Chip>
                       }
@@ -161,12 +139,7 @@ export default function EditStatusModal({
                     <SelectItem
                       key="preparing"
                       startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="primary"
-                          size="sm"
-                          variant="flat"
-                        >
+                        <Chip className="min-w-16" color="primary" size="sm" variant="flat">
                           準備中
                         </Chip>
                       }
@@ -176,12 +149,7 @@ export default function EditStatusModal({
                     <SelectItem
                       key="completed"
                       startContent={
-                        <Chip
-                          className="min-w-16"
-                          color="success"
-                          size="sm"
-                          variant="flat"
-                        >
+                        <Chip className="min-w-16" color="success" size="sm" variant="flat">
                           已完成
                         </Chip>
                       }
@@ -191,9 +159,7 @@ export default function EditStatusModal({
                   </Select>
 
                   {error && (
-                    <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">
-                      {error}
-                    </div>
+                    <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">{error}</div>
                   )}
                 </form>
               </ModalBody>
@@ -210,12 +176,7 @@ export default function EditStatusModal({
                   <Button color="default" variant="flat" onPress={onClose}>
                     取消
                   </Button>
-                  <Button
-                    color="primary"
-                    form="edit-status-form"
-                    isLoading={loading}
-                    type="submit"
-                  >
+                  <Button color="primary" form="edit-status-form" isLoading={loading} type="submit">
                     儲存變更
                   </Button>
                 </div>
@@ -230,19 +191,13 @@ export default function EditStatusModal({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                確認刪除訂單
-              </ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">確認刪除訂單</ModalHeader>
               <ModalBody>
                 <div className="space-y-4">
-                  <p className="text-default-700">
-                    您確定要刪除此訂單嗎？此操作無法復原。
-                  </p>
+                  <p className="text-default-700">您確定要刪除此訂單嗎？此操作無法復原。</p>
 
                   <div className="rounded-lg bg-danger-50 p-3">
-                    <div className="mb-2 text-sm font-medium text-danger-600">
-                      訂單資訊
-                    </div>
+                    <div className="mb-2 text-sm font-medium text-danger-600">訂單資訊</div>
                     <div className="space-y-1 text-xs text-danger-600">
                       <div>店家：{orderInfo.storeName}</div>
                       <div>社群名稱：{orderInfo.pickupName}</div>
@@ -250,9 +205,7 @@ export default function EditStatusModal({
                   </div>
 
                   {error && (
-                    <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">
-                      {error}
-                    </div>
+                    <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">{error}</div>
                   )}
                 </div>
               </ModalBody>

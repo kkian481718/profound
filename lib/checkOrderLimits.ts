@@ -9,9 +9,7 @@ export interface OrderLimitCheck {
   storeCount?: number;
 }
 
-export async function checkOrderLimits(
-  storeId: string,
-): Promise<OrderLimitCheck> {
+export async function checkOrderLimits(storeId: string): Promise<OrderLimitCheck> {
   try {
     const supabase = createClient();
     const today = new Date();
@@ -25,9 +23,7 @@ export async function checkOrderLimits(
       .eq("setting_key", "max_daily_orders")
       .single();
 
-    const globalLimit = globalSetting?.setting_value
-      ? Number(globalSetting.setting_value)
-      : null;
+    const globalLimit = globalSetting?.setting_value ? Number(globalSetting.setting_value) : null;
 
     // 獲取店家設定
     const { data: store } = await supabase
@@ -96,9 +92,7 @@ export async function checkGlobalOrderLimit(): Promise<OrderLimitCheck> {
       .eq("setting_key", "max_daily_orders")
       .single();
 
-    const globalLimit = globalSetting?.setting_value
-      ? Number(globalSetting.setting_value)
-      : null;
+    const globalLimit = globalSetting?.setting_value ? Number(globalSetting.setting_value) : null;
 
     // 如果沒有設定全域限制，則允許下單
     if (globalLimit === null) {

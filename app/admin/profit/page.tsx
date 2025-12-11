@@ -40,9 +40,7 @@ interface ProfitSummary {
 export default function ProfitPage() {
   const [profitData, setProfitData] = useState<ProfitSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"single" | "week" | "month">(
-    "single",
-  );
+  const [timeRange, setTimeRange] = useState<"single" | "week" | "month">("single");
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
 
@@ -96,11 +94,7 @@ export default function ProfitPage() {
         // 使用選擇的月份日期（月初到月底）
         const selectedDateObj = new Date(selectedMonthDate);
 
-        startDate = new Date(
-          selectedDateObj.getFullYear(),
-          selectedDateObj.getMonth(),
-          1,
-        );
+        startDate = new Date(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), 1);
         startDate.setHours(0, 0, 0, 0);
         referenceDate = selectedDateObj;
       }
@@ -194,15 +188,7 @@ export default function ProfitPage() {
         const dailyGroupedData: Record<string, DailyProfitData> = {};
 
         // 初始化週一到週日的數據
-        const dayNames = [
-          "週一",
-          "週二",
-          "週三",
-          "週四",
-          "週五",
-          "週六",
-          "週日",
-        ];
+        const dayNames = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
 
         for (let i = 0; i < 7; i++) {
           const date = new Date(startDate);
@@ -229,8 +215,7 @@ export default function ProfitPage() {
             const localDateStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${String(orderDate.getDate()).padStart(2, "0")}`;
 
             if (dailyGroupedData[localDateStr]) {
-              dailyGroupedData[localDateStr].total_shipping_fee +=
-                order.shipping_fee;
+              dailyGroupedData[localDateStr].total_shipping_fee += order.shipping_fee;
               dailyGroupedData[localDateStr].total_dev_fee += order.dev_fee;
               dailyGroupedData[localDateStr].total_amount += order.total_amount;
               dailyGroupedData[localDateStr].order_count += 1;
@@ -271,8 +256,7 @@ export default function ProfitPage() {
             const localDateStr = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${String(orderDate.getDate()).padStart(2, "0")}`;
 
             if (dailyGroupedData[localDateStr]) {
-              dailyGroupedData[localDateStr].total_shipping_fee +=
-                order.shipping_fee;
+              dailyGroupedData[localDateStr].total_shipping_fee += order.shipping_fee;
               dailyGroupedData[localDateStr].total_dev_fee += order.dev_fee;
               dailyGroupedData[localDateStr].total_amount += order.total_amount;
               dailyGroupedData[localDateStr].order_count += 1;
@@ -284,25 +268,11 @@ export default function ProfitPage() {
       }
 
       const summary: ProfitSummary = {
-        total_shipping_fee: profitDataArray.reduce(
-          (sum, item) => sum + item.total_shipping_fee,
-          0,
-        ),
-        total_dev_fee: profitDataArray.reduce(
-          (sum, item) => sum + item.total_dev_fee,
-          0,
-        ),
-        total_amount: profitDataArray.reduce(
-          (sum, item) => sum + item.total_amount,
-          0,
-        ),
-        total_orders: profitDataArray.reduce(
-          (sum, item) => sum + item.order_count,
-          0,
-        ),
-        profit_data: profitDataArray.sort(
-          (a, b) => b.total_amount - a.total_amount,
-        ),
+        total_shipping_fee: profitDataArray.reduce((sum, item) => sum + item.total_shipping_fee, 0),
+        total_dev_fee: profitDataArray.reduce((sum, item) => sum + item.total_dev_fee, 0),
+        total_amount: profitDataArray.reduce((sum, item) => sum + item.total_amount, 0),
+        total_orders: profitDataArray.reduce((sum, item) => sum + item.order_count, 0),
+        profit_data: profitDataArray.sort((a, b) => b.total_amount - a.total_amount),
         daily_profit_data: dailyProfitData,
       };
 
@@ -361,9 +331,7 @@ export default function ProfitPage() {
         <div>
           <h1 className="text-3xl font-bold">利潤分析</h1>
           {getDateRangeDisplay() && (
-            <p className="text-sm text-default-500 mt-1">
-              {getDateRangeDisplay()}
-            </p>
+            <p className="text-sm text-default-500 mt-1">{getDateRangeDisplay()}</p>
           )}
         </div>
         <div className="flex items-center gap-4">
@@ -432,23 +400,17 @@ export default function ProfitPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
             <Card>
               <CardHeader className="pb-2">
-                <h4 className="text-sm font-medium text-default-600">
-                  總訂單數
-                </h4>
+                <h4 className="text-sm font-medium text-default-600">總訂單數</h4>
               </CardHeader>
               <CardBody className="pt-0">
-                <p className="text-2xl font-bold text-primary">
-                  {profitData.total_orders}
-                </p>
+                <p className="text-2xl font-bold text-primary">{profitData.total_orders}</p>
               </CardBody>
             </Card>
 
             <div className="flex gap-2">
               <Card className="flex-1">
                 <CardHeader className="pb-2">
-                  <h4 className="text-sm font-medium text-default-600">
-                    總運費
-                  </h4>
+                  <h4 className="text-sm font-medium text-default-600">總運費</h4>
                 </CardHeader>
                 <CardBody className="pt-0">
                   <p className="text-2xl font-bold text-success">
@@ -459,9 +421,7 @@ export default function ProfitPage() {
 
               <Card className="flex-1">
                 <CardHeader className="pb-2">
-                  <h4 className="text-sm font-medium text-default-600">
-                    總開發費
-                  </h4>
+                  <h4 className="text-sm font-medium text-default-600">總開發費</h4>
                 </CardHeader>
                 <CardBody className="pt-0">
                   <p className="text-2xl font-bold text-warning">
@@ -476,39 +436,34 @@ export default function ProfitPage() {
                 <h4 className="text-sm font-medium text-default-600">總金額</h4>
               </CardHeader>
               <CardBody className="pt-0">
-                <p className="text-2xl font-bold">
-                  {formatCurrency(profitData.total_amount)}
-                </p>
+                <p className="text-2xl font-bold">{formatCurrency(profitData.total_amount)}</p>
               </CardBody>
             </Card>
           </div>
 
           {/* 每日利潤圖表 (週/月) */}
-          {(timeRange === "week" || timeRange === "month") &&
-            profitData.daily_profit_data && (
-              <Card>
-                <CardHeader>
-                  <h4 className="text-lg font-semibold">每日利潤分析</h4>
-                </CardHeader>
-                <Divider />
-                <CardBody>
-                  {profitData.daily_profit_data.some(
-                    (day) => day.order_count > 0,
-                  ) ? (
-                    <DailyProfitChart
-                      data={profitData.daily_profit_data}
-                      timeRange={timeRange as "week" | "month"}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center py-12">
-                      <p className="text-default-500">
-                        {timeRange === "week" ? "本週" : "本月"}暫無利潤資料
-                      </p>
-                    </div>
-                  )}
-                </CardBody>
-              </Card>
-            )}
+          {(timeRange === "week" || timeRange === "month") && profitData.daily_profit_data && (
+            <Card>
+              <CardHeader>
+                <h4 className="text-lg font-semibold">每日利潤分析</h4>
+              </CardHeader>
+              <Divider />
+              <CardBody>
+                {profitData.daily_profit_data.some((day) => day.order_count > 0) ? (
+                  <DailyProfitChart
+                    data={profitData.daily_profit_data}
+                    timeRange={timeRange as "week" | "month"}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center py-12">
+                    <p className="text-default-500">
+                      {timeRange === "week" ? "本週" : "本月"}暫無利潤資料
+                    </p>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          )}
 
           {/* 店家利潤圖表 */}
           <Card>
@@ -522,11 +477,7 @@ export default function ProfitPage() {
               ) : (
                 <div className="flex items-center justify-center py-12">
                   <p className="text-default-500">
-                    {timeRange === "single"
-                      ? "該日"
-                      : timeRange === "week"
-                        ? "本週"
-                        : "本月"}
+                    {timeRange === "single" ? "該日" : timeRange === "week" ? "本週" : "本月"}
                     暫無利潤資料
                   </p>
                 </div>
@@ -552,16 +503,9 @@ export default function ProfitPage() {
                   </thead>
                   <tbody>
                     {profitData.profit_data.map((item) => (
-                      <tr
-                        key={item.store_id}
-                        className="border-b border-divider last:border-b-0"
-                      >
-                        <td className="py-2 px-2 font-medium">
-                          {item.store_name}
-                        </td>
-                        <td className="py-2 px-2 text-right">
-                          {item.order_count}
-                        </td>
+                      <tr key={item.store_id} className="border-b border-divider last:border-b-0">
+                        <td className="py-2 px-2 font-medium">{item.store_name}</td>
+                        <td className="py-2 px-2 text-right">{item.order_count}</td>
                         <td className="py-2 px-2 text-right font-bold">
                           {formatCurrency(item.total_amount)}
                         </td>

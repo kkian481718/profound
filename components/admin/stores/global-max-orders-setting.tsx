@@ -11,9 +11,7 @@ interface GlobalMaxOrdersSettingProps {
   onSuccess?: () => void;
 }
 
-export default function GlobalMaxOrdersSetting({
-  onSuccess,
-}: GlobalMaxOrdersSettingProps) {
+export default function GlobalMaxOrdersSetting({ onSuccess }: GlobalMaxOrdersSettingProps) {
   const [maxOrders, setMaxOrders] = useState<string>("100");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -178,9 +176,7 @@ export default function GlobalMaxOrdersSetting({
             </svg>
           </div>
           <div>
-            <h2 className="text-md font-semibold text-foreground">
-              每日訂單上限
-            </h2>
+            <h2 className="text-md font-semibold text-foreground">每日訂單上限</h2>
             <p className="text-sm text-default-500">超過後，系統會停止接單</p>
           </div>
         </div>
@@ -191,15 +187,12 @@ export default function GlobalMaxOrdersSetting({
         <div className="flex items-center justify-between rounded-lg bg-primary-50 border border-primary-200 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary">
-              <span className="text-lg font-bold text-white">
-                {todayOrderCount}
-              </span>
+              <span className="text-lg font-bold text-white">{todayOrderCount}</span>
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">今日訂單數</p>
               <p className="text-xs text-default-500">
-                上限 {maxOrders} 單 • 剩餘{" "}
-                {Math.max(0, Number(maxOrders) - todayOrderCount)} 單
+                上限 {maxOrders} 單 • 剩餘 {Math.max(0, Number(maxOrders) - todayOrderCount)} 單
               </p>
             </div>
           </div>
