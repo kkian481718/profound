@@ -42,6 +42,7 @@ export async function cleanupOldOrderImages(daysOld: number = 30): Promise<Clean
   try {
     // 計算截止日期
     const cutoffDate = new Date();
+
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
     const cutoffDateISO = cutoffDate.toISOString();
 
@@ -77,6 +78,7 @@ export async function cleanupOldOrderImages(daysOld: number = 30): Promise<Clean
       if (order.menu_image_url) {
         // URL 格式: https://xxx.supabase.co/storage/v1/object/public/orders/order-images/filename.jpg
         const urlParts = order.menu_image_url.split("/storage/v1/object/public/orders/");
+
         if (urlParts.length === 2) {
           imagePaths.push(urlParts[1]);
           orderIdsToUpdate.push(order.id);
@@ -137,6 +139,7 @@ export async function cleanupOldOrderImages(daysOld: number = 30): Promise<Clean
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+
     errors.push(errorMessage);
 
     return {
@@ -160,6 +163,7 @@ export async function getCleanupPreview(daysOld: number = 30) {
   const supabase = createAdminClient();
 
   const cutoffDate = new Date();
+
   cutoffDate.setDate(cutoffDate.getDate() - daysOld);
   const cutoffDateISO = cutoffDate.toISOString();
 
