@@ -13,6 +13,8 @@ CREATE TABLE stores (
   is_open BOOLEAN DEFAULT false,
   order_deadline TIMESTAMP WITH TIME ZONE,
   max_daily_orders INTEGER DEFAULT NULL,
+  extra_shipping_fee DECIMAL(10, 2) DEFAULT NULL,
+  extra_shipping_threshold DECIMAL(10, 2) DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -29,6 +31,8 @@ CREATE INDEX idx_stores_created_at ON stores(created_at);
 - `is_open`: 是否開放接單
 - `order_deadline`: 最後下單時間
 - `max_daily_orders`: 每日最大訂單數限制（NULL 表示無限制）
+- `extra_shipping_fee`: 額外運費金額（遠程店家加收運費，NULL 表示不加收）
+- `extra_shipping_threshold`: 免額外運費門檻（訂單金額超過此值不加收額外運費，NULL 表示無門檻限制）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 

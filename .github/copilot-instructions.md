@@ -89,7 +89,13 @@ Customer Order → Store Validation → Order Limits Check → Price Calculation
 ### Environment Variables
 
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `CRON_SECRET`: Protects automated store closure endpoint
+- `SUPABASE_SERVICE_ROLE_KEY`: For admin operations (cleanup jobs)
+- `CRON_SECRET`: Protects automated cron endpoints
+
+### GitHub Actions Secrets
+
+- `CRON_SECRET`: Same as environment variable
+- `APP_URL`: Production URL (e.g., https://your-app.vercel.app)
 
 ### Development Commands
 
@@ -108,8 +114,10 @@ Customer Order → Store Validation → Order Limits Check → Price Calculation
 ### Cron Jobs
 
 - `GET /api/cron/close-stores`: Automated store deadline enforcement
-- Requires `Authorization: Bearer {CRON_SECRET}` header
-- Returns closure count and timestamp
+- `GET /api/cron/cleanup-images`: Preview old order images to cleanup
+- `POST /api/cron/cleanup-images`: Execute cleanup of old order images (default: 30 days)
+- All cron endpoints require `Authorization: Bearer {CRON_SECRET}` header
+- GitHub Actions workflow runs weekly cleanup on Sundays 3:00 AM (UTC+8)
 
 ## Common Patterns
 

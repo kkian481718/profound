@@ -18,6 +18,7 @@ import {
 import AddStoreModal from "@/components/admin/stores/add-store-modal";
 import DeadlineEditor from "@/components/admin/stores/deadline-editor";
 import GlobalMaxOrdersSetting from "@/components/admin/stores/global-max-orders-setting";
+import StoreExtraShippingEditor from "@/components/admin/stores/store-extra-shipping-editor";
 import StoreMaxOrdersEditor from "@/components/admin/stores/store-max-orders-editor";
 import StorePlaceholderEditor from "@/components/admin/stores/store-placeholder-editor";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +31,8 @@ interface Store {
   order_deadline: string | null;
   max_daily_orders: number | null;
   menu_placeholder: string | null;
+  extra_shipping_fee: number | null;
+  extra_shipping_threshold: number | null;
   created_at: string;
 }
 
@@ -426,6 +429,37 @@ export default function StoresPage() {
                           </div>
                           <StoreMaxOrdersEditor
                             currentMaxOrders={store.max_daily_orders}
+                            storeId={store.id}
+                            onSuccess={fetchStores}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <svg
+                              className="h-4 w-4 text-warning"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
+                              <path
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              />
+                            </svg>
+                            <span className="font-medium text-foreground">遠距運費</span>
+                          </div>
+                          <StoreExtraShippingEditor
+                            currentExtraFee={store.extra_shipping_fee}
+                            currentThreshold={store.extra_shipping_threshold}
                             storeId={store.id}
                             onSuccess={fetchStores}
                           />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { calculateOrderPricing } from "../utils/pricing";
+import { calculateOrderPricing, StoreShippingConfig } from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
 import { trackOrderEvent } from "@/lib/gtag";
@@ -18,6 +18,7 @@ type SubmitOrderParams = {
   offCampusAddress: string;
   uploadedImage: File | null;
   showOffCampusAddress: boolean;
+  storeShippingConfig?: StoreShippingConfig;
 };
 
 export function useOrderSubmit() {
@@ -93,9 +94,9 @@ export function useOrderSubmit() {
         menuImageUrl = await uploadImageToStorage(params.uploadedImage);
       }
 
-      // 使用統一的價格計算函數
+      // 使用統一的價格計算函數（包含店家額外運費設定）
       const costNum = parseFloat(params.cost);
-      const pricing = calculateOrderPricing(costNum);
+      const pricing = calculateOrderPricing(costNum, params.storeShippingConfig);
 
       const orderData = {
         store_id: params.selectedStore,

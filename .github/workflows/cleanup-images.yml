@@ -1,0 +1,63 @@
+name: Cleanup Old Order Images
+
+on:
+  # 每週日凌晨 3:00 (UTC+8 台灣時間) 執行
+  # UTC 時間為週六 19:00
+  schedule:
+    - cron: "0 19 * * 6"
+
+  # 允許手動觸發
+  workflow_dispatch:
+    inputs:
+      days_old:
+        description: "清理超過幾天的圖片"
+        required: false
+        default: "30"
+      dry_run:
+        description: "僅預覽不實際刪除"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  cleanup-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cleanup old order images
+        run: |
+          DAYS_OLD="${{ github.event.inputs.days_old || '30' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          echo "🧹 開始清理超過 ${DAYS_OLD} 天的訂單圖片..."
+          echo "Dry run mode: ${DRY_RUN}"
+
+          if [ "$DRY_RUN" = "true" ]; then
+            # 預覽模式 - 使用 GET
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              "${{ secrets.APP_URL }}/api/cron/cleanup-images?days=${DAYS_OLD}")
+          else
+            # 實際清理 - 使用 POST
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              "${{ secrets.APP_URL }}/api/cron/cleanup-images?days=${DAYS_OLD}")
+          fi
+
+          # 分離 response body 和 status code
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ 清理失敗，HTTP 狀態碼: $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "✅ 清理完成"

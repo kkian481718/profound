@@ -113,6 +113,15 @@ export function OrderForm({ stores }: OrderFormProps) {
       return;
     }
 
+    // 取得選中店家的運費設定
+    const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
+    const storeShippingConfig = selectedStoreData
+      ? {
+          extraShippingFee: selectedStoreData.extra_shipping_fee,
+          extraShippingThreshold: selectedStoreData.extra_shipping_threshold,
+        }
+      : undefined;
+
     const success = await submitOrder({
       selectedStore: selectedStore!,
       menuItems,
@@ -123,6 +132,7 @@ export function OrderForm({ stores }: OrderFormProps) {
       offCampusAddress,
       uploadedImage,
       showOffCampusAddress,
+      storeShippingConfig,
     });
 
     if (success) {

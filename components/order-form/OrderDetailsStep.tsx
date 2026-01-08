@@ -66,15 +66,29 @@ export function OrderDetailsStep({
   onBack,
   onSubmit,
 }: OrderDetailsStepProps) {
-  // 使用統一的價格計算函數
+  // 取得選中店家的資料
+  const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
+
+  // 取得店家運費設定
+  const storeShippingConfig = selectedStoreData
+    ? {
+        extraShippingFee: selectedStoreData.extra_shipping_fee,
+        extraShippingThreshold: selectedStoreData.extra_shipping_threshold,
+      }
+    : undefined;
+
+  // 使用統一的價格計算函數（包含店家額外運費設定）
   const costNum = parseFloat(cost) || 0;
-  const pricing = calculateOrderPricing(costNum);
+  const pricing = calculateOrderPricing(costNum, storeShippingConfig);
 
   // 取得選中店家的自訂 placeholder
-  const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
   const menuPlaceholder =
     selectedStoreData?.menu_placeholder ||
     "例如：大麥克套餐 x2（去洋蔥）\n薯條大份 x1\n可樂中杯 x2";
+
+  // 檢查店家是否有額外運費設定
+  const hasExtraShippingFee =
+    selectedStoreData?.extra_shipping_fee && selectedStoreData.extra_shipping_fee > 0;
 
   return (
     <Card className="w-full max-w-2xl shadow-small p-3">
@@ -129,11 +143,34 @@ export function OrderDetailsStep({
                   <span className="font-medium">NT$ {pricing.cost.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>服務費：</span>
+                  <span>基本服務費：</span>
                   <span className="font-medium">
-                    NT$ {(pricing.devFee + pricing.shippingFee).toFixed(0)}
+                    NT$ {(pricing.devFee + pricing.baseShippingFee).toFixed(0)}
                   </span>
                 </div>
+                {hasExtraShippingFee && (
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1">
+                      遠距運費：
+                      {pricing.extraShippingFee === 0 && (
+                        <span className="text-xs text-success">（已達免運門檻）</span>
+                      )}
+                    </span>
+                    <span
+                      className={`font-medium ${pricing.extraShippingFee === 0 ? "line-through text-default-400" : "text-warning"}`}
+                    >
+                      NT$ {selectedStoreData?.extra_shipping_fee?.toFixed(0) || 0}
+                    </span>
+                  </div>
+                )}
+                {hasExtraShippingFee &&
+                  selectedStoreData?.extra_shipping_threshold &&
+                  pricing.extraShippingFee > 0 && (
+                    <div className="text-xs text-warning px-1">
+                      ⚠ 訂單滿 NT$ {selectedStoreData.extra_shipping_threshold.toFixed(0)}{" "}
+                      可免遠距運費
+                    </div>
+                  )}
                 <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
                   <span>總金額：</span>
                   <span>NT$ {pricing.totalAmount.toFixed(0)}</span>

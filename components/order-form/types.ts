@@ -4,6 +4,8 @@ export type StoreOption = {
   order_deadline?: string | null;
   max_daily_orders?: number | null;
   menu_placeholder?: string | null;
+  extra_shipping_fee?: number | null;
+  extra_shipping_threshold?: number | null;
 };
 
 export type ErrorState = {
