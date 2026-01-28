@@ -46,6 +46,7 @@ CREATE INDEX idx_stores_created_at ON stores(created_at);
 CREATE TABLE orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  store_name VARCHAR(255),
   order_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
   -- 外送訂單欄位
@@ -84,6 +85,7 @@ CREATE INDEX idx_orders_pickup_phone ON orders(pickup_phone);
 
 - `id`: 訂單唯一識別碼 (UUID)
 - `store_id`: 店家 ID (外鍵參照 stores.id，必填)
+- `store_name`: 店家名稱（冗餘欄位，方便同步/查詢）
 - `order_time`: 下訂時間
 
 **外送訂單欄位：**

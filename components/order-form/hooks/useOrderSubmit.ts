@@ -10,6 +10,7 @@ import { checkOrderLimits } from "@/lib/checkOrderLimits";
 
 type SubmitOrderParams = {
   selectedStore: string;
+  storeName: string;
   menuItems: string;
   cost: string;
   phoneNumber: string;
@@ -100,6 +101,7 @@ export function useOrderSubmit() {
 
       const orderData = {
         store_id: params.selectedStore,
+        store_name: params.storeName,
         pickup_location: params.showOffCampusAddress
           ? params.selectedPickupLocation === "校內教學區"
             ? `[校內教學區] ${params.offCampusAddress}`
@@ -130,7 +132,7 @@ export function useOrderSubmit() {
 
       // 追蹤訂單完成事件
       trackOrderEvent("order_completed", {
-        store_name: params.selectedStore,
+        store_name: params.storeName,
         order_total: pricing.totalAmount,
         pickup_location: params.showOffCampusAddress
           ? params.selectedPickupLocation === "校內教學區"
@@ -162,7 +164,7 @@ export function useOrderSubmit() {
 
       // 追蹤訂單失敗事件
       trackOrderEvent("order_failed", {
-        store_name: params.selectedStore,
+        store_name: params.storeName,
       });
 
       return false;

@@ -122,8 +122,11 @@ export function OrderForm({ stores }: OrderFormProps) {
         }
       : undefined;
 
+    const storeName = selectedStoreData?.label || "未知店家";
+
     const success = await submitOrder({
       selectedStore: selectedStore!,
+      storeName,
       menuItems,
       cost,
       phoneNumber,

@@ -152,3 +152,14 @@ const { isOpen, onOpen, onOpenChange } = useDisclosure();
 - **Supabase RLS**: All data security handled at database level
 - **Image Storage**: Public bucket with cache control headers
 - **Cron**: External service needed for automated store closure
+
+## Disaster Recovery
+
+### Google Sheets Order Sync
+
+When Supabase is unavailable, orders are backed up to Google Sheets for emergency access.
+
+- **Edge Function**: `supabase/functions/sync-to-sheets/` - Syncs new orders to Google Sheets
+- **Trigger**: Database Webhook on `orders` table INSERT events
+- **Setup Guide**: See `docs/google-sheets-sync-setup.md`
+- **Synced Fields**: order_time, store_name, pickup info, costs, status, notes
