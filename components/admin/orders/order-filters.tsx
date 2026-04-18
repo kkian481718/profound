@@ -46,7 +46,7 @@ export default function OrderFilters({
   onShowTodayOnlyChange,
   onSortByChange,
 }: OrderFiltersProps) {
-  const hasActiveFilters = filterStore || filterDelivery || filterLocation || !showTodayOnly;
+  const hasActiveFilters = filterStore || filterDelivery || filterLocation || showTodayOnly;
 
   return (
     <Card>

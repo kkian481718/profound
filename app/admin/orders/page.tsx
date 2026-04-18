@@ -31,7 +31,7 @@ function OrdersContent() {
   const [filterStore, setFilterStore] = useState("");
   const [filterDelivery, setFilterDelivery] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
-  const [showTodayOnly, setShowTodayOnly] = useState(true);
+  const [showTodayOnly, setShowTodayOnly] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedOrderForContent, setSelectedOrderForContent] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -231,7 +231,7 @@ function OrdersContent() {
     setFilterStore("");
     setFilterDelivery("");
     setFilterLocation("");
-    setShowTodayOnly(true);
+    setShowTodayOnly(false);
     setSortBy("order_time");
     router.push("/admin/orders");
   };
