@@ -283,6 +283,10 @@ export function OrderDetailsStep({
             />
           ) : null}
 
+          <div className="rounded-large border border-warning-200 bg-warning-50 px-4 py-3 text-xs leading-relaxed text-warning-700">
+            本服務屬於委託代買性質，因代購車程較長（單趟約20分鐘）且運費僅收餐點金額10%，為維持服務營運，委託人同意將該筆消費之發票權利贈與代購方處理。若需自行保留發票，請於下單前告知，將另行核算服務費用。
+          </div>
+
           <div className="flex gap-3">
             <Button className="w-full md:w-auto" color="default" variant="flat" onPress={onBack}>
               回上一步
