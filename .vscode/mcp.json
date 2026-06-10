@@ -1,13 +1,13 @@
 {
-	"servers": {
-		"supabase": {
-			"type": "http",
-			"url": "https://mcp.supabase.com/mcp?project_ref=zqrzzzwgpwnslmktzhwh"
-		},
-		"Vercel": {
-			"url": "https://mcp.vercel.com",
-			"type": "http"
-		}
-	},
-	"inputs": []
+  "inputs": [],
+  "servers": {
+    "Vercel": {
+      "url": "https://mcp.vercel.com",
+      "type": "http"
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=zqrzzzwgpwnslmktzhwh&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching%2Cstorage"
+    }
+  }
 }

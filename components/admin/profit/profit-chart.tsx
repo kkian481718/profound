@@ -45,14 +45,14 @@ export default function ProfitChart({ data }: ProfitChartProps) {
   return (
     <div className="space-y-6">
       {/* 圖例 */}
-      <div className="flex flex-wrap gap-4 text-sm">
+      <div className="flex flex-wrap gap-5 text-sm font-medium">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-success rounded" />
-          <span>運費</span>
+          <div className="w-3 h-3 bg-[#0ea5e9] rounded-full shadow-sm" />
+          <span className="text-[#0284c7]">運費</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-warning rounded" />
-          <span>開發費</span>
+          <div className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-sm" />
+          <span className="text-[#6d28d9]">開發費</span>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
                 <div className="h-full flex">
                   {/* 運費部分 */}
                   <div
-                    className="bg-success h-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300"
+                    className="bg-[#0ea5e9] h-full flex items-center justify-center text-white text-xs font-bold tracking-wide transition-all duration-300"
                     style={{
                       width: `${item.shippingPercentage}%`,
                       minWidth: item.total_shipping_fee > 0 ? "20px" : "0",
@@ -81,7 +81,7 @@ export default function ProfitChart({ data }: ProfitChartProps) {
                   </div>
                   {/* 開發費部分 */}
                   <div
-                    className="bg-warning h-full flex items-center justify-center text-white text-xs font-medium transition-all duration-300"
+                    className="bg-[#8b5cf6] h-full flex items-center justify-center text-white text-xs font-bold tracking-wide transition-all duration-300"
                     style={{
                       width: `${item.devFeePercentage}%`,
                       minWidth: item.total_dev_fee > 0 ? "20px" : "0",

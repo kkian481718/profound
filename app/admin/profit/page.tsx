@@ -413,7 +413,7 @@ export default function ProfitPage() {
                   <h4 className="text-sm font-medium text-default-600">總運費</h4>
                 </CardHeader>
                 <CardBody className="pt-0">
-                  <p className="text-2xl font-bold text-success">
+                  <p className="text-2xl font-bold text-[#0284c7]">
                     {formatCurrency(profitData.total_shipping_fee)}
                   </p>
                 </CardBody>
@@ -424,7 +424,7 @@ export default function ProfitPage() {
                   <h4 className="text-sm font-medium text-default-600">總開發費</h4>
                 </CardHeader>
                 <CardBody className="pt-0">
-                  <p className="text-2xl font-bold text-warning">
+                  <p className="text-2xl font-bold text-[#6d28d9]">
                     {formatCurrency(profitData.total_dev_fee)}
                   </p>
                 </CardBody>
