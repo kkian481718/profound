@@ -63,17 +63,20 @@ export default function DailyProfitChart({ data, timeRange = "week" }: DailyProf
     if (maxValue <= 2000) return 500;
     if (maxValue <= 5000) return 1000;
     if (maxValue <= 10000) return 2000;
+
     return Math.ceil(maxValue / 5000) * 1000;
   })();
 
   const maxTick = Math.ceil(maxValue / intervalAmount) * intervalAmount;
   const yAxisTicks = [];
+
   for (let i = 0; i <= maxTick; i += intervalAmount) {
     yAxisTicks.push(i);
   }
 
   const getX = (index: number) => {
     if (chartData.length <= 1) return paddingX + chartWidth / 2;
+
     return paddingX + (index / (chartData.length - 1)) * chartWidth;
   };
 
@@ -141,32 +144,33 @@ export default function DailyProfitChart({ data, timeRange = "week" }: DailyProf
       <div className="relative w-full overflow-x-auto overflow-y-hidden pb-2 -mt-2">
         <div className="min-w-[500px]">
           <svg
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             className="w-full h-auto font-sans"
             preserveAspectRatio="none"
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           >
             {/* 格線與 Y 軸數值 (以固定間距渲染) */}
             {yAxisTicks.map((tick, i) => {
               const y = getY(tick);
+
               return (
                 <g key={`tick-${i}`}>
                   <line
-                    x1={paddingX}
-                    y1={y}
-                    x2={svgWidth - paddingX}
-                    y2={y}
-                    stroke="currentColor"
                     className="text-default-200"
-                    strokeWidth="1"
+                    stroke="currentColor"
                     strokeDasharray="3 4"
+                    strokeWidth="1"
+                    x1={paddingX}
+                    x2={svgWidth - paddingX}
+                    y1={y}
+                    y2={y}
                   />
                   <text
+                    className="text-default-400 font-medium"
+                    fill="currentColor"
+                    fontSize="10"
+                    textAnchor="end"
                     x={paddingX - 8}
                     y={y + 3}
-                    textAnchor="end"
-                    fontSize="10"
-                    fill="currentColor"
-                    className="text-default-400 font-medium"
                   >
                     {tick}
                   </text>
@@ -176,23 +180,23 @@ export default function DailyProfitChart({ data, timeRange = "week" }: DailyProf
 
             {/* 開發費折線 */}
             <path
+              className="transition-all duration-500 ease-out"
               d={`M ${devFeePoints}`}
               fill="none"
               stroke="#8b5cf6"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="transition-all duration-500 ease-out"
               strokeWidth="2.5"
             />
 
             {/* 運費折線 */}
             <path
+              className="transition-all duration-500 ease-out"
               d={`M ${shippingPoints}`}
               fill="none"
               stroke="#0ea5e9"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="transition-all duration-500 ease-out"
               strokeWidth="2.5"
             />
 
@@ -208,12 +212,12 @@ export default function DailyProfitChart({ data, timeRange = "week" }: DailyProf
                 <g key={item.date} className="group">
                   {/* X 軸標籤 */}
                   <text
+                    className={`transition-colors duration-300 ${isActive ? "text-default-900 font-bold" : "text-default-500"}`}
+                    fill="currentColor"
+                    fontSize="11"
+                    textAnchor="middle"
                     x={x}
                     y={svgHeight - 8}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill="currentColor"
-                    className={`transition-colors duration-300 ${isActive ? "text-default-900 font-bold" : "text-default-500"}`}
                   >
                     {item.day_name}
                   </text>
@@ -221,47 +225,47 @@ export default function DailyProfitChart({ data, timeRange = "week" }: DailyProf
                   {/* 如果點擊或 Hover 動態顯示垂直線 */}
                   {isActive && (
                     <line
-                      x1={x}
-                      y1={paddingTop}
-                      x2={x}
-                      y2={svgHeight - paddingBottom}
-                      stroke="currentColor"
                       className="text-default-300"
-                      strokeWidth="1.5"
+                      stroke="currentColor"
                       strokeDasharray="4 4"
+                      strokeWidth="1.5"
+                      x1={x}
+                      x2={x}
+                      y1={paddingTop}
+                      y2={svgHeight - paddingBottom}
                     />
                   )}
 
                   {/* 節點圓點 (運費) */}
                   <circle
+                    className={`transition-all duration-300 ${isActive ? "shadow-sm" : ""}`}
                     cx={x}
                     cy={getY(item.total_shipping_fee)}
-                    r={isActive ? "5" : "3"}
                     fill="#fff"
+                    r={isActive ? "5" : "3"}
                     stroke="#0ea5e9"
                     strokeWidth="2"
-                    className={`transition-all duration-300 ${isActive ? "shadow-sm" : ""}`}
                   />
                   {/* 節點圓點 (開發費) */}
                   <circle
+                    className={`transition-all duration-300 ${isActive ? "shadow-sm" : ""}`}
                     cx={x}
                     cy={getY(item.total_dev_fee)}
-                    r={isActive ? "5" : "3"}
                     fill="#fff"
+                    r={isActive ? "5" : "3"}
                     stroke="#8b5cf6"
                     strokeWidth="2"
-                    className={`transition-all duration-300 ${isActive ? "shadow-sm" : ""}`}
                   />
 
                   {/* 感應區塊 (無形)，適合觸控 */}
                   <rect
+                    className="cursor-pointer"
+                    fill="transparent"
+                    height={svgHeight}
+                    width={areaWidth}
                     x={x - areaWidth / 2}
                     y={0}
-                    width={areaWidth}
-                    height={svgHeight}
-                    fill="transparent"
                     onClick={() => setActiveIndex(isActive ? null : index)}
-                    className="cursor-pointer"
                   />
                 </g>
               );

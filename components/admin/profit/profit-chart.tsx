@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Card, CardBody } from "@heroui/card";
 
 interface ProfitData {
   store_id: string;
@@ -19,19 +20,27 @@ export default function ProfitChart({ data }: ProfitChartProps) {
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
-    // 找出最大值用於計算比例
-    const maxAmount = Math.max(...data.map((item) => item.total_amount));
+    const sortedData = [...data].sort((left, right) => right.total_amount - left.total_amount);
+    const totalAmount = sortedData.reduce((sum, item) => sum + item.total_amount, 0) || 1;
 
-    return data.map((item) => ({
-      ...item,
-      shippingPercentage: (item.total_shipping_fee / maxAmount) * 100,
-      devFeePercentage: (item.total_dev_fee / maxAmount) * 100,
-      totalPercentage: (item.total_amount / maxAmount) * 100,
-    }));
+    return sortedData.map((item) => {
+      const storeTotal = item.total_amount || 0;
+
+      return {
+        ...item,
+        shippingPercentage: storeTotal > 0 ? (item.total_shipping_fee / storeTotal) * 100 : 0,
+        devFeePercentage: storeTotal > 0 ? (item.total_dev_fee / storeTotal) * 100 : 0,
+        totalSharePercentage: (storeTotal / totalAmount) * 100,
+      };
+    });
   }, [data]);
 
   const formatCurrency = (amount: number) => {
     return `NT$ ${amount.toLocaleString()}`;
+  };
+
+  const formatPercent = (amount: number) => {
+    return `${amount.toFixed(0)}%`;
   };
 
   if (!data || data.length === 0) {
@@ -42,89 +51,130 @@ export default function ProfitChart({ data }: ProfitChartProps) {
     );
   }
 
+  const totalShippingFee = data.reduce((sum, item) => sum + item.total_shipping_fee, 0);
+  const totalDevFee = data.reduce((sum, item) => sum + item.total_dev_fee, 0);
+  const totalOrders = data.reduce((sum, item) => sum + item.order_count, 0);
+  const topStore = chartData[0];
+
   return (
     <div className="space-y-6">
-      {/* 圖例 */}
-      <div className="flex flex-wrap gap-5 text-sm font-medium">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#0ea5e9] rounded-full shadow-sm" />
+      <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+        <div className="flex items-center gap-2 rounded-full bg-[#0ea5e9]/10 px-3 py-1">
+          <div className="h-3 w-3 rounded-full bg-[#0ea5e9] shadow-sm" />
           <span className="text-[#0284c7]">運費</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-sm" />
+        <div className="flex items-center gap-2 rounded-full bg-[#8b5cf6]/10 px-3 py-1">
+          <div className="h-3 w-3 rounded-full bg-[#8b5cf6] shadow-sm" />
           <span className="text-[#6d28d9]">開發費</span>
         </div>
+        <span className="text-default-500">依總金額由高到低排序</span>
       </div>
 
-      {/* 長條圖 */}
-      <div className="space-y-4">
-        {chartData.map((item) => (
-          <div key={item.store_id} className="space-y-2">
-            <div className="flex justify-begin items-center">
-              <h5 className="font-medium text-sm truncate flex-1 mr-1">{item.store_name}</h5>
-            </div>
+      <div className="grid gap-3">
+        {chartData.map((item, index) => {
+          const averagePerOrder = item.order_count > 0 ? item.total_amount / item.order_count : 0;
 
-            <div className="relative">
-              {/* 背景條 */}
-              <div className="w-full h-8 bg-default-100 rounded-lg overflow-hidden">
-                {/* 堆疊長條圖 */}
-                <div className="h-full flex">
-                  {/* 運費部分 */}
-                  <div
-                    className="bg-[#0ea5e9] h-full flex items-center justify-center text-white text-xs font-bold tracking-wide transition-all duration-300"
-                    style={{
-                      width: `${item.shippingPercentage}%`,
-                      minWidth: item.total_shipping_fee > 0 ? "20px" : "0",
-                    }}
-                  >
-                    {item.shippingPercentage > 15 && <span>NT$ {item.total_shipping_fee}</span>}
+          return (
+            <Card key={item.store_id} className="border border-default-200/80 shadow-none">
+              <CardBody className="p-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-default-100 text-xs font-bold text-default-600">
+                          {index + 1}
+                        </span>
+                        <h5 className="truncate text-base font-semibold text-default-900">
+                          {item.store_name}
+                        </h5>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-default-500">
+                        <span>{item.order_count} 筆訂單</span>
+                        <span>•</span>
+                        <span>平均每單 {formatCurrency(averagePerOrder)}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-default-500">總金額</p>
+                      <p className="text-2xl font-bold text-default-900">
+                        {formatCurrency(item.total_amount)}
+                      </p>
+                    </div>
                   </div>
-                  {/* 開發費部分 */}
-                  <div
-                    className="bg-[#8b5cf6] h-full flex items-center justify-center text-white text-xs font-bold tracking-wide transition-all duration-300"
-                    style={{
-                      width: `${item.devFeePercentage}%`,
-                      minWidth: item.total_dev_fee > 0 ? "20px" : "0",
-                    }}
-                  >
-                    {item.devFeePercentage > 15 && <span>NT$ {item.total_dev_fee}</span>}
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between text-xs text-default-500">
+                      <span>店內費用結構</span>
+                      <span>
+                        運費 {formatPercent(item.shippingPercentage)} / 開發費{" "}
+                        {formatPercent(item.devFeePercentage)}
+                      </span>
+                    </div>
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-default-100">
+                      <div className="flex h-full w-full">
+                        <div
+                          className="h-full bg-[#0ea5e9] transition-all duration-300"
+                          style={{ width: `${item.shippingPercentage}%` }}
+                        />
+                        <div
+                          className="h-full bg-[#8b5cf6] transition-all duration-300"
+                          style={{ width: `${item.devFeePercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-xs sm:grid-cols-3">
+                    <div className="rounded-lg bg-[#0ea5e9]/10 p-2">
+                      <p className="font-medium text-[#0284c7]">運費</p>
+                      <p className="mt-1 text-sm font-semibold text-default-900">
+                        {formatCurrency(item.total_shipping_fee)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-[#8b5cf6]/10 p-2">
+                      <p className="font-medium text-[#6d28d9]">開發費</p>
+                      <p className="mt-1 text-sm font-semibold text-default-900">
+                        {formatCurrency(item.total_dev_fee)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-default-50 p-2">
+                      <p className="font-medium text-default-600">總占比</p>
+                      <p className="mt-1 text-sm font-semibold text-default-900">
+                        {formatPercent(item.totalSharePercentage)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* 詳細數據提示 */}
-              <div className="mt-1 flex justify-end text-xs text-default-600">
-                <span>運費: {formatCurrency(item.total_shipping_fee)}</span>
-                <span>&nbsp;•&nbsp;</span>
-                <span>開發費: {formatCurrency(item.total_dev_fee)}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+              </CardBody>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* 統計摘要 */}
-      <div className="mt-6 p-4 bg-default-50 rounded-lg">
-        <div className="grid grid-cols-2 gap-4 text-xs">
+      <div className="rounded-lg bg-default-50 p-4">
+        <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
           <div>
-            <span className="text-default-600">平均訂單運費</span>
+            <span className="text-default-600">總店數</span>
+            <p className="font-medium text-lg">{data.length}</p>
+          </div>
+          <div>
+            <span className="text-default-600">總訂單數</span>
+            <p className="font-medium text-lg">{totalOrders}</p>
+          </div>
+          <div>
+            <span className="text-default-600">平均每單運費</span>
             <p className="font-medium text-lg">
-              {formatCurrency(
-                data.reduce((sum, item) => sum + item.total_shipping_fee, 0) /
-                  data.reduce((sum, item) => sum + item.order_count, 0) || 0,
-              )}
+              {formatCurrency(totalOrders > 0 ? totalShippingFee / totalOrders : 0)}
             </p>
           </div>
           <div>
-            <span className="text-default-600">運費最高店家</span>
-            <p className="font-medium text-lg">
-              {data.length > 0
-                ? data.reduce((max, item) =>
-                    item.total_shipping_fee > max.total_shipping_fee ? item : max,
-                  ).store_name
-                : "無"}
-            </p>
+            <span className="text-default-600">總開發費</span>
+            <p className="font-medium text-lg">{formatCurrency(totalDevFee)}</p>
           </div>
+        </div>
+        <div className="mt-3 text-xs text-default-500">
+          最高總額店家：{topStore?.store_name || "無"}
         </div>
       </div>
     </div>

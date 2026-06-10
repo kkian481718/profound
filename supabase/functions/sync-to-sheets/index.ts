@@ -62,9 +62,11 @@ async function getAccessToken(): Promise<string> {
   const encoder = new TextEncoder();
   const base64url = (data: Uint8Array) => {
     let binary = "";
+
     for (let i = 0; i < data.length; i++) {
       binary += String.fromCharCode(data[i]);
     }
+
     return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   };
 
@@ -107,6 +109,7 @@ async function getAccessToken(): Promise<string> {
   });
 
   const tokenData = await tokenResponse.json();
+
   if (!tokenData.access_token) {
     throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
   }
@@ -117,6 +120,7 @@ async function getAccessToken(): Promise<string> {
 // 格式化日期時間 (轉為台灣時間)
 function formatDateTime(isoString: string): string {
   const date = new Date(isoString);
+
   return date.toLocaleString("zh-TW", {
     timeZone: "Asia/Taipei",
     year: "numeric",
@@ -182,6 +186,7 @@ async function appendToSheet(order: OrderPayload["record"]): Promise<void> {
 
   if (!response.ok) {
     const errorText = await response.text();
+
     throw new Error(`Failed to append to sheet: ${response.status} ${errorText}`);
   }
 
@@ -219,6 +224,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error("Error syncing to Google Sheets:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
+
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
