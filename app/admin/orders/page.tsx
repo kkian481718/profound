@@ -31,11 +31,11 @@ function OrdersContent() {
   const [filterStore, setFilterStore] = useState("");
   const [filterDelivery, setFilterDelivery] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
-  const [showTodayOnly, setShowTodayOnly] = useState(false);
+  const [showTodayOnly, setShowTodayOnly] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedOrderForContent, setSelectedOrderForContent] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<"detailed" | "summary">("summary");
+  const [viewMode, setViewMode] = useState<"detailed" | "summary">("detailed");
   const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">("order_time");
   const itemsPerPage = 15;
 
