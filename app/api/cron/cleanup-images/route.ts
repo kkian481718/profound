@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 
 import { NextResponse } from "next/server";
 
@@ -9,12 +9,10 @@ const DEFAULT_DAYS_OLD = 30;
 
 // Use constant-time comparison to prevent timing attacks
 function safeCompare(a: string, b: string): boolean {
-  const aBuf = new Uint8Array(Buffer.from(a));
-  const bBuf = new Uint8Array(Buffer.from(b));
+  const aHash = createHash("sha256").update(a).digest();
+  const bHash = createHash("sha256").update(b).digest();
 
-  if (aBuf.length !== bBuf.length) return false;
-
-  return timingSafeEqual(aBuf, bBuf);
+  return timingSafeEqual(new Uint8Array(aHash), new Uint8Array(bHash));
 }
 
 /**
