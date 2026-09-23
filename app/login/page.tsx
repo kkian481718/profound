@@ -31,7 +31,7 @@ export default function LoginPage() {
       if (error) throw error;
 
       // 追蹤管理員登入事件
-      trackAdminEvent("admin_login", email);
+      trackAdminEvent("admin_login", "success");
 
       router.push("/admin/stores");
       router.refresh();

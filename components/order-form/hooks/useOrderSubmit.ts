@@ -134,11 +134,7 @@ export function useOrderSubmit() {
       trackOrderEvent("order_completed", {
         store_name: params.storeName,
         order_total: pricing.totalAmount,
-        pickup_location: params.showOffCampusAddress
-          ? params.selectedPickupLocation === "校內教學區"
-            ? `[校內教學區] ${params.offCampusAddress}`
-            : `[校外] ${params.offCampusAddress}`
-          : params.selectedPickupLocation,
+        pickup_location: params.selectedPickupLocation,
       });
 
       // 導航到訂單確認頁面
