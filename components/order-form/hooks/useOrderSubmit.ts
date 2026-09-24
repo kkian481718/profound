@@ -31,8 +31,10 @@ export function useOrderSubmit() {
 
   const uploadImageToStorage = async (image: File): Promise<string | null> => {
     try {
-      const fileExt = image.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Sanitize file extension to prevent path traversal
+      const rawExt = image.name.split(".").pop() || "";
+      const fileExt = rawExt.replace(/[^a-zA-Z0-9]/g, "");
+      const fileName = `${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
       const filePath = `order-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage.from("orders").upload(filePath, image, {
