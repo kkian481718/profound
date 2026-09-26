@@ -31,7 +31,16 @@ export function useOrderSubmit() {
 
   const uploadImageToStorage = async (image: File): Promise<string | null> => {
     try {
-      const fileExt = image.name.split(".").pop();
+      // Validate file extension and MIME type for security
+      const fileExt = image.name.split(".").pop()?.toLowerCase();
+      const allowedExts = ["jpg", "jpeg", "png", "webp", "gif", "heic", "heif"];
+
+      if (!fileExt || !allowedExts.includes(fileExt) || !image.type.startsWith("image/")) {
+        console.error("Invalid file type uploaded");
+
+        return null;
+      }
+
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `order-images/${fileName}`;
 
