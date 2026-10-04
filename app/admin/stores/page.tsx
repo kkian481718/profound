@@ -15,13 +15,9 @@ import {
 } from "@heroui/modal";
 
 import AddStoreModal from "@/components/admin/stores/add-store-modal";
-import EditStoreModal from "@/components/admin/stores/edit-store-modal";
-import DeadlineEditor from "@/components/admin/stores/deadline-editor";
+import StoreSettingsModal from "@/components/admin/stores/store-settings-modal";
 import GlobalMaxOrdersSetting from "@/components/admin/stores/global-max-orders-setting";
-import StoreExtraShippingEditor from "@/components/admin/stores/store-extra-shipping-editor";
-import StoreMaxOrdersEditor from "@/components/admin/stores/store-max-orders-editor";
-import StorePlaceholderEditor from "@/components/admin/stores/store-placeholder-editor";
-import { NoteIcon, TrashIcon } from "@/components/icons";
+import { TrashIcon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/client";
 import { closeAllExpiredStores } from "@/lib/validateStore";
 
@@ -48,17 +44,17 @@ export default function StoresPage() {
     id: string;
     name: string;
   } | null>(null);
-  const [storeToEdit, setStoreToEdit] = useState<Store | null>(null);
+  const [storeToConfigure, setStoreToConfigure] = useState<Store | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // 新增店家的 Modal 狀態
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  // 編輯店家的 Modal 狀態
+  // 店家詳細設定的 Modal 狀態
   const {
-    isOpen: isEditModalOpen,
-    onOpen: onEditModalOpen,
-    onOpenChange: onEditModalOpenChange,
+    isOpen: isSettingsModalOpen,
+    onOpen: onSettingsModalOpen,
+    onOpenChange: onSettingsModalOpenChange,
   } = useDisclosure();
 
   // 刪除確認的 Modal 狀態
@@ -134,9 +130,9 @@ export default function StoresPage() {
     onDeleteModalOpen();
   };
 
-  const openEditModal = (store: Store) => {
-    setStoreToEdit(store);
-    onEditModalOpen();
+  const openSettingsModal = (store: Store) => {
+    setStoreToConfigure(store);
+    onSettingsModalOpen();
   };
 
   const confirmDeleteStore = async () => {
@@ -188,6 +184,25 @@ export default function StoresPage() {
     return stores.filter((s) => (s.category?.trim() || "其他") === selectedCategory);
   }, [stores, selectedCategory]);
 
+  // 格式化截止時間簡述
+  const formatDeadlineSummary = (deadlineStr: string | null) => {
+    if (!deadlineStr) return null;
+    const date = new Date(deadlineStr);
+    const now = new Date();
+    const diffHours = Math.round((date.getTime() - now.getTime()) / (1000 * 60 * 60));
+    const timeStr = date.toLocaleTimeString("zh-TW", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    if (diffHours < 0) return `已過期 (${timeStr})`;
+    if (diffHours < 1) return `即將截止 (${timeStr})`;
+    if (diffHours < 24) return `${timeStr} 截止 (${diffHours}h)`;
+
+    return `${date.getMonth() + 1}/${date.getDate()} ${timeStr} 截止`;
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -222,13 +237,14 @@ export default function StoresPage() {
         {/* 店家列表雙欄載入 */}
         <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="border-l-4 border-l-default-300">
-              <CardHeader className="flex-row items-center justify-between p-3">
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 w-20 bg-default-200 rounded animate-pulse" />
-                  <div className="h-3 w-14 bg-default-100 rounded animate-pulse" />
+            <Card key={i} className="border border-default-200">
+              <CardHeader className="p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="h-5 w-9 bg-default-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-12 bg-default-200 rounded animate-pulse" />
                 </div>
-                <div className="h-6 w-6 bg-default-200 rounded animate-pulse" />
+                <div className="h-5 w-24 bg-default-200 rounded animate-pulse" />
+                <div className="h-4 w-14 bg-default-100 rounded animate-pulse" />
               </CardHeader>
             </Card>
           ))}
@@ -405,20 +421,23 @@ export default function StoresPage() {
             </CardBody>
           </Card>
         ) : (
-          /* 店家卡片列表：手機雙欄、卡片精簡化 */
+          /* 店家卡片列表：上下分層、店名不截斷、高度統一整齊 */
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredStores.map((store) => (
-              <Card
-                key={store.id}
-                className={`transition-all hover:shadow-md ${
-                  store.is_open
-                    ? "col-span-2 md:col-span-1 border-l-4 border-l-success shadow-success/10"
-                    : "col-span-1 border-l-3 border-l-default-300"
-                }`}
-              >
-                <CardHeader className="flex flex-col gap-1.5 p-2.5 sm:p-3">
-                  <div className="flex items-start justify-between gap-1 w-full">
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+            {filteredStores.map((store) => {
+              const deadlineSummary = formatDeadlineSummary(store.order_deadline);
+
+              return (
+                <Card
+                  key={store.id}
+                  className={`transition-all hover:shadow-md ${
+                    store.is_open
+                      ? "border-2 border-success shadow-success/10 bg-success-50/5 dark:bg-success-950/10"
+                      : "border border-default-200"
+                  }`}
+                >
+                  <CardHeader className="flex flex-col justify-between h-full p-2.5 sm:p-3 gap-2">
+                    {/* 頂部：開關與狀態徽章 */}
+                    <div className="flex items-center justify-between w-full">
                       <Switch
                         classNames={{
                           wrapper: "mr-0",
@@ -428,167 +447,103 @@ export default function StoresPage() {
                         size="sm"
                         onValueChange={() => toggleStoreStatus(store.id, store.is_open)}
                       />
-                      <div className="min-w-0 flex-1">
-                        <h3
-                          className="text-xs sm:text-sm md:text-base font-bold text-foreground truncate"
-                          title={store.name}
-                        >
-                          {store.name}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* 操作按鈕：編輯與刪除 */}
-                    <div className="flex items-center gap-0.5 flex-shrink-0">
-                      <Button
-                        isIconOnly
-                        aria-label="編輯店家"
-                        className="h-6 w-6 min-w-6 text-default-500 hover:text-foreground"
+                      <Chip
+                        className="h-4.5 px-1.5 text-[10px] font-semibold"
+                        color={store.is_open ? "success" : "default"}
                         size="sm"
-                        variant="light"
-                        onPress={() => openEditModal(store)}
+                        variant={store.is_open ? "solid" : "flat"}
                       >
-                        <NoteIcon className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        aria-label="刪除店家"
-                        className="h-6 w-6 min-w-6 text-danger-400 hover:text-danger"
-                        color="danger"
-                        size="sm"
-                        variant="light"
-                        onPress={() => openDeleteModal(store.id, store.name)}
+                        {store.is_open ? "開放中" : "已關閉"}
+                      </Chip>
+                    </div>
+
+                    {/* 中間：店家全名（獨佔整行、允許折行、絕不被截斷） */}
+                    <div className="w-full my-0.5">
+                      <h3
+                        className="text-xs sm:text-sm font-bold text-foreground leading-snug break-words line-clamp-2 min-h-[2rem] flex items-center"
+                        title={store.name}
                       >
-                        <TrashIcon className="h-3.5 w-3.5" />
-                      </Button>
+                        {store.name}
+                      </h3>
+
+                      {/* 開放中若有截止時間或單量，顯示簡短狀態 */}
+                      {store.is_open && (
+                        <div className="mt-1 flex items-center gap-1 text-[10px] text-success-600 dark:text-success-400 font-medium truncate">
+                          <svg
+                            className="h-3 w-3 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                          </svg>
+                          <span className="truncate">
+                            {deadlineSummary ||
+                              (store.max_daily_orders
+                                ? `限 ${store.max_daily_orders} 單`
+                                : "無時間限制")}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* 標籤列：分類標籤與狀態 */}
-                  <div className="flex items-center gap-1.5 flex-wrap pl-7 sm:pl-8">
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-default-100 text-default-600 font-medium">
-                      {store.category || "其他"}
-                    </span>
-                    <Chip
-                      className="h-4 px-1 text-[10px]"
-                      color={store.is_open ? "success" : "default"}
-                      size="sm"
-                      variant="dot"
-                    >
-                      {store.is_open ? "開放中" : "已關閉"}
-                    </Chip>
-                  </div>
-                </CardHeader>
+                    {/* 底部：分類標籤 + 設定/刪除按鈕 */}
+                    <div className="flex items-center justify-between w-full pt-1.5 border-t border-default-100">
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-default-100 text-default-600 font-medium">
+                        {store.category || "其他"}
+                      </span>
 
-                {/* 當店家開啟時，顯示進階設定 */}
-                {store.is_open && (
-                  <CardBody className="space-y-3 p-3 pt-0 border-t border-default-100 mt-1">
-                    <div className="space-y-1.5 pt-2">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <svg
-                          className="h-3.5 w-3.5 text-warning"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          isIconOnly
+                          aria-label="店家設定"
+                          className="h-6 w-6 min-w-6 text-default-500 hover:text-success"
+                          size="sm"
+                          variant="light"
+                          onPress={() => openSettingsModal(store)}
                         >
-                          <path
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                        <span className="font-medium text-foreground">截止時間</span>
-                      </div>
-                      <DeadlineEditor
-                        currentDeadline={store.order_deadline}
-                        storeId={store.id}
-                        onSuccess={fetchStores}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <svg
-                          className="h-3.5 w-3.5 text-primary"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                          <svg
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                            <path
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                            />
+                          </svg>
+                        </Button>
+                        <Button
+                          isIconOnly
+                          aria-label="刪除店家"
+                          className="h-6 w-6 min-w-6 text-danger-400 hover:text-danger"
+                          color="danger"
+                          size="sm"
+                          variant="light"
+                          onPress={() => openDeleteModal(store.id, store.name)}
                         >
-                          <path
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                        <span className="font-medium text-foreground">單量限制</span>
+                          <TrashIcon className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
-                      <StoreMaxOrdersEditor
-                        currentMaxOrders={store.max_daily_orders}
-                        storeId={store.id}
-                        onSuccess={fetchStores}
-                      />
                     </div>
-
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <svg
-                          className="h-3.5 w-3.5 text-warning"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                          <path
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                        <span className="font-medium text-foreground">遠距運費</span>
-                      </div>
-                      <StoreExtraShippingEditor
-                        currentExtraFee={store.extra_shipping_fee}
-                        currentThreshold={store.extra_shipping_threshold}
-                        storeId={store.id}
-                        onSuccess={fetchStores}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <svg
-                          className="h-3.5 w-3.5 text-secondary"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M4 6h16M4 12h16M4 18h7"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                          />
-                        </svg>
-                        <span className="font-medium text-foreground">點餐提示文字</span>
-                      </div>
-                      <StorePlaceholderEditor
-                        currentPlaceholder={store.menu_placeholder}
-                        storeId={store.id}
-                        onSuccess={fetchStores}
-                      />
-                    </div>
-                  </CardBody>
-                )}
-              </Card>
-            ))}
+                  </CardHeader>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
@@ -601,11 +556,11 @@ export default function StoresPage() {
         onSuccess={fetchStores}
       />
 
-      <EditStoreModal
+      <StoreSettingsModal
         existingCategories={availableCategories}
-        isOpen={isEditModalOpen}
-        store={storeToEdit}
-        onOpenChange={onEditModalOpenChange}
+        isOpen={isSettingsModalOpen}
+        store={storeToConfigure}
+        onOpenChange={onSettingsModalOpenChange}
         onSuccess={fetchStores}
       />
 
