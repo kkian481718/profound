@@ -2,27 +2,66 @@
 
 import { useState } from "react";
 import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 
 import { createClient } from "@/lib/supabase/client";
 
+const DEFAULT_CATEGORIES = ["速食", "甜點", "超市", "飲料", "其他"];
+
 interface AddStoreModalProps {
   isOpen: boolean;
   onOpenChange: () => void;
   onSuccess: () => void;
+  existingCategories?: string[];
 }
 
-export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddStoreModalProps) {
+export default function AddStoreModal({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+  existingCategories = [],
+}: AddStoreModalProps) {
   const [storeName, setStoreName] = useState("");
+  const [category, setCategory] = useState("速食");
+  const [customCategory, setCustomCategory] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(false);
   const [deadline, setDeadline] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const allCategories = Array.from(
+    new Set([...DEFAULT_CATEGORIES, ...existingCategories.filter(Boolean)]),
+  );
+
+  const handleSelectCategory = (cat: string) => {
+    if (cat === "__custom__") {
+      setIsCustom(true);
+      setCategory("__custom__");
+    } else {
+      setIsCustom(false);
+      setCategory(cat);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const finalCategory = isCustom ? customCategory.trim() : category;
+
+    if (!storeName.trim()) {
+      setError("店家名稱不能為空");
+
+      return;
+    }
+    if (isCustom && !finalCategory) {
+      setError("請輸入自訂分類名稱");
+
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -31,7 +70,8 @@ export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddSt
 
       const { error: insertError } = await supabase.from("stores").insert([
         {
-          name: storeName,
+          name: storeName.trim(),
+          category: finalCategory || "其他",
           is_open: isStoreOpen,
           order_deadline: isStoreOpen && deadline ? new Date(deadline) : null,
         },
@@ -41,6 +81,9 @@ export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddSt
 
       // 重置表單
       setStoreName("");
+      setCategory("速食");
+      setCustomCategory("");
+      setIsCustom(false);
       setIsStoreOpen(false);
       setDeadline("");
       setError("");
@@ -56,6 +99,9 @@ export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddSt
   const handleClose = () => {
     // 重置表單狀態
     setStoreName("");
+    setCategory("速食");
+    setCustomCategory("");
+    setIsCustom(false);
     setIsStoreOpen(false);
     setDeadline("");
     setError("");
@@ -77,6 +123,42 @@ export default function AddStoreModal({ isOpen, onOpenChange, onSuccess }: AddSt
                   value={storeName}
                   onValueChange={setStoreName}
                 />
+
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium">店家分類</p>
+                  <div className="flex flex-wrap gap-2">
+                    {allCategories.map((cat) => (
+                      <Chip
+                        key={cat}
+                        className="cursor-pointer select-none transition-all"
+                        color={!isCustom && category === cat ? "success" : "default"}
+                        variant={!isCustom && category === cat ? "solid" : "flat"}
+                        onClick={() => handleSelectCategory(cat)}
+                      >
+                        {cat}
+                      </Chip>
+                    ))}
+                    <Chip
+                      className="cursor-pointer select-none transition-all"
+                      color={isCustom ? "success" : "default"}
+                      variant={isCustom ? "solid" : "flat"}
+                      onClick={() => handleSelectCategory("__custom__")}
+                    >
+                      + 自訂分類
+                    </Chip>
+                  </div>
+
+                  {isCustom && (
+                    <Input
+                      className="mt-2"
+                      label="自訂分類名稱"
+                      placeholder="例如：便當、早午餐"
+                      size="sm"
+                      value={customCategory}
+                      onValueChange={setCustomCategory}
+                    />
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1">
