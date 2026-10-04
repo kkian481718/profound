@@ -55,10 +55,9 @@ export function useStores(providedStores?: StoreOption[]) {
   };
 
   useEffect(() => {
-    // 先關閉所有過期的店家，只在組件掛載時執行一次
-    closeAllExpiredStores().finally(() => {
-      fetchStores();
-    });
+    // 平行執行：在背景關閉過期店家，同時立即抓取店家資料，不再互相等待阻塞 UI
+    closeAllExpiredStores().catch(console.error);
+    fetchStores();
   }, []);
 
   const storeOptions = useMemo<StoreOption[]>(() => {

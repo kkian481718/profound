@@ -147,24 +147,29 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
             <Card className="bg-content2">
               <CardBody className="py-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">店家訂單狀況</span>
-                  <Chip
-                    color={
-                      orderProgress.isOverLimit
-                        ? "danger"
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">本店接單額度</span>
+                    <Chip
+                      color={
+                        orderProgress.isOverLimit
+                          ? "danger"
+                          : orderProgress.isNearLimit
+                            ? "warning"
+                            : "success"
+                      }
+                      size="sm"
+                      variant="flat"
+                    >
+                      {orderProgress.isOverLimit
+                        ? "已滿額"
                         : orderProgress.isNearLimit
-                          ? "warning"
-                          : "success"
-                    }
-                    size="sm"
-                    variant="shadow"
-                  >
-                    {orderProgress.isOverLimit
-                      ? "已滿額"
-                      : orderProgress.isNearLimit
-                        ? "接近滿額"
-                        : "可接單"}
-                  </Chip>
+                          ? "即將額滿"
+                          : "尚有餘額"}
+                    </Chip>
+                  </div>
+                  <span className="text-sm font-semibold text-default-600">
+                    剩餘 {orderProgress.remaining} 份
+                  </span>
                 </div>
 
                 <Progress
@@ -175,17 +180,10 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
                         ? "warning"
                         : "success"
                   }
-                  formatOptions={{ style: "percent", maximumFractionDigits: 0 }}
-                  showValueLabel={true}
                   size="sm"
                   value={orderProgress.percentage}
                 />
 
-                {orderProgress.isOverLimit && (
-                  <Chip className="mt-2" color="danger" size="sm" variant="flat">
-                    此店家今日已滿額
-                  </Chip>
-                )}
               </CardBody>
             </Card>
           ) : null}
