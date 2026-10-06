@@ -36,8 +36,8 @@ function OrdersContent() {
   const [selectedOrderForContent, setSelectedOrderForContent] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"detailed" | "summary">("detailed");
-  const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">("order_time");
-  const itemsPerPage = 15;
+  const [sortBy, setSortBy] = useState<"order_time" | "pickup_location">("pickup_location");
+  const itemsPerPage = 16;
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -232,7 +232,7 @@ function OrdersContent() {
     setFilterDelivery("");
     setFilterLocation("");
     setShowTodayOnly(false);
-    setSortBy("order_time");
+    setSortBy("pickup_location");
     router.push("/admin/orders");
   };
 
@@ -341,6 +341,17 @@ function OrdersContent() {
               onViewContent={handleViewContent}
             />
           ))}
+        </div>
+      )}
+
+      {filteredOrders.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center mt-4">
+          <Pagination
+            showControls
+            page={currentPage}
+            total={totalPages}
+            onChange={setCurrentPage}
+          />
         </div>
       )}
 
