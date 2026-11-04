@@ -1,0 +1,4 @@
+## 2025-02-12 - [Critical] Fixed Timing Attack Vulnerability in safeCompare
+**Vulnerability:** A timing attack vulnerability was present in `app/api/cron/cleanup-images/route.ts` and `app/api/cron/close-stores/route.ts` where `safeCompare` leaked the length of `CRON_SECRET`. The check `if (aBuf.length !== bBuf.length) return false;` returned early, allowing an attacker to deduce the correct secret length based on response timing.
+**Learning:** Even when using `timingSafeEqual`, variable-length string comparisons can still leak length information if an early return on length mismatch is implemented before the constant-time check.
+**Prevention:** Always hash the secret strings (e.g., using SHA-256) before passing them to `timingSafeEqual`. Hashes have a fixed length, avoiding early length returns entirely and guaranteeing a true constant-time comparison.
