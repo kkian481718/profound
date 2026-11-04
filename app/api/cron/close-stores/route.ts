@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "crypto";
+import { timingSafeEqual, createHash } from "crypto";
 
 import { NextResponse } from "next/server";
 
@@ -6,12 +6,10 @@ import { closeAllExpiredStores } from "@/lib/validateStore";
 
 // Use constant-time comparison to prevent timing attacks
 function safeCompare(a: string, b: string): boolean {
-  const aBuf = new Uint8Array(Buffer.from(a));
-  const bBuf = new Uint8Array(Buffer.from(b));
+  const aHash = createHash("sha256").update(a).digest();
+  const bHash = createHash("sha256").update(b).digest();
 
-  if (aBuf.length !== bBuf.length) return false;
-
-  return timingSafeEqual(aBuf, bBuf);
+  return timingSafeEqual(new Uint8Array(aHash), new Uint8Array(bHash));
 }
 
 export async function GET(request: Request) {
