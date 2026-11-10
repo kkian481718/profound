@@ -3,9 +3,9 @@
  */
 
 export interface PricingBreakdown {
-  /** 餐點金額 */
+  /** 餐點/商品金額 */
   cost: number;
-  /** 開發費 */
+  /** 開發費（網頁服務費） */
   devFee: number;
   /** 基本運費 */
   baseShippingFee: number;
@@ -15,14 +15,25 @@ export interface PricingBreakdown {
   shippingFee: number;
   /** 總金額 */
   totalAmount: number;
+  /** 購買件數（僅 per_item 模式有值） */
+  quantity?: number;
 }
+
+export type ShippingMethod = "standard" | "per_item";
 
 export interface StoreShippingConfig {
   /** 額外運費金額 */
   extraShippingFee?: number | null;
   /** 免額外運費門檻（訂單金額超過此值不加收額外運費） */
   extraShippingThreshold?: number | null;
+  /** 運費計算模式：standard=金額比例制, per_item=件數制 */
+  shippingMethod?: ShippingMethod | string | null;
 }
+
+/** per_item 模式：第一件運費 */
+export const PER_ITEM_FIRST_SHIPPING_FEE = 30;
+/** per_item 模式：第二件起每件運費 */
+export const PER_ITEM_ADDITIONAL_SHIPPING_FEE = 15;
 
 /**
  * 計算訂單的完整價格明細
@@ -47,20 +58,7 @@ export function calculateOrderPricing(
   }
 
   // 額外運費計算
-  let extraShippingFee = 0;
-
-  if (storeConfig?.extraShippingFee && storeConfig.extraShippingFee > 0) {
-    // 檢查是否達到免額外運費門檻
-    const threshold = storeConfig.extraShippingThreshold;
-
-    if (threshold && threshold > 0 && costNum >= threshold) {
-      // 訂單金額已達門檻，不加收額外運費
-      extraShippingFee = 0;
-    } else {
-      // 需要加收額外運費
-      extraShippingFee = storeConfig.extraShippingFee;
-    }
-  }
+  const extraShippingFee = calculateExtraShippingFee(costNum, storeConfig);
 
   const shippingFee = baseShippingFee + extraShippingFee;
   const totalAmount = costNum + devFee + shippingFee;
@@ -72,6 +70,107 @@ export function calculateOrderPricing(
     extraShippingFee,
     shippingFee,
     totalAmount,
+  };
+}
+
+/**
+ * 計算額外運費（遠程店家加收，含免運門檻判斷）
+ */
+function calculateExtraShippingFee(costNum: number, storeConfig?: StoreShippingConfig): number {
+  if (!storeConfig?.extraShippingFee || storeConfig.extraShippingFee <= 0) {
+    return 0;
+  }
+
+  const threshold = storeConfig.extraShippingThreshold;
+
+  if (threshold && threshold > 0 && costNum >= threshold) {
+    return 0;
+  }
+
+  return storeConfig.extraShippingFee;
+}
+
+/**
+ * 計算件數制（per_item）的完整價格明細
+ * 運費規則：第一件 NT$30，第二件起每件 NT$15
+ * @param unitPrice 商品單價
+ * @param quantity 購買件數
+ * @param storeConfig 店家運費設定（可選）
+ * @returns 包含各項費用的價格明細
+ */
+export function calculatePerItemPricing(
+  unitPrice: number,
+  quantity: number,
+  storeConfig?: StoreShippingConfig,
+): PricingBreakdown {
+  const quantityNum = Math.max(1, Math.floor(quantity) || 1);
+  const unitPriceNum = Math.max(0, unitPrice);
+  const costNum = unitPriceNum * quantityNum;
+  const devFee = 10; // 固定網頁服務費 10 元
+  const baseShippingFee =
+    PER_ITEM_FIRST_SHIPPING_FEE + PER_ITEM_ADDITIONAL_SHIPPING_FEE * (quantityNum - 1);
+
+  const extraShippingFee = calculateExtraShippingFee(costNum, storeConfig);
+  const shippingFee = baseShippingFee + extraShippingFee;
+  const totalAmount = costNum + devFee + shippingFee;
+
+  return {
+    cost: costNum,
+    devFee,
+    baseShippingFee,
+    extraShippingFee,
+    shippingFee,
+    totalAmount,
+    quantity: quantityNum,
+  };
+}
+
+export interface PerItemEntry {
+  /** 商品單價 */
+  unitPrice: number;
+  /** 數量 */
+  quantity: number;
+}
+
+/**
+ * 計算件數制（per_item）多商品明細的完整價格明細
+ * 運費規則：第一件 NT$30，第二件起每件 NT$15（依總件數計算）
+ * @param items 商品明細（單價 + 數量）
+ * @param storeConfig 店家運費設定（可選）
+ * @returns 包含各項費用的價格明細
+ */
+export function calculatePerItemItemsPricing(
+  items: PerItemEntry[],
+  storeConfig?: StoreShippingConfig,
+): PricingBreakdown {
+  let costNum = 0;
+  let totalQuantity = 0;
+
+  for (const item of items) {
+    const qty = Math.max(1, Math.floor(item.quantity) || 1);
+
+    costNum += Math.max(0, item.unitPrice) * qty;
+    totalQuantity += qty;
+  }
+
+  totalQuantity = Math.max(1, totalQuantity);
+
+  const devFee = 10; // 固定網頁服務費 10 元
+  const baseShippingFee =
+    PER_ITEM_FIRST_SHIPPING_FEE + PER_ITEM_ADDITIONAL_SHIPPING_FEE * (totalQuantity - 1);
+
+  const extraShippingFee = calculateExtraShippingFee(costNum, storeConfig);
+  const shippingFee = baseShippingFee + extraShippingFee;
+  const totalAmount = costNum + devFee + shippingFee;
+
+  return {
+    cost: costNum,
+    devFee,
+    baseShippingFee,
+    extraShippingFee,
+    shippingFee,
+    totalAmount,
+    quantity: totalQuantity,
   };
 }
 

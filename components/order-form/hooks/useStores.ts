@@ -17,7 +17,7 @@ export function useStores(providedStores?: StoreOption[]) {
       const { data, error } = await supabase
         .from("stores")
         .select(
-          "id, name, order_deadline, max_daily_orders, menu_placeholder, extra_shipping_fee, extra_shipping_threshold",
+          "id, name, order_deadline, max_daily_orders, menu_placeholder, extra_shipping_fee, extra_shipping_threshold, shipping_method",
         )
         .eq("is_open", true)
         .order("name");
@@ -41,6 +41,7 @@ export function useStores(providedStores?: StoreOption[]) {
           menu_placeholder: store.menu_placeholder,
           extra_shipping_fee: store.extra_shipping_fee,
           extra_shipping_threshold: store.extra_shipping_threshold,
+          shipping_method: store.shipping_method,
         }));
 
         setStoresFromDB(formattedStores);

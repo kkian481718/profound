@@ -1,6 +1,6 @@
 import type { Selection } from "@react-types/shared";
 import type { FormEvent, ChangeEvent } from "react";
-import type { ErrorState, StoreOption } from "./types";
+import type { ErrorState, OrderItemDraft, StoreOption } from "./types";
 
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
@@ -9,13 +9,20 @@ import { Alert } from "@heroui/alert";
 import { Select, SelectItem } from "@heroui/select";
 
 import { pickupLocations } from "./constants";
-import { calculateOrderPricing } from "./utils/pricing";
+import {
+  calculateOrderPricing,
+  calculatePerItemItemsPricing,
+  PER_ITEM_FIRST_SHIPPING_FEE,
+  PER_ITEM_ADDITIONAL_SHIPPING_FEE,
+} from "./utils/pricing";
+import { parseOrderItems } from "./utils/orderItems";
 
 type OrderDetailsStepProps = {
   storeOptions: StoreOption[];
   selectedStore: string | null;
   menuItems: string;
   cost: string;
+  orderItems: OrderItemDraft[];
   phoneNumber: string;
   pickupName: string;
   selectedPickupLocation: string | null;
@@ -29,6 +36,9 @@ type OrderDetailsStepProps = {
   showOffCampusAddress: boolean;
   onMenuItemsChange: (value: string) => void;
   onCostChange: (value: string) => void;
+  onAddItem: () => void;
+  onRemoveItem: (index: number) => void;
+  onItemChange: (index: number, field: keyof OrderItemDraft, value: string) => void;
   onPhoneNumberChange: (value: string) => void;
   onPickupNameChange: (value: string) => void;
   onPickupLocationChange: (keys: Selection) => void;
@@ -44,6 +54,7 @@ export function OrderDetailsStep({
   selectedStore,
   menuItems,
   cost,
+  orderItems,
   phoneNumber,
   pickupName,
   selectedPickupLocation,
@@ -57,6 +68,9 @@ export function OrderDetailsStep({
   showOffCampusAddress,
   onMenuItemsChange,
   onCostChange,
+  onAddItem,
+  onRemoveItem,
+  onItemChange,
   onPhoneNumberChange,
   onPickupNameChange,
   onPickupLocationChange,
@@ -70,16 +84,28 @@ export function OrderDetailsStep({
   const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
 
   // 取得店家運費設定
+  const isPerItemMode = selectedStoreData?.shipping_method === "per_item";
   const storeShippingConfig = selectedStoreData
     ? {
         extraShippingFee: selectedStoreData.extra_shipping_fee,
         extraShippingThreshold: selectedStoreData.extra_shipping_threshold,
+        shippingMethod: selectedStoreData.shipping_method,
       }
     : undefined;
 
   // 使用統一的價格計算函數（包含店家額外運費設定）
   const costNum = parseFloat(cost) || 0;
-  const pricing = calculateOrderPricing(costNum, storeShippingConfig);
+  const parsedItems = isPerItemMode ? parseOrderItems(orderItems) : null;
+  const pricing = isPerItemMode
+    ? calculatePerItemItemsPricing(
+        (parsedItems ?? []).map((item) => ({
+          unitPrice: item.unit_price,
+          quantity: item.quantity,
+        })),
+        storeShippingConfig,
+      )
+    : calculateOrderPricing(costNum, storeShippingConfig);
+  const showPricing = isPerItemMode ? Boolean(parsedItems?.length) : costNum > 0;
 
   // 取得選中店家的自訂 placeholder
   const menuPlaceholder =
@@ -105,20 +131,104 @@ export function OrderDetailsStep({
             </p>
           </div>
 
-          <Textarea
-            isRequired
-            aria-label="點餐內容"
-            description="請詳細描述您想點的餐點、數量及備註"
-            errorMessage={errors.menuItems || undefined}
-            isInvalid={Boolean(errors.menuItems)}
-            label="點餐內容"
-            minRows={4}
-            placeholder={menuPlaceholder}
-            value={menuItems}
-            onValueChange={onMenuItemsChange}
-          />
+          {isPerItemMode ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-default-700">商品明細</span>
+                <Button color="primary" size="sm" variant="flat" onPress={onAddItem}>
+                  + 新增商品
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {orderItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-2 rounded-large border border-default-200 p-3 sm:flex-row sm:items-start"
+                  >
+                    <Input
+                      isRequired
+                      aria-label={`商品 ${index + 1} 品名`}
+                      className="flex-1"
+                      placeholder="商品名稱"
+                      size="sm"
+                      value={item.name}
+                      onValueChange={(value) => onItemChange(index, "name", value)}
+                    />
+                    <div className="flex gap-2 sm:w-[220px]">
+                      <Input
+                        aria-label={`商品 ${index + 1} 單價`}
+                        className="flex-1"
+                        min={0}
+                        placeholder="單價"
+                        size="sm"
+                        startContent={
+                          <span className="text-default-400 text-xs pointer-events-none">NT$</span>
+                        }
+                        type="number"
+                        value={item.price}
+                        onValueChange={(value) => onItemChange(index, "price", value)}
+                      />
+                      <Input
+                        aria-label={`商品 ${index + 1} 數量`}
+                        className="w-20"
+                        min={1}
+                        placeholder="數量"
+                        size="sm"
+                        step={1}
+                        type="number"
+                        value={item.quantity}
+                        onValueChange={(value) => onItemChange(index, "quantity", value)}
+                      />
+                    </div>
+                    {orderItems.length > 1 && (
+                      <Button
+                        isIconOnly
+                        aria-label={`刪除商品 ${index + 1}`}
+                        color="danger"
+                        size="sm"
+                        variant="light"
+                        onPress={() => onRemoveItem(index)}
+                      >
+                        ✕
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {errors.items && <p className="text-xs text-danger px-1">{errors.items}</p>}
+              <p className="text-xs text-default-400 px-1">
+                運費規則：第一件 NT${PER_ITEM_FIRST_SHIPPING_FEE}，第二件起每件 NT$
+                {PER_ITEM_ADDITIONAL_SHIPPING_FEE}
+              </p>
+            </div>
+          ) : (
+            <Textarea
+              isRequired
+              aria-label="點餐內容"
+              description="請詳細描述您想點的餐點、數量及備註"
+              errorMessage={errors.menuItems || undefined}
+              isInvalid={Boolean(errors.menuItems)}
+              label="點餐內容"
+              minRows={4}
+              placeholder={menuPlaceholder}
+              value={menuItems}
+              onValueChange={onMenuItemsChange}
+            />
+          )}
 
-          <div className="space-y-2">
+          {isPerItemMode && (
+            <Textarea
+              aria-label="備註"
+              description="選填：特殊要求或其他備註"
+              label="備註（選填）"
+              minRows={2}
+              placeholder="例如：請備註取貨時間、特殊包裝需求"
+              value={menuItems}
+              onValueChange={onMenuItemsChange}
+            />
+          )}
+
+          {!isPerItemMode && (
             <Input
               isRequired
               aria-label="餐點原始金額"
@@ -136,48 +246,67 @@ export function OrderDetailsStep({
               value={cost}
               onValueChange={onCostChange}
             />
-            {costNum > 0 && (
-              <div className="text-sm text-default-600 space-y-1 px-1">
-                <div className="flex justify-between">
-                  <span>餐點金額：</span>
-                  <span className="font-medium">NT$ {pricing.cost.toFixed(0)}</span>
-                </div>
+          )}
+
+          {showPricing && (
+            <div className="text-sm text-default-600 space-y-1 px-1">
+              <div className="flex justify-between">
+                <span>
+                  {isPerItemMode ? `商品金額（共 ${parsedItems?.length ?? 0} 項）：` : "餐點金額："}
+                </span>
+                <span className="font-medium">NT$ {pricing.cost.toFixed(0)}</span>
+              </div>
+              {isPerItemMode ? (
+                <>
+                  <div className="flex justify-between">
+                    <span>
+                      運費（首件 NT${PER_ITEM_FIRST_SHIPPING_FEE} + 其餘每件 NT$
+                      {PER_ITEM_ADDITIONAL_SHIPPING_FEE}）：
+                    </span>
+                    <span className="font-medium">NT$ {pricing.baseShippingFee.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>網頁服務費：</span>
+                    <span className="font-medium">NT$ {pricing.devFee.toFixed(0)}</span>
+                  </div>
+                </>
+              ) : (
                 <div className="flex justify-between">
                   <span>基本服務費：</span>
                   <span className="font-medium">
                     NT$ {(pricing.devFee + pricing.baseShippingFee).toFixed(0)}
                   </span>
                 </div>
-                {hasExtraShippingFee && (
-                  <div className="flex justify-between">
-                    <span className="flex items-center gap-1">
-                      遠距運費：
-                      {pricing.extraShippingFee === 0 && (
-                        <span className="text-xs text-success">（已達免運門檻）</span>
-                      )}
-                    </span>
-                    <span
-                      className={`font-medium ${pricing.extraShippingFee === 0 ? "line-through text-default-400" : "text-warning"}`}
-                    >
-                      NT$ {selectedStoreData?.extra_shipping_fee?.toFixed(0) || 0}
-                    </span>
+              )}
+              {hasExtraShippingFee && (
+                <div className="flex justify-between">
+                  <span className="flex items-center gap-1">
+                    遠距運費：
+                    {pricing.extraShippingFee === 0 && (
+                      <span className="text-xs text-success">（已達免運門檻）</span>
+                    )}
+                  </span>
+                  <span
+                    className={`font-medium ${pricing.extraShippingFee === 0 ? "line-through text-default-400" : "text-warning"}`}
+                  >
+                    NT$ {selectedStoreData?.extra_shipping_fee?.toFixed(0) || 0}
+                  </span>
+                </div>
+              )}
+              {hasExtraShippingFee &&
+                selectedStoreData?.extra_shipping_threshold &&
+                pricing.extraShippingFee > 0 && (
+                  <div className="text-xs text-warning px-1">
+                    ⚠ 訂單滿 NT$ {selectedStoreData.extra_shipping_threshold.toFixed(0)}{" "}
+                    可免遠距運費
                   </div>
                 )}
-                {hasExtraShippingFee &&
-                  selectedStoreData?.extra_shipping_threshold &&
-                  pricing.extraShippingFee > 0 && (
-                    <div className="text-xs text-warning px-1">
-                      ⚠ 訂單滿 NT$ {selectedStoreData.extra_shipping_threshold.toFixed(0)}{" "}
-                      可免遠距運費
-                    </div>
-                  )}
-                <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
-                  <span>總金額：</span>
-                  <span>NT$ {pricing.totalAmount.toFixed(0)}</span>
-                </div>
+              <div className="flex justify-between border-t border-default-200 pt-1 font-semibold text-primary">
+                <span>總金額：</span>
+                <span>NT$ {pricing.totalAmount.toFixed(0)}</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">

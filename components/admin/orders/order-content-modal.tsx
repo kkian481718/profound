@@ -17,7 +17,8 @@ interface OrderContentModalProps {
 export default function OrderContentModal({ isOpen, onOpenChange, order }: OrderContentModalProps) {
   if (!order) return null;
 
-  const hasContent = order.menu_items || order.menu_image_url;
+  const hasContent =
+    order.menu_items || order.menu_image_url || (order.items && order.items.length > 0);
 
   return (
     <Modal isOpen={isOpen} scrollBehavior="inside" size="2xl" onOpenChange={onOpenChange}>
@@ -51,6 +52,42 @@ export default function OrderContentModal({ isOpen, onOpenChange, order }: Order
                             loading="lazy"
                             src={order.menu_image_url}
                           />
+                        </div>
+                      </CardBody>
+                    </Card>
+                  )}
+
+                  {/* 商品明細（件數制訂單） */}
+                  {order.items && order.items.length > 0 && (
+                    <Card>
+                      <CardBody>
+                        <h4 className="text-medium font-semibold mb-3">商品明細</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-left text-default-500 border-b border-default-200">
+                                <th className="py-2 pr-4 font-medium">品名</th>
+                                <th className="py-2 pr-4 font-medium text-right">單價</th>
+                                <th className="py-2 pr-4 font-medium text-right">數量</th>
+                                <th className="py-2 font-medium text-right">小計</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {order.items.map((item, index) => (
+                                <tr
+                                  key={index}
+                                  className="border-b border-default-100 last:border-0"
+                                >
+                                  <td className="py-2 pr-4">{item.name}</td>
+                                  <td className="py-2 pr-4 text-right">NT$ {item.unit_price}</td>
+                                  <td className="py-2 pr-4 text-right">x{item.quantity}</td>
+                                  <td className="py-2 text-right font-medium">
+                                    NT$ {item.unit_price * item.quantity}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       </CardBody>
                     </Card>

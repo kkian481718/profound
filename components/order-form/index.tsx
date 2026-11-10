@@ -1,7 +1,8 @@
 "use client";
 
 import type { Selection } from "@react-types/shared";
-import type { ErrorState, OrderFormProps, Step } from "./types";
+import type { ErrorState, OrderFormProps, OrderItemDraft, Step } from "./types";
+import type { OrderItem } from "@/types";
 
 import { useState, type FormEvent } from "react";
 
@@ -11,6 +12,7 @@ import { useImageUpload } from "./hooks/useImageUpload";
 import { useOrderSubmit } from "./hooks/useOrderSubmit";
 import { useOrderLimits } from "./hooks/useOrderLimits";
 import { validateStore, validateOrderDetails } from "./utils/validation";
+import { parseOrderItems, buildMenuItemsSummary } from "./utils/orderItems";
 import { StoreSelectionStep } from "./StoreSelectionStep";
 import { OrderDetailsStep } from "./OrderDetailsStep";
 import { GlobalOrderProgress } from "./GlobalOrderProgress";
@@ -23,6 +25,9 @@ export function OrderForm({ stores }: OrderFormProps) {
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [menuItems, setMenuItems] = useState("");
   const [cost, setCost] = useState("");
+  const [orderItems, setOrderItems] = useState<OrderItemDraft[]>([
+    { name: "", price: "", quantity: "1" },
+  ]);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pickupName, setPickupName] = useState("");
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<string | null>(null);
@@ -51,6 +56,7 @@ export function OrderForm({ stores }: OrderFormProps) {
     setSelectedStore(null);
     setMenuItems("");
     setCost("");
+    setOrderItems([{ name: "", price: "", quantity: "1" }]);
     setPhoneNumber("");
     setPickupName("");
     setSelectedPickupLocation(null);
@@ -96,10 +102,16 @@ export function OrderForm({ stores }: OrderFormProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    // 取得選中店家的運費設定
+    const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
+    const isPerItemMode = selectedStoreData?.shipping_method === "per_item";
+
     // 驗證表單資料
     const validation = validateOrderDetails(
       menuItems,
       cost,
+      orderItems,
+      isPerItemMode,
       phoneNumber,
       pickupName,
       selectedPickupLocation,
@@ -113,22 +125,28 @@ export function OrderForm({ stores }: OrderFormProps) {
       return;
     }
 
-    // 取得選中店家的運費設定
-    const selectedStoreData = storeOptions.find((s) => s.value === selectedStore);
     const storeShippingConfig = selectedStoreData
       ? {
           extraShippingFee: selectedStoreData.extra_shipping_fee,
           extraShippingThreshold: selectedStoreData.extra_shipping_threshold,
+          shippingMethod: selectedStoreData.shipping_method,
         }
       : undefined;
 
     const storeName = selectedStoreData?.label || "未知店家";
 
+    // per_item 模式：解析商品明細並產生 menu_items 摘要
+    const parsedItems: OrderItem[] = isPerItemMode ? (parseOrderItems(orderItems) ?? []) : [];
+    const finalMenuItems = isPerItemMode
+      ? buildMenuItemsSummary(parsedItems, menuItems)
+      : menuItems;
+
     const success = await submitOrder({
       selectedStore: selectedStore!,
       storeName,
-      menuItems,
+      menuItems: finalMenuItems,
       cost,
+      items: parsedItems,
       phoneNumber,
       pickupName,
       selectedPickupLocation: selectedPickupLocation!,
@@ -193,6 +211,7 @@ export function OrderForm({ stores }: OrderFormProps) {
         isSubmitting={isSubmitting}
         menuItems={menuItems}
         offCampusAddress={offCampusAddress}
+        orderItems={orderItems}
         phoneNumber={phoneNumber}
         pickupName={pickupName}
         selectedPickupLocation={selectedPickupLocation}
@@ -201,12 +220,19 @@ export function OrderForm({ stores }: OrderFormProps) {
         storeOptions={storeOptions}
         submitError={submitError}
         wasSubmitted={wasSubmitted}
+        onAddItem={() => setOrderItems((prev) => [...prev, { name: "", price: "", quantity: "1" }])}
         onBack={() => setCurrentStep(1)}
         onCostChange={(value) => {
           setCost(value);
           setErrors((prev) => ({ ...prev, cost: "" }));
         }}
         onImageChange={handleImageChange}
+        onItemChange={(index, field, value) => {
+          setOrderItems((prev) =>
+            prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+          );
+          setErrors((prev) => ({ ...prev, items: "" }));
+        }}
         onMenuItemsChange={(value) => {
           setMenuItems(value);
           setErrors((prev) => ({ ...prev, menuItems: "" }));
@@ -225,6 +251,7 @@ export function OrderForm({ stores }: OrderFormProps) {
           setErrors((prev) => ({ ...prev, pickupName: "" }));
         }}
         onRemoveImage={handleRemoveImage}
+        onRemoveItem={(index) => setOrderItems((prev) => prev.filter((_, i) => i !== index))}
         onSubmit={handleSubmit}
       />
     </div>

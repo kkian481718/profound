@@ -280,7 +280,9 @@ export default function OrderCard({
               {isDetailed && (
                 <div className="space-y-0.5 mb-1.5">
                   <div className="flex justify-between items-center text-default-500">
-                    <span className="text-xs">餐點成本</span>
+                    <span className="text-xs">
+                      餐點成本{order.quantity ? `（× ${order.quantity} 件）` : ""}
+                    </span>
                     <span className="text-xs">${order.cost}</span>
                   </div>
                   <div className="flex justify-between items-center text-default-500">

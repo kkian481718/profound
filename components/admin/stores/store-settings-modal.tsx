@@ -6,6 +6,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
+import { Radio, RadioGroup } from "@heroui/radio";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,6 +25,7 @@ interface StoreSettingsModalProps {
     menu_placeholder: string | null;
     extra_shipping_fee: number | null;
     extra_shipping_threshold: number | null;
+    shipping_method?: "standard" | "per_item" | string | null;
   } | null;
   existingCategories?: string[];
   onSuccess: () => void;
@@ -46,6 +48,7 @@ export default function StoreSettingsModal({
   const [extraFee, setExtraFee] = useState("");
   const [threshold, setThreshold] = useState("");
   const [placeholder, setPlaceholder] = useState("");
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "per_item">("standard");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,6 +91,7 @@ export default function StoreSettingsModal({
         store.extra_shipping_threshold !== null ? String(store.extra_shipping_threshold) : "",
       );
       setPlaceholder(store.menu_placeholder || "");
+      setShippingMethod(store.shipping_method === "per_item" ? "per_item" : "standard");
       setError("");
     }
   }, [store]);
@@ -144,6 +148,7 @@ export default function StoreSettingsModal({
         extra_shipping_fee: extraFee ? parseFloat(extraFee) : null,
         extra_shipping_threshold: threshold ? parseFloat(threshold) : null,
         menu_placeholder: placeholder.trim() || null,
+        shipping_method: shippingMethod,
       };
 
       const { error: updateError } = await supabase
@@ -250,6 +255,26 @@ export default function StoreSettingsModal({
                   {/* 分頁 2: 截止時間與限制 */}
                   <Tab key="order_rules" title="⏰ 接單與運費">
                     <div className="space-y-4 pt-1">
+                      {/* 運費計算模式 */}
+                      <div className="space-y-2 p-3 rounded-xl bg-default-50 border border-default-100">
+                        <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <span className="text-primary">🧮</span> 運費計算模式
+                        </p>
+                        <RadioGroup
+                          orientation="horizontal"
+                          value={shippingMethod}
+                          onValueChange={(value) =>
+                            setShippingMethod(value === "per_item" ? "per_item" : "standard")
+                          }
+                        >
+                          <Radio value="standard">金額比例制（未滿150收20，滿150收12%）</Radio>
+                          <Radio value="per_item">件數制（首件 30，第二件起每件 15）</Radio>
+                        </RadioGroup>
+                        <p className="text-[11px] text-default-400">
+                          件數制適用於好市多等商品，顧客需填寫單價與件數
+                        </p>
+                      </div>
+
                       {/* 截止時間 */}
                       <div className="space-y-2 p-3 rounded-xl bg-default-50 border border-default-100">
                         <div className="flex items-center justify-between">

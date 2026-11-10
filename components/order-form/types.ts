@@ -6,6 +6,13 @@ export type StoreOption = {
   menu_placeholder?: string | null;
   extra_shipping_fee?: number | null;
   extra_shipping_threshold?: number | null;
+  shipping_method?: "standard" | "per_item" | string | null;
+};
+
+export type OrderItemDraft = {
+  name: string;
+  price: string;
+  quantity: string;
 };
 
 export type ErrorState = {
@@ -13,6 +20,7 @@ export type ErrorState = {
   store: string;
   menuItems: string;
   cost: string;
+  items: string;
   phone: string;
   pickupLocation: string;
   address: string;

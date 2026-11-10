@@ -1,4 +1,4 @@
-import type { ErrorState } from "../types";
+import type { ErrorState, OrderItemDraft } from "../types";
 
 import { initialErrors } from "../constants";
 
@@ -13,6 +13,8 @@ export function validateStore(selectedStore: string | null): string {
 export function validateOrderDetails(
   menuItems: string,
   cost: string,
+  items: OrderItemDraft[],
+  isPerItemMode: boolean,
   phoneNumber: string,
   pickupName: string,
   selectedPickupLocation: string | null,
@@ -22,19 +24,41 @@ export function validateOrderDetails(
   let hasError = false;
   const nextErrors: ErrorState = { ...initialErrors };
 
-  if (!menuItems.trim()) {
-    nextErrors.menuItems = "請輸入想點的餐點";
-    hasError = true;
-  }
+  if (isPerItemMode) {
+    const hasInvalidItem = items.some((item) => {
+      const priceNum = Number(item.price);
+      const qtyNum = Number(item.quantity);
 
-  const costNum = parseFloat(cost);
+      return (
+        !item.name.trim() ||
+        !item.price.trim() ||
+        isNaN(priceNum) ||
+        priceNum <= 0 ||
+        !item.quantity.trim() ||
+        !Number.isInteger(qtyNum) ||
+        qtyNum < 1
+      );
+    });
 
-  if (!cost.trim()) {
-    nextErrors.cost = "請輸入餐點金額";
-    hasError = true;
-  } else if (isNaN(costNum) || costNum <= 0) {
-    nextErrors.cost = "請輸入有效的金額";
-    hasError = true;
+    if (items.length === 0 || hasInvalidItem) {
+      nextErrors.items = "請完整填寫所有商品的品名、單價與件數";
+      hasError = true;
+    }
+  } else {
+    const costNum = parseFloat(cost);
+
+    if (!cost.trim()) {
+      nextErrors.cost = "請輸入餐點金額";
+      hasError = true;
+    } else if (isNaN(costNum) || costNum <= 0) {
+      nextErrors.cost = "請輸入有效的金額";
+      hasError = true;
+    }
+
+    if (!menuItems.trim()) {
+      nextErrors.menuItems = "請輸入想點的餐點";
+      hasError = true;
+    }
   }
 
   const normalizedPhone = phoneNumber.trim();

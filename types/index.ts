@@ -21,6 +21,12 @@ declare global {
   }
 }
 
+export interface OrderItem {
+  name: string;
+  unit_price: number;
+  quantity: number;
+}
+
 export interface Order {
   id: string;
   store_id: string;
@@ -35,6 +41,8 @@ export interface Order {
   dev_fee: number;
   shipping_fee: number;
   total_amount: number;
+  quantity?: number | null;
+  items?: OrderItem[] | null;
   order_status: "pending" | "preparing" | "completed";
   admin_note?: string;
 }
@@ -48,6 +56,7 @@ export interface Store {
   menu_placeholder: string | null;
   extra_shipping_fee: number | null;
   extra_shipping_threshold: number | null;
+  shipping_method?: "standard" | "per_item" | string | null;
   created_at: string;
 }
 

@@ -15,6 +15,7 @@ CREATE TABLE stores (
   max_daily_orders INTEGER DEFAULT NULL,
   extra_shipping_fee DECIMAL(10, 2) DEFAULT NULL,
   extra_shipping_threshold DECIMAL(10, 2) DEFAULT NULL,
+  shipping_method TEXT NOT NULL DEFAULT 'standard' CHECK (shipping_method IN ('standard', 'per_item')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -33,6 +34,7 @@ CREATE INDEX idx_stores_created_at ON stores(created_at);
 - `max_daily_orders`: 每日最大訂單數限制（NULL 表示無限制）
 - `extra_shipping_fee`: 額外運費金額（遠程店家加收運費，NULL 表示不加收）
 - `extra_shipping_threshold`: 免額外運費門檻（訂單金額超過此值不加收額外運費，NULL 表示無門檻限制）
+- `shipping_method`: 運費計算模式（`standard`=金額比例制：未滿150收20、滿150收12%；`per_item`=件數制：首件30、第二件起每件15，適用好市多等商品）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間
 
@@ -61,6 +63,8 @@ CREATE TABLE orders (
   dev_fee DECIMAL(10, 2) NOT NULL DEFAULT 10.00,
   shipping_fee DECIMAL(10, 2) NOT NULL,
   total_amount DECIMAL(10, 2) NOT NULL,
+  quantity INTEGER,
+  items JSONB,
   order_status VARCHAR(20) DEFAULT 'pending' CHECK (order_status IN ('pending', 'preparing', 'completed')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -102,6 +106,8 @@ CREATE INDEX idx_orders_pickup_phone ON orders(pickup_phone);
 - `dev_fee`: 開發費（固定10元）
 - `shipping_fee`: 運費
 - `total_amount`: 總金額（成本 + 開發費 + 運費）
+- `quantity`: 購買件數（僅 `per_item` 運費模式的訂單有值）
+- `items`: 商品明細 JSONB `[{name, unit_price, quantity}]`（僅 `per_item` 運費模式的訂單有值）
 - `order_status`: 訂單狀態（pending=待處理 / preparing=準備中 / completed=已完成）
 - `created_at`: 建立時間
 - `updated_at`: 更新時間

@@ -40,6 +40,7 @@ export const initialErrors: ErrorState = {
   store: "",
   menuItems: "",
   cost: "",
+  items: "",
   phone: "",
   pickupLocation: "",
   address: "",

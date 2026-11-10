@@ -1,7 +1,13 @@
+import type { OrderItem } from "@/types";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { calculateOrderPricing, StoreShippingConfig } from "../utils/pricing";
+import {
+  calculateOrderPricing,
+  calculatePerItemItemsPricing,
+  StoreShippingConfig,
+} from "../utils/pricing";
 
 import { createClient } from "@/lib/supabase/client";
 import { trackOrderEvent } from "@/lib/gtag";
@@ -13,6 +19,7 @@ type SubmitOrderParams = {
   storeName: string;
   menuItems: string;
   cost: string;
+  items: OrderItem[];
   phoneNumber: string;
   pickupName: string;
   selectedPickupLocation: string;
@@ -97,7 +104,16 @@ export function useOrderSubmit() {
 
       // 使用統一的價格計算函數（包含店家額外運費設定）
       const costNum = parseFloat(params.cost);
-      const pricing = calculateOrderPricing(costNum, params.storeShippingConfig);
+      const isPerItemMode = params.storeShippingConfig?.shippingMethod === "per_item";
+      const pricing = isPerItemMode
+        ? calculatePerItemItemsPricing(
+            params.items.map((item) => ({
+              unitPrice: item.unit_price,
+              quantity: item.quantity,
+            })),
+            params.storeShippingConfig,
+          )
+        : calculateOrderPricing(costNum, params.storeShippingConfig);
 
       const orderData = {
         store_id: params.selectedStore,
@@ -115,6 +131,8 @@ export function useOrderSubmit() {
         dev_fee: pricing.devFee,
         shipping_fee: pricing.shippingFee,
         total_amount: pricing.totalAmount,
+        quantity: isPerItemMode ? (pricing.quantity ?? null) : null,
+        items: isPerItemMode && params.items.length > 0 ? params.items : null,
         order_status: "pending",
       };
 
