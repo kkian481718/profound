@@ -39,4 +39,6 @@ yarn.lock
 package-lock.json
 bun.lockb
 .agents/
-skills-lock.jsonga4-scripts/
+skills-lock.json
+ga4-scripts/
+
