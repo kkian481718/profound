@@ -357,6 +357,11 @@ function OrdersContent() {
 
       {selectedOrder && (
         <EditStatusModal
+          currentAmounts={{
+            cost: selectedOrder.cost,
+            devFee: selectedOrder.dev_fee,
+            shippingFee: selectedOrder.shipping_fee,
+          }}
           currentOrderStatus={selectedOrder.order_status}
           isOpen={isOpen}
           orderId={selectedOrder.id}

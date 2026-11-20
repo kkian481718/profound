@@ -5,6 +5,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Select, SelectItem } from "@heroui/select";
+import { Input } from "@heroui/input";
 import { useDisclosure } from "@heroui/modal";
 
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +17,11 @@ interface EditStatusModalProps {
   onSuccess: () => void;
   orderId: string;
   currentOrderStatus: "pending" | "preparing" | "completed";
+  currentAmounts: {
+    cost: number;
+    devFee: number;
+    shippingFee: number;
+  };
   orderInfo: {
     storeName: string;
     pickupName: string;
@@ -28,9 +34,13 @@ export default function EditStatusModal({
   onSuccess,
   orderId,
   currentOrderStatus,
+  currentAmounts,
   orderInfo,
 }: EditStatusModalProps) {
   const [orderStatus, setOrderStatus] = useState(currentOrderStatus);
+  const [cost, setCost] = useState(String(currentAmounts.cost));
+  const [devFee, setDevFee] = useState(String(currentAmounts.devFee));
+  const [shippingFee, setShippingFee] = useState(String(currentAmounts.shippingFee));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -44,8 +54,22 @@ export default function EditStatusModal({
   // 當 props 改變時，更新 state
   useEffect(() => {
     setOrderStatus(currentOrderStatus);
+    setCost(String(currentAmounts.cost));
+    setDevFee(String(currentAmounts.devFee));
+    setShippingFee(String(currentAmounts.shippingFee));
     setError("");
-  }, [currentOrderStatus, orderId]);
+  }, [
+    currentOrderStatus,
+    currentAmounts.cost,
+    currentAmounts.devFee,
+    currentAmounts.shippingFee,
+    orderId,
+  ]);
+
+  const parsedCost = Math.max(0, parseFloat(cost) || 0);
+  const parsedDevFee = Math.max(0, parseFloat(devFee) || 0);
+  const parsedShippingFee = Math.max(0, parseFloat(shippingFee) || 0);
+  const totalAmount = parsedCost + parsedDevFee + parsedShippingFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +83,10 @@ export default function EditStatusModal({
         .from("orders")
         .update({
           order_status: orderStatus,
+          cost: parsedCost,
+          dev_fee: parsedDevFee,
+          shipping_fee: parsedShippingFee,
+          total_amount: totalAmount,
         })
         .eq("id", orderId);
 
@@ -76,6 +104,9 @@ export default function EditStatusModal({
   const handleClose = () => {
     // 重置表單狀態
     setOrderStatus(currentOrderStatus);
+    setCost(String(currentAmounts.cost));
+    setDevFee(String(currentAmounts.devFee));
+    setShippingFee(String(currentAmounts.shippingFee));
     setError("");
     onOpenChange();
   };
@@ -107,7 +138,7 @@ export default function EditStatusModal({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">編輯訂單狀態</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">編輯訂單</ModalHeader>
               <ModalBody>
                 <div className="mb-4 rounded-lg bg-default-100 p-3">
                   <div className="mb-2 text-sm font-medium">訂單資訊</div>
@@ -157,6 +188,61 @@ export default function EditStatusModal({
                       已完成
                     </SelectItem>
                   </Select>
+
+                  <div className="flex flex-col gap-3">
+                    <div className="text-sm font-medium">訂單金額</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        isRequired
+                        label="餐點成本"
+                        labelPlacement="outside"
+                        min={0}
+                        size="sm"
+                        startContent={
+                          <div className="pointer-events-none flex items-center">
+                            <span className="text-default-400 text-xs">NT$</span>
+                          </div>
+                        }
+                        type="number"
+                        value={cost}
+                        onValueChange={setCost}
+                      />
+                      <Input
+                        isRequired
+                        label="開發費"
+                        labelPlacement="outside"
+                        min={0}
+                        size="sm"
+                        startContent={
+                          <div className="pointer-events-none flex items-center">
+                            <span className="text-default-400 text-xs">NT$</span>
+                          </div>
+                        }
+                        type="number"
+                        value={devFee}
+                        onValueChange={setDevFee}
+                      />
+                      <Input
+                        isRequired
+                        label="運費"
+                        labelPlacement="outside"
+                        min={0}
+                        size="sm"
+                        startContent={
+                          <div className="pointer-events-none flex items-center">
+                            <span className="text-default-400 text-xs">NT$</span>
+                          </div>
+                        }
+                        type="number"
+                        value={shippingFee}
+                        onValueChange={setShippingFee}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center rounded-lg bg-default-100 px-3 py-2">
+                      <span className="text-sm text-default-600">總金額</span>
+                      <span className="font-bold">NT$ {totalAmount}</span>
+                    </div>
+                  </div>
 
                   {error && (
                     <div className="rounded-lg bg-danger-50 p-3 text-sm text-danger">{error}</div>
