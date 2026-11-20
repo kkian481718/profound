@@ -1,5 +1,7 @@
 "use client";
 
+import type { StoreShippingConfig } from "@/components/order-form/utils/pricing";
+
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@heroui/button";
@@ -369,6 +371,19 @@ function OrdersContent() {
             storeName: selectedOrder.store_name,
             pickupName: selectedOrder.pickup_name,
           }}
+          orderItems={selectedOrder.items}
+          orderQuantity={selectedOrder.quantity}
+          storeShippingConfig={(() => {
+            const store = stores.find((s) => s.id === selectedOrder.store_id);
+
+            if (!store) return undefined;
+
+            return {
+              extraShippingFee: store.extra_shipping_fee,
+              extraShippingThreshold: store.extra_shipping_threshold,
+              shippingMethod: store.shipping_method,
+            } satisfies StoreShippingConfig;
+          })()}
           onOpenChange={onOpenChange}
           onSuccess={handleStatusUpdateSuccess}
         />

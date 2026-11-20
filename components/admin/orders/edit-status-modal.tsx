@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { OrderItem } from "@/types";
+
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
@@ -10,6 +12,19 @@ import { useDisclosure } from "@heroui/modal";
 
 import { createClient } from "@/lib/supabase/client";
 import { TrashIcon } from "@/components/icons";
+import {
+  calculateOrderPricing,
+  calculatePerItemItemsPricing,
+  StoreShippingConfig,
+} from "@/components/order-form/utils/pricing";
+
+const DEV_FEE = 10; // 網頁服務費固定 10 元
+
+interface EditableOrderItem {
+  name: string;
+  unitPrice: string;
+  quantity: string;
+}
 
 interface EditStatusModalProps {
   isOpen: boolean;
@@ -26,7 +41,42 @@ interface EditStatusModalProps {
     storeName: string;
     pickupName: string;
   };
+  storeShippingConfig?: StoreShippingConfig;
+  orderItems?: OrderItem[] | null;
+  orderQuantity?: number | null;
 }
+
+const toEditableItems = (
+  items?: OrderItem[] | null,
+  quantity?: number | null,
+): EditableOrderItem[] => {
+  if (items && items.length > 0) {
+    return items.map((item) => ({
+      name: item.name,
+      unitPrice: String(item.unit_price),
+      quantity: String(item.quantity),
+    }));
+  }
+
+  if (quantity && quantity > 0) {
+    return [
+      {
+        name: "",
+        unitPrice: "",
+        quantity: String(quantity),
+      },
+    ];
+  }
+
+  return [];
+};
+
+const parseEditableItems = (items: EditableOrderItem[]) =>
+  items.map((item) => ({
+    name: item.name.trim(),
+    unit_price: Math.max(0, parseFloat(item.unitPrice) || 0),
+    quantity: Math.max(0, Math.floor(parseFloat(item.quantity) || 0)),
+  }));
 
 export default function EditStatusModal({
   isOpen,
@@ -36,14 +86,20 @@ export default function EditStatusModal({
   currentOrderStatus,
   currentAmounts,
   orderInfo,
+  storeShippingConfig,
+  orderItems,
+  orderQuantity,
 }: EditStatusModalProps) {
   const [orderStatus, setOrderStatus] = useState(currentOrderStatus);
   const [cost, setCost] = useState(String(currentAmounts.cost));
-  const [devFee, setDevFee] = useState(String(currentAmounts.devFee));
   const [shippingFee, setShippingFee] = useState(String(currentAmounts.shippingFee));
+  const [items, setItems] = useState<EditableOrderItem[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const isPerItemMode =
+    storeShippingConfig?.shippingMethod === "per_item" || (orderItems?.length ?? 0) > 0;
 
   const {
     isOpen: isDeleteOpen,
@@ -55,8 +111,8 @@ export default function EditStatusModal({
   useEffect(() => {
     setOrderStatus(currentOrderStatus);
     setCost(String(currentAmounts.cost));
-    setDevFee(String(currentAmounts.devFee));
     setShippingFee(String(currentAmounts.shippingFee));
+    setItems(isPerItemMode ? toEditableItems(orderItems, orderQuantity) : []);
     setError("");
   }, [
     currentOrderStatus,
@@ -64,12 +120,78 @@ export default function EditStatusModal({
     currentAmounts.devFee,
     currentAmounts.shippingFee,
     orderId,
+    isPerItemMode,
+    orderItems,
+    orderQuantity,
   ]);
 
-  const parsedCost = Math.max(0, parseFloat(cost) || 0);
-  const parsedDevFee = Math.max(0, parseFloat(devFee) || 0);
+  // 依公式計算的價格明細（僅供對照與自動帶入，不直接覆蓋 DB 現值）
+  const formulaPricing = useMemo(() => {
+    if (isPerItemMode) {
+      return calculatePerItemItemsPricing(
+        parseEditableItems(items).map((item) => ({
+          unitPrice: item.unit_price,
+          quantity: item.quantity,
+        })),
+        storeShippingConfig,
+      );
+    }
+
+    return calculateOrderPricing(parseFloat(cost) || 0, storeShippingConfig);
+  }, [isPerItemMode, items, cost, storeShippingConfig]);
+
+  const formulaShippingFee = formulaPricing.shippingFee;
   const parsedShippingFee = Math.max(0, parseFloat(shippingFee) || 0);
-  const totalAmount = parsedCost + parsedDevFee + parsedShippingFee;
+  const shippingDeviated = Math.abs(parsedShippingFee - formulaShippingFee) > 0.5;
+
+  const costNum = isPerItemMode ? formulaPricing.cost : Math.max(0, parseFloat(cost) || 0);
+  const totalAmount = costNum + DEV_FEE + parsedShippingFee;
+
+  // standard 模式：成本異動時自動重算運費
+  const handleCostChange = (value: string) => {
+    setCost(value);
+    const pricing = calculateOrderPricing(parseFloat(value) || 0, storeShippingConfig);
+
+    setShippingFee(String(pricing.shippingFee));
+  };
+
+  // per_item 模式：商品明細異動時自動重算成本與運費
+  const recalcPerItemShipping = (nextItems: EditableOrderItem[]) => {
+    const pricing = calculatePerItemItemsPricing(
+      parseEditableItems(nextItems).map((item) => ({
+        unitPrice: item.unit_price,
+        quantity: item.quantity,
+      })),
+      storeShippingConfig,
+    );
+
+    setShippingFee(String(pricing.shippingFee));
+  };
+
+  const updateItem = (index: number, field: keyof EditableOrderItem, value: string) => {
+    const nextItems = items.map((item, i) => (i === index ? { ...item, [field]: value } : item));
+
+    setItems(nextItems);
+    recalcPerItemShipping(nextItems);
+  };
+
+  const addItem = () => {
+    const nextItems = [...items, { name: "", unitPrice: "", quantity: "1" }];
+
+    setItems(nextItems);
+    recalcPerItemShipping(nextItems);
+  };
+
+  const removeItem = (index: number) => {
+    const nextItems = items.filter((_, i) => i !== index);
+
+    setItems(nextItems);
+    recalcPerItemShipping(nextItems);
+  };
+
+  const validItemCount = isPerItemMode
+    ? parseEditableItems(items).filter((item) => item.name.length > 0 && item.quantity >= 1).length
+    : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,16 +199,43 @@ export default function EditStatusModal({
     setError("");
 
     try {
+      if (isPerItemMode && validItemCount === 0) {
+        setError("請至少新增一項有效商品（需填寫品名且數量 ≥ 1）");
+
+        return;
+      }
+
       const supabase = createClient();
+
+      let finalCost = costNum;
+      let finalQuantity: number | null = null;
+      let finalItems: OrderItem[] | null = null;
+
+      if (isPerItemMode) {
+        finalItems = parseEditableItems(items).filter(
+          (item) => item.name.length > 0 && item.quantity >= 1,
+        );
+        const pricing = calculatePerItemItemsPricing(
+          finalItems.map((item) => ({ unitPrice: item.unit_price, quantity: item.quantity })),
+          storeShippingConfig,
+        );
+
+        finalCost = pricing.cost;
+        finalQuantity = pricing.quantity ?? null;
+      }
+
+      const finalTotalAmount = finalCost + DEV_FEE + parsedShippingFee;
 
       const { error: updateError } = await supabase
         .from("orders")
         .update({
           order_status: orderStatus,
-          cost: parsedCost,
-          dev_fee: parsedDevFee,
+          cost: finalCost,
+          dev_fee: DEV_FEE,
           shipping_fee: parsedShippingFee,
-          total_amount: totalAmount,
+          total_amount: finalTotalAmount,
+          quantity: isPerItemMode ? finalQuantity : null,
+          items: isPerItemMode ? finalItems : null,
         })
         .eq("id", orderId);
 
@@ -105,8 +254,8 @@ export default function EditStatusModal({
     // 重置表單狀態
     setOrderStatus(currentOrderStatus);
     setCost(String(currentAmounts.cost));
-    setDevFee(String(currentAmounts.devFee));
     setShippingFee(String(currentAmounts.shippingFee));
+    setItems(isPerItemMode ? toEditableItems(orderItems, orderQuantity) : []);
     setError("");
     onOpenChange();
   };
@@ -191,12 +340,78 @@ export default function EditStatusModal({
 
                   <div className="flex flex-col gap-3">
                     <div className="text-sm font-medium">訂單金額</div>
-                    <div className="grid grid-cols-3 gap-2">
+
+                    {isPerItemMode ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="grid grid-cols-[1fr_90px_70px_32px] gap-2 text-xs text-default-500">
+                          <span>品名</span>
+                          <span>單價</span>
+                          <span>數量</span>
+                          <span />
+                        </div>
+                        {items.map((item, index) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-[1fr_90px_70px_32px] items-center gap-2"
+                          >
+                            <Input
+                              aria-label={`商品 ${index + 1} 品名`}
+                              placeholder="品名"
+                              size="sm"
+                              value={item.name}
+                              onValueChange={(v) => updateItem(index, "name", v)}
+                            />
+                            <Input
+                              aria-label={`商品 ${index + 1} 單價`}
+                              placeholder="單價"
+                              size="sm"
+                              startContent={
+                                <div className="pointer-events-none flex items-center">
+                                  <span className="text-default-400 text-xs">$</span>
+                                </div>
+                              }
+                              type="number"
+                              value={item.unitPrice}
+                              onValueChange={(v) => updateItem(index, "unitPrice", v)}
+                            />
+                            <Input
+                              aria-label={`商品 ${index + 1} 數量`}
+                              placeholder="數量"
+                              size="sm"
+                              type="number"
+                              value={item.quantity}
+                              onValueChange={(v) => updateItem(index, "quantity", v)}
+                            />
+                            <Button
+                              isIconOnly
+                              aria-label={`刪除商品 ${index + 1}`}
+                              color="danger"
+                              size="sm"
+                              variant="light"
+                              onPress={() => removeItem(index)}
+                            >
+                              <TrashIcon size={14} />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button size="sm" variant="flat" onPress={addItem}>
+                          新增品項
+                        </Button>
+                        <div className="flex justify-between px-1 text-sm">
+                          <span className="text-default-600">
+                            商品金額（共 {validItemCount} 項）：
+                          </span>
+                          <span className="font-medium">NT$ {formulaPricing.cost.toFixed(0)}</span>
+                        </div>
+                      </div>
+                    ) : (
                       <Input
                         isRequired
+                        aria-label="餐點原始金額"
                         label="餐點成本"
                         labelPlacement="outside"
                         min={0}
+                        placeholder="0"
                         size="sm"
                         startContent={
                           <div className="pointer-events-none flex items-center">
@@ -205,39 +420,40 @@ export default function EditStatusModal({
                         }
                         type="number"
                         value={cost}
-                        onValueChange={setCost}
+                        onValueChange={handleCostChange}
                       />
-                      <Input
-                        isRequired
-                        label="開發費"
-                        labelPlacement="outside"
-                        min={0}
-                        size="sm"
-                        startContent={
-                          <div className="pointer-events-none flex items-center">
-                            <span className="text-default-400 text-xs">NT$</span>
-                          </div>
-                        }
-                        type="number"
-                        value={devFee}
-                        onValueChange={setDevFee}
-                      />
-                      <Input
-                        isRequired
-                        label="運費"
-                        labelPlacement="outside"
-                        min={0}
-                        size="sm"
-                        startContent={
-                          <div className="pointer-events-none flex items-center">
-                            <span className="text-default-400 text-xs">NT$</span>
-                          </div>
-                        }
-                        type="number"
-                        value={shippingFee}
-                        onValueChange={setShippingFee}
-                      />
-                    </div>
+                    )}
+
+                    <Input
+                      isRequired
+                      aria-label="運費"
+                      description={`公式運費：NT$ ${formulaShippingFee}（可手動調整）`}
+                      label="運費"
+                      labelPlacement="outside"
+                      min={0}
+                      size="sm"
+                      startContent={
+                        <div className="pointer-events-none flex items-center">
+                          <span className="text-default-400 text-xs">NT$</span>
+                        </div>
+                      }
+                      type="number"
+                      value={shippingFee}
+                      onValueChange={setShippingFee}
+                    />
+                    {shippingDeviated && (
+                      <p className="px-1 text-xs text-warning">
+                        目前運費與公式不同（公式 NT$ {formulaShippingFee}
+                        ），仍可手動調整後儲存
+                      </p>
+                    )}
+
+                    {Math.abs(formulaShippingFee - currentAmounts.shippingFee) > 0.5 && (
+                      <Chip className="self-start" color="warning" size="sm" variant="flat">
+                        公式運費 NT$ {formulaShippingFee}（原訂單 NT$ {currentAmounts.shippingFee}）
+                      </Chip>
+                    )}
+
                     <div className="flex justify-between items-center rounded-lg bg-default-100 px-3 py-2">
                       <span className="text-sm text-default-600">總金額</span>
                       <span className="font-bold">NT$ {totalAmount}</span>
