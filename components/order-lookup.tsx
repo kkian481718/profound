@@ -19,6 +19,7 @@ type OrderData = {
   dev_fee: number;
   shipping_fee: number;
   total_amount: number;
+  quantity?: number | null;
   order_status: string;
   created_at: string;
 };
@@ -73,6 +74,7 @@ export function OrderLookup() {
           dev_fee,
           shipping_fee,
           total_amount,
+          quantity,
           order_status,
           created_at
         `,
@@ -223,7 +225,9 @@ export function OrderLookup() {
                   <div className="border-t border-default-200 pt-4">
                     <div className="flex flex-col gap-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-default-500">餐點費用:</span>
+                        <span className="text-default-500">
+                          餐點費用{order.quantity ? `（× ${order.quantity} 件）` : ""}:
+                        </span>
                         <span className="font-medium">NT$ {order.cost}</span>
                       </div>
                       <div className="flex justify-between">
