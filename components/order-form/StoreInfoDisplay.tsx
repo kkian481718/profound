@@ -183,7 +183,6 @@ function StoreInfoCard({ store }: StoreInfoCardProps) {
                   size="sm"
                   value={orderProgress.percentage}
                 />
-
               </CardBody>
             </Card>
           ) : null}

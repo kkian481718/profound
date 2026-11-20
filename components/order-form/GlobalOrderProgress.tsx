@@ -36,22 +36,14 @@ export function GlobalOrderProgress({
 
   if (isOverLimit) {
     return (
-      <Alert
-        color="danger"
-        title="今日全站外送已滿單"
-        variant="flat"
-      >
+      <Alert color="danger" title="今日全站外送已滿單" variant="flat">
         平台今日外送單量已達上限，暫停接單，請明日再試。
       </Alert>
     );
   }
 
   return (
-    <Alert
-      color="warning"
-      title="平台今日外送單量即將額滿"
-      variant="flat"
-    >
+    <Alert color="warning" title="平台今日外送單量即將額滿" variant="flat">
       目前訂單量較大，隨時可能滿單，請盡速下單。
     </Alert>
   );
